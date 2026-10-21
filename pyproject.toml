@@ -5,8 +5,10 @@ requires-python = ">=3.11"
 dependencies = [
     "fastapi>=0.115,<1",
     "openai>=3.35.1",
+    "psycopg[binary]>=3.2,<4",
     "pydantic>=2.8,<3",
     "python-multipart>=0.0.18,<1",
+    "sqlalchemy>=2.0,<2.1",
     "uvicorn>=0.30,<1",
 ]
 
