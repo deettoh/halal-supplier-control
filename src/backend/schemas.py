@@ -40,7 +40,7 @@ class APIModel(BaseModel):
 
 
 class LabelExtraction(APIModel):
-    """Model output: all three keys required; unreadable values are null."""
+    """Model output: all four keys required; unreadable values are null."""
 
     model_config = ConfigDict(extra="forbid", frozen=True)
 
@@ -48,6 +48,9 @@ class LabelExtraction(APIModel):
     brand: str | None = Field(description="Brand name on the label")
     manufacturer: str | None = Field(
         description="Manufacturer name on the label"
+    )
+    halal_mark_present: bool | None = Field(
+        description="Presence of a halal mark on the label"
     )
 
 
