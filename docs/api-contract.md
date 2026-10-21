@@ -31,8 +31,9 @@ explicitly declared. This keeps frontend handling predictable.
 
 ## Choices made explicit for team review
 
-- **Label schema:** three required nullable string fields: `product_name`,
-  `brand`, and `manufacturer`. This supersedes the PDF's four-field draft.
+- **Label schema:** four required nullable fields: `product_name`, `brand`,
+  `manufacturer`, and `halal_mark_present`. The first three are strings;
+  `halal_mark_present` is a boolean. This retains the PDF's four-field draft.
   `backend.schemas.LabelExtraction` owns the definition; the existing
   `backend.extract.LabelExtraction` import remains compatible.
 - **Rule results:** always five entries, R1 through R5 in order. `passed` is
