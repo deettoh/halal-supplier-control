@@ -1,5 +1,6 @@
 import json
 from datetime import date, datetime
+
 from rapidfuzz import fuzz
 
 # Fictional issuer used only for the hackathon demo.
