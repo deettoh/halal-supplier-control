@@ -31,13 +31,17 @@ explicitly declared. This keeps frontend handling predictable.
 
 ## Choices made explicit for team review
 
-- **Label schema:** retain the existing four required nullable fields.
+- **Label schema:** three required nullable string fields: `product_name`,
+  `brand`, and `manufacturer`. This supersedes the PDF's four-field draft.
   `backend.schemas.LabelExtraction` owns the definition; the existing
   `backend.extract.LabelExtraction` import remains compatible.
 - **Rule results:** always five entries, R1 through R5 in order. `passed` is
   true, false, or null. Null means not evaluated (for example no readable
   label or no certificate); `detail` explains why. This extends the draft's
   boolean checklist rather than falsely reporting an unchecked rule as a pass.
+  For example, after a model timeout R1 is false (extraction failed), while
+  R2 is null with detail "Not evaluated: label extraction failed". Null is
+  neither a pass nor a confirmed mismatch; the delivery needs human review.
 - **Scope shape:** an array of `{product_name, brand}` objects. `brand` may
   be omitted/null to mean no brand restriction for that product. The rules
   owner must implement the agreed matching semantics; no fuzzy scope matcher

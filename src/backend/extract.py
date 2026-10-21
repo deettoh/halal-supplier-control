@@ -9,7 +9,6 @@ STUB_LABEL = LabelExtraction(
     product_name="Tepung Gandum Serbaguna",
     brand="Bunga Mawar",
     manufacturer="Kilang Tepung Contoh Sdn Bhd",
-    halal_mark_present=True,
 )
 
 

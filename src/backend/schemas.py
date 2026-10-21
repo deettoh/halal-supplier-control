@@ -40,7 +40,7 @@ class APIModel(BaseModel):
 
 
 class LabelExtraction(APIModel):
-    """Model output: all four keys required; unreadable values are null."""
+    """Model output: all three keys required; unreadable values are null."""
 
     model_config = ConfigDict(extra="forbid", frozen=True)
 

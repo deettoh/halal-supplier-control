@@ -5,7 +5,7 @@ from pydantic import ValidationError
 
 from backend.extract import LabelExtraction, extract_label
 
-LABEL_FIELDS = {"product_name", "brand", "manufacturer", "halal_mark_present"}
+LABEL_FIELDS = {"product_name", "brand", "manufacturer"}
 
 
 def test_model_accepts_all_nulls() -> None:
@@ -26,6 +26,7 @@ def test_model_rejects_missing_key() -> None:
 
 def test_stub_returns_fully_populated_label() -> None:
     label = extract_label(b"\x89PNG fake image bytes")
+    assert set(label.model_dump()) == LABEL_FIELDS
     assert all(value is not None for value in label.model_dump().values())
 
 
