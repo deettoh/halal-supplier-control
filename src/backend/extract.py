@@ -1,21 +1,8 @@
-"""Label extraction schema and stub extractor."""
+"""Stub extractor; LabelExtraction is re-exported for existing callers."""
 
-from pydantic import BaseModel, ConfigDict, Field
+from backend.schemas import LabelExtraction
 
-
-class LabelExtraction(BaseModel):
-    """Fields printed on one delivery label, null if unreadable."""
-
-    model_config = ConfigDict(extra="forbid", frozen=True)
-
-    product_name: str | None = Field(description="Product name on the label")
-    brand: str | None = Field(description="Brand name on the label")
-    manufacturer: str | None = Field(
-        description="Manufacturer name on the label"
-    )
-    halal_mark_present: bool | None = Field(
-        description="Presence of a halal mark on the label"
-    )
+__all__ = ["STUB_LABEL", "LabelExtraction", "extract_label"]
 
 
 STUB_LABEL = LabelExtraction(
