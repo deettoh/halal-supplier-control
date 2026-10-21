@@ -3,11 +3,13 @@ name = "halal-supplier-control"
 version = "0.1.0"
 requires-python = ">=3.11"
 dependencies = [
+    "openai>=3.35.1",
     "pydantic>=2.8,<3",
 ]
 
 [dependency-groups]
 dev = [
+    "httpx2>=2.16.0",
     "mypy>=1.10",
     "pytest>=8",
     "ruff>=0.6",
