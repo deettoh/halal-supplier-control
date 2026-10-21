@@ -38,3 +38,12 @@ See [the contract decisions and integration guide](docs/api-contract.md).
 Merge this contract branch before the team starts parallel implementations.
 After merge, keep route signatures and response models when replacing the
 501 handlers. Contract changes need a coordinated schema/route/test update.
+
+## Database setup
+
+The five SQLAlchemy models and lazy connection/session helpers are in
+`src/backend/db.py`. For local PostgreSQL, start Docker Desktop and run
+`docker compose up -d --wait postgres`, then follow the environment,
+initialisation and test commands in [the database guide](docs/database.md).
+The same models use Replit's DATABASE_URL later. Importing the models does
+not connect to a database, and business routes remain contract scaffolds.
