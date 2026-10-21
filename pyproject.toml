@@ -1,3 +1,18 @@
+[project]
+name = "halal-supplier-control"
+version = "0.1.0"
+requires-python = ">=3.11"
+dependencies = [
+    "pydantic>=2.8,<3",
+]
+
+[dependency-groups]
+dev = [
+    "mypy>=1.10",
+    "pytest>=8",
+    "ruff>=0.6",
+]
+
 [tool.pytest.ini_options]
 pythonpath = ["src"]
 testpaths = ["tests"]
@@ -8,3 +23,7 @@ markers = [
 
 [tool.ruff]
 line-length = 79
+
+[tool.mypy]
+strict = true
+mypy_path = "src"
