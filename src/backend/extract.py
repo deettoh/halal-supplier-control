@@ -1,4 +1,4 @@
-"""Label extraction schema and RunPod extractor."""
+"""RunPod extractor using the shared label schema."""
 
 import base64
 import os
@@ -7,20 +7,9 @@ from openai import OpenAI
 from openai.types.shared_params import ResponseFormatJSONSchema
 from pydantic import BaseModel, ConfigDict, Field, HttpUrl, SecretStr
 
+from backend.schemas import LabelExtraction
 
-class LabelExtraction(BaseModel):
-    """Fields printed on one delivery label, null if unreadable."""
-
-    model_config = ConfigDict(extra="forbid", frozen=True)
-
-    product_name: str | None = Field(description="Product name on the label")
-    brand: str | None = Field(description="Brand name on the label")
-    manufacturer: str | None = Field(
-        description="Manufacturer name on the label"
-    )
-    halal_mark_present: bool | None = Field(
-        description="Presence of a halal mark on the label"
-    )
+__all__ = ["LABEL_JSON_SCHEMA", "LabelExtraction", "extract_label"]
 
 
 class RunPodConfig(BaseModel):
