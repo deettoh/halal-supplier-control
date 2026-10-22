@@ -19,13 +19,15 @@ from sqlalchemy import (
     ForeignKey,
     ForeignKeyConstraint,
     Index,
+    LargeBinary,
     String,
     Text,
     UniqueConstraint,
     create_engine,
+    inspect,
     text,
 )
-from sqlalchemy.engine import Engine, make_url
+from sqlalchemy.engine import Connection, Engine, make_url
 from sqlalchemy.exc import ArgumentError, SQLAlchemyError
 from sqlalchemy.orm import (
     DeclarativeBase,
@@ -34,6 +36,10 @@ from sqlalchemy.orm import (
     mapped_column,
     sessionmaker,
 )
+from sqlalchemy.schema import CreateColumn
+
+# Serialize schema creation and seeding across simultaneous PostgreSQL workers.
+STARTUP_LOCK = 0x48414C414C4442
 
 
 def utc_now() -> datetime:
@@ -78,6 +84,10 @@ class Certificate(Base):
     expiry_date: Mapped[date] = mapped_column(Date)
     scope: Mapped[list[dict[str, Any]]] = mapped_column(JSON)
     image: Mapped[str | None] = mapped_column(Text)
+    image_bytes: Mapped[bytes | None] = mapped_column(
+        LargeBinary, deferred=True
+    )
+    image_content_type: Mapped[str | None] = mapped_column(String(100))
     status: Mapped[str] = mapped_column(String(20), default="active")
 
 
@@ -133,6 +143,10 @@ class Delivery(Base):
     tenant: Mapped[str] = mapped_column(String(100))
     material_id: Mapped[int] = mapped_column(index=True)
     image: Mapped[str] = mapped_column(Text)
+    image_bytes: Mapped[bytes | None] = mapped_column(
+        LargeBinary, deferred=True
+    )
+    image_content_type: Mapped[str | None] = mapped_column(String(100))
     extracted: Mapped[dict[str, Any] | None] = mapped_column(
         JSON(none_as_null=True), nullable=True
     )
@@ -221,9 +235,72 @@ def get_db() -> Generator[Session, None, None]:
         yield session
 
 
-def init_db(engine: Engine | None = None) -> None:
-    """Create missing tables only. Does not reset data or migrate tables."""
-    Base.metadata.create_all(get_engine() if engine is None else engine)
+def lock_startup(connection: Connection) -> None:
+    if connection.dialect.name == "postgresql":
+        connection.execute(
+            text("SELECT pg_advisory_xact_lock(:key)"), {"key": STARTUP_LOCK}
+        )
+
+
+def database_schema(connection: Connection) -> str | None:
+    schema_map = connection.get_execution_options().get("schema_translate_map")
+    return schema_map.get(None) if schema_map else None
+
+
+def qualified_table_name(connection: Connection, table_name: str) -> str:
+    quote = connection.dialect.identifier_preparer.quote
+    schema = database_schema(connection)
+    return (
+        f"{quote(schema)}.{quote(table_name)}"
+        if schema is not None
+        else quote(table_name)
+    )
+
+
+def _initialize_schema(connection: Connection) -> None:
+    lock_startup(connection)
+    Base.metadata.create_all(connection)
+    # Narrow additive upgrade for databases created before binary storage.
+    # Existing image references/rows are retained; no conversion or reset.
+    schema = database_schema(connection)
+    for table_name in ("certificates", "deliveries"):
+        columns = {
+            column["name"]
+            for column in inspect(connection).get_columns(table_name, schema)
+        }
+        qualified = qualified_table_name(connection, table_name)
+        for column_name in ("image_bytes", "image_content_type"):
+            if column_name in columns:
+                continue
+            column = Base.metadata.tables[table_name].c[column_name]
+            definition = str(
+                CreateColumn(column).compile(dialect=connection.dialect)
+            )
+            connection.execute(
+                text(f"ALTER TABLE {qualified} ADD COLUMN {definition}")
+            )
+
+
+def init_db(engine: Engine | Connection | None = None) -> None:
+    """Create tables and add missing image columns, preserving existing data.
+
+    Only the documented image-column upgrade is automatic. Other schema
+    changes still require an explicit migration.
+    """
+    target = get_engine() if engine is None else engine
+    if isinstance(target, Connection):
+        _initialize_schema(target)
+    else:
+        with target.begin() as connection:
+            _initialize_schema(connection)
+
+
+def dispose_db() -> None:
+    """Release cached connections at application shutdown."""
+    if get_engine.cache_info().currsize:
+        get_engine().dispose()
+    get_session_factory.cache_clear()
+    get_engine.cache_clear()
 
 
 def main() -> int:
