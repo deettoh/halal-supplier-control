@@ -2,8 +2,8 @@
 
 `src/backend/db.py` describes the five persistent tables. `schemas.py`
 describes API input/output. Changing one does not automatically change the
-other. This branch adds storage infrastructure; business API handlers still
-return 501 until their workflows are implemented.
+other. Core read/write services and protected image retrieval are implemented.
+Only stretch certificate extraction remains 501.
 
 | Table | Stores | Scope |
 | --- | --- | --- |
@@ -20,7 +20,9 @@ live in the database; `image` can be a future API URL rather than a local file.
 Binary columns are loaded only when explicitly accessed, keeping list reads
 small. JSON columns store scope, extracted fields and the checklist. Existing
 reference-only records remain valid; their new image columns start as null.
-Upload validation and image-serving endpoints remain later backend work.
+PNG uploads and protected image-serving endpoints are implemented. Uploads
+are limited to 10 MiB and checked for a PNG signature; decoding/resizing is
+not performed by the service layer.
 
 ## Start locally (PowerShell in the repository root)
 

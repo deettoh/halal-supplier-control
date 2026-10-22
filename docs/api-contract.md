@@ -1,7 +1,7 @@
 # API contract 0.1.0
 
-This branch proposes concrete wire formats for the draft architecture.
-Review and merge it before parallel work. It is not yet an implemented MVP.
+These are the agreed wire formats for the MVP. All core workflows are
+implemented; certificate extraction remains a stretch scaffold.
 The executable reference is FastAPI `/docs`, backed by `/openapi.json`.
 
 ## Requests and responses
@@ -10,7 +10,8 @@ Every business endpoint requires `X-Demo-Role` (`staff`, `supervisor`, or
 `supplier`) and `X-Demo-Tenant`. For staff/supervisor, tenant is the SME
 identifier. For supplier, it is that supplier's ID encoded as a string.
 These headers simulate platform identity; they are not secure authentication.
-The later backend must resolve ownership, not just trust a claimed role.
+Services enforce tenant/supplier ownership as well as role gates.
+These demo headers still simulate platform identity.
 
 | Method | Path | Request | Success response | Role |
 | --- | --- | --- | --- | --- |
@@ -45,14 +46,20 @@ explicitly declared. This keeps frontend handling predictable.
   neither a pass nor a confirmed mismatch; the delivery needs human review.
 - **Scope shape:** an array of `{product_name, brand}` objects. `brand` may
   be omitted/null to mean no brand restriction for that product. The rules
-  owner must implement the agreed matching semantics; no fuzzy scope matcher
-  is included here.
+  match normalized product names and any explicit certificate brand
+  restriction. Fuzzy comparison belongs to R2's brand/manufacturer check.
 - **Renewal upload:** flat multipart fields `issuer`, `cert_no`, `holder_name`,
   `expiry_date`, `scope`, plus optional binary `image`. The `scope` field is
   JSON text in the form; the response contains a normal JSON array. This lets
   the supplier send fields and an image in one request.
+  Issuer and holder name are limited to 200 characters; certificate number
+  to 100, matching the database. Longer fields return 422 before any write.
 - **Images:** response `image` is a URL/path reference, not base64 data.
-  It must be served with suitable tenant/supplier access checks later.
+  GET `/api/deliveries/{id}/image` serves the PNG to staff/supervisor of its
+  SME. GET `/api/certificates/{id}/image` serves it to its owning supplier or
+  staff/supervisor of a linked SME. Unknown/not-owned/missing images return
+  404. Both image routes require the same demo headers. Browser clients
+  should fetch with those headers and display a blob URL.
 - **Coverage:** MaterialResponse uses `coverage_status` and nullable
   `certificate_expiry_date`. Coverage is computed, not persisted.
 - **Decisions:** JSON `decision` is `accept` or `reject`, with a required,
@@ -60,12 +67,12 @@ explicitly declared. This keeps frontend handling predictable.
   Unknown/not-owned deliveries should produce 404; already-resolved ones 409.
 - **Delivery fields:** include image, created_at, decided_by, and reason in
   addition to the draft's fields so the review queue can display the evidence.
-- **Extraction failure:** future delivery creation still returns 201 with
+- **Extraction failure:** delivery creation still returns 201 with
   `needs_human`, `pending_review`, a safe `error`, and nullable extraction
   values; an upstream model failure must not masquerade as a rejected upload.
 - **Automatic acceptance:** covered and expiring map to auto_accepted;
   substitution, not_covered, and needs_human map to pending_review. Actual
-  transitions and cross-field business validation belong to the backend/rules.
+  transitions are enforced by the service workflows.
 - **Stretch extraction:** returns `{extracted, error}` and never creates a
   certificate. All extracted certificate fields can be null for correction.
   Request validation does not establish document coverage or halal status.
@@ -91,29 +98,50 @@ await fetch("/api/certificates", {
 
 Let the browser set multipart Content-Type including its boundary.
 
-## Errors and scaffold behavior
+## Errors and implementation status
 
 HTTP errors use `{detail: "message"}`. Validation errors use FastAPI's
 `{detail: [{loc, msg, type, ...}]}` shape, returning 422. Wrong permitted
 role returns 403; missing/invalid header values return 422. Required reasons
-are validated, but upload bytes are not decoded/checked by this scaffold.
+are validated. Uploads must have a PNG signature and be at most 10 MiB
+(413 when larger). Invalid PNGs and invalid supplier IDs return 422 with
+`{detail: "message"}`; FastAPI schema validation retains its list-shaped
+detail. `/docs` documents both 422 response shapes.
 
-Every valid business request currently returns 501. This keeps unfinished
-features visible without a database, RunPod, audit log, or fabricated success.
-Frontend developers can construct fixtures using response models, but the
-scaffold is not a functioning end-to-end demo. Do not publish it over a
-working backend without intentionally integrating the route declarations.
+GET materials, deliveries, activity and certificates use real database reads.
+PNG retrieval routes return stored bytes with access checks. Reads never call
+RunPod or write activity rows. Database unavailability returns 503 with a safe
+error message. Health and API documentation remain available without a
+configured database.
+
+Delivery creation saves photo evidence before its blocking model call, with
+an internal error marker until processing completes. This row is excluded
+from the queue during the 180-second extraction window. A decision attempted
+before completion returns 409 without a write. After completion or timeout,
+normal verdict/status rules apply. An interrupted worker's fallback also
+becomes reviewable once that deadline expires. A late result cannot undo a
+supervisor decision. The public status vocabulary is unchanged.
+
+Decision writes and their logs are atomic. Renewal locks the supplier row,
+supersedes its active certificate, inserts the new active certificate, and
+logs each distinct linked SME in one transaction. The demo actor is `staff`
+or `supervisor` for those roles and `supplier:{id}` for supplier renewals;
+there is no authenticated person identifier in the two-header demo contract.
+
+Only POST `/api/certificates/extract` still returns 501. No certificate
+extractor is available yet. See [the service guide](backend-services.md).
 
 ## Integration boundaries
 
 - Frontend: use the documented form fields and JSON responses.
 - Extraction: import LabelExtraction from schemas; return structured fields.
 - Rules: use shared verdict/rule vocabulary; return a complete checklist.
-- Backend: replace 501 handlers while retaining signatures and response
-  models; enforce role AND tenant/supplier ownership and write audit records.
-  Renewal must supersede the old version and update linked SMEs atomically.
-- Database work is deliberately excluded from this branch.
+- Backend: services enforce role and tenant/supplier ownership, transactions,
+  and audit records. Renewal changes coverage for linked SMEs immediately
+  because coverage is recomputed on each read.
+- Database: SQLAlchemy models, startup initialization and PNG seed backfill
+  are already implemented. Read APIs reuse them.
 
-Run `uv run pytest -q`, `uv run ruff check src tests`, and
-`uv run mypy src tests` before merging. No merge or remote push is performed
+Run `uv run pytest -q`, `uv run ruff check --select E,F,I src tests`,
+`uv run ruff format --check src tests`, and `uv run mypy src/backend tests` before merging. No merge or remote push is performed
 by simply editing these files.

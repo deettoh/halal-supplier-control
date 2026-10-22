@@ -31,15 +31,20 @@ uv run uvicorn backend.main:app --app-dir src --reload
 Open http://127.0.0.1:8000/docs. Without DATABASE_URL the app runs in contract
 preview mode. With DATABASE_URL it initializes the database at startup.
 No RunPod endpoint is needed for startup or the contract preview.
-Business endpoints intentionally return **501 Not Implemented**, including
-reads: they do not pretend to save data or run checks. `/api/health` works.
-Demo role gates and request validation are implemented; tenant ownership
-checks, transactions, logging, image checks/storage, and rules come later.
+The core backend is implemented: tenant-scoped reads, protected PNG retrieval,
+label uploads and rule checks, supervisor decisions, and supplier renewal with
+transactional activity records. Extraction uses the current RunPod client
+with a 180-second timeout and no retries. Failures become reviewable
+`needs_human` deliveries; supervisors cannot decide while extraction runs.
+Only the stretch certificate-extraction endpoint remains **501**.
+`/api/health` works without a database. Business routes need DATABASE_URL;
+only delivery extraction needs the RunPod secrets.
+See [the backend service guide](docs/backend-services.md).
 
 See [the contract decisions and integration guide](docs/api-contract.md).
 Merge this contract branch before the team starts parallel implementations.
-After merge, keep route signatures and response models when replacing the
-501 handlers. Contract changes need a coordinated schema/route/test update.
+Keep route signatures and shared response models coordinated with the
+frontend. Contract changes need a coordinated schema/route/test update.
 
 ## Database setup
 
@@ -54,7 +59,8 @@ uv run --env-file .env uvicorn backend.main:app --app-dir src --reload
 Use `.env.example` to create your ignored `.env` first. Startup creates missing
 tables, adds the binary-photo columns to the previous schema, and seeds empty
 tables if `src/seed/seed.json` exists. Photos can be stored as PostgreSQL BYTEA;
-upload/retrieval endpoints will be implemented with the business workflows.
+uploads and protected retrieval both use the database.
 See [the database guide](docs/database.md) and [seed format](docs/seed-format.md).
 The same models use Replit's DATABASE_URL later. Importing the models alone
-does not connect to a database, and business routes remain contract scaffolds.
+does not connect to a database. Read routes require a configured database;
+delivery uploads also need RunPod secrets for successful extraction.

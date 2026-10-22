@@ -49,7 +49,7 @@ Minimal fictional format example (not the final seed dataset):
 seed directory and use a `.png` extension. Missing files are skipped; present
 files must have a PNG signature. The bytes are stored in PostgreSQL and `image`
 is set to the future `/api/certificates/{id}/image` URL (or deliveries URL).
-An image-serving endpoint still needs to be implemented. No
+The image endpoints enforce SME/supplier access and return PNG bytes. No
 `image_content_type` field is needed: image responses will use `image/png`.
 Actual image decoding/resizing is not performed by the loader.
 Without `image_file`, certificates may omit the image. Reference-only rows
