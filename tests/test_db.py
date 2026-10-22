@@ -346,12 +346,8 @@ def test_binary_photos_survive_new_session(engine: Engine) -> None:
     payload = photo.read_bytes()
     with Session(engine) as session:
         supplier, material = catalog(session)
-        cert = certificate(
-            supplier.id, image_bytes=payload, image_content_type="image/png"
-        )
-        item = delivery(
-            material.id, image_bytes=payload, image_content_type="image/png"
-        )
+        cert = certificate(supplier.id, image_bytes=payload)
+        item = delivery(material.id, image_bytes=payload)
         session.add_all([cert, item])
         session.commit()
         ids = (cert.id, item.id)
@@ -363,7 +359,8 @@ def test_binary_photos_survive_new_session(engine: Engine) -> None:
         assert "image_bytes" in inspect(saved_delivery).unloaded
         assert saved_delivery.image_bytes == payload
         assert saved_cert.image_bytes == payload
-        assert saved_delivery.image_content_type == "image/png"
+        assert "image_content_type" not in inspect(Delivery).columns
+        assert "image_content_type" not in inspect(Certificate).columns
 
 
 def test_legacy_image_column_upgrade_preserves_records(engine: Engine) -> None:
@@ -376,7 +373,7 @@ def test_legacy_image_column_upgrade_preserves_records(engine: Engine) -> None:
     with engine.begin() as connection:
         for table in ("certificates", "deliveries"):
             name = db.qualified_table_name(connection, table)
-            for column in ("image_bytes", "image_content_type"):
+            for column in ("image_bytes",):
                 connection.execute(
                     text(f"ALTER TABLE {name} DROP COLUMN {column}")
                 )
@@ -471,7 +468,6 @@ def test_seed_photos_are_copied_into_postgresql(
                 "expiry_date": "2027-12-31",
                 "scope": [{"product_name": "Flour"}],
                 "image_file": "sample.png",
-                "image_content_type": "image/png",
             }
         ],
     )
@@ -484,7 +480,7 @@ def test_seed_photos_are_copied_into_postgresql(
         assert saved.image == "/api/certificates/20/image"
 
 
-def test_missing_seed_image_rolls_back_inserts(
+def test_missing_seed_image_is_filled_on_later_startup(
     engine: Engine, tmp_path: Path
 ) -> None:
     path = seed_file(
@@ -499,14 +495,95 @@ def test_missing_seed_image_rolls_back_inserts(
                 "expiry_date": "2027-12-31",
                 "scope": [{"product_name": "Flour"}],
                 "image_file": "absent.png",
-                "image_content_type": "image/png",
             }
         ],
     )
-    with pytest.raises(FileNotFoundError):
+    assert bootstrap_database(engine, path)["certificates"] == 1
+    with Session(engine) as session:
+        saved = session.get(Certificate, 20)
+        assert saved is not None
+        assert saved.image_bytes is None
+        assert saved.image is None
+        saved.holder_name = "Keep edited holder"
+        session.commit()
+    payload = (
+        Path(__file__).parent / "fixtures" / "synthetic_label.png"
+    ).read_bytes()
+    photo = tmp_path / "absent.png"
+    photo.write_bytes(payload)
+    assert bootstrap_database(engine, path)["certificates"] == 0
+    with Session(engine) as session:
+        saved = session.get(Certificate, 20)
+        assert saved is not None
+        assert saved.image_bytes == payload
+        assert saved.image == "/api/certificates/20/image"
+        assert saved.holder_name == "Keep edited holder"
+    # Never replace a stored photo, even when the file changes or disappears.
+    photo.write_bytes(b"different file contents")
+    bootstrap_database(engine, path)
+    photo.unlink()
+    bootstrap_database(engine, path)
+    with Session(engine) as session:
+        assert session.scalar(select(Certificate.image_bytes)) == payload
+
+
+@pytest.mark.parametrize(
+    ("filename", "payload"),
+    [
+        ("sample.jpg", b"not a PNG"),
+        ("sample.png", b"not a PNG"),
+        ("../outside.png", b"not a PNG"),
+    ],
+)
+def test_invalid_seed_photo_rolls_back_inserts(
+    engine: Engine, tmp_path: Path, filename: str, payload: bytes
+) -> None:
+    (tmp_path / filename).write_bytes(payload)
+    path = seed_file(
+        tmp_path,
+        certificates=[
+            {
+                "id": 20,
+                "supplier_id": 20,
+                "issuer": "SAMPLE",
+                "cert_no": "SAMPLE-001",
+                "holder_name": "SAMPLE Supplier",
+                "expiry_date": "2027-12-31",
+                "scope": [{"product_name": "Flour"}],
+                "image_file": filename,
+            }
+        ],
+    )
+    with pytest.raises(ValueError, match="Seed image"):
         bootstrap_database(engine, path)
     with Session(engine) as session:
         assert session.scalar(select(func.count()).select_from(Supplier)) == 0
+
+
+def test_photo_backfill_does_not_touch_different_certificate(
+    engine: Engine, tmp_path: Path
+) -> None:
+    seed = json.loads(DEFAULT_SEED_PATH.read_text())
+    path = tmp_path / "seed.json"
+    path.write_text(json.dumps(seed))
+    bootstrap_database(engine, path)
+    with Session(engine) as session:
+        saved = session.get(Certificate, 1)
+        assert saved is not None
+        saved.cert_no = "Different certificate"
+        session.commit()
+    photo = tmp_path / seed["certificates"][0]["image_file"]
+    photo.parent.mkdir(parents=True)
+    photo.write_bytes(
+        (
+            Path(__file__).parent / "fixtures" / "synthetic_label.png"
+        ).read_bytes()
+    )
+    bootstrap_database(engine, path)
+    with Session(engine) as session:
+        saved = session.get(Certificate, 1)
+        assert saved is not None
+        assert saved.image_bytes is None
 
 
 def test_concurrent_postgres_startup_does_not_duplicate_seed(

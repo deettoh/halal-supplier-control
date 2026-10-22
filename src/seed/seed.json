@@ -29,8 +29,8 @@
         "Semolina",
         "Potato Starch"
       ],
-      "image": "certificates/cert_01_expiring.png",
-      "status": "active"
+      "status": "active",
+      "image_file": "certificates/cert_01_expiring.png"
     },
     {
       "id": 2,
@@ -45,8 +45,8 @@
         "Cake Flour",
         "Corn Starch"
       ],
-      "image": "certificates/cert_02_expired.png",
-      "status": "superseded"
+      "status": "superseded",
+      "image_file": "certificates/cert_02_expired.png"
     },
     {
       "id": 3,
@@ -65,8 +65,8 @@
         "Salt",
         "Spice Mix"
       ],
-      "image": "certificates/cert_03_valid.png",
-      "status": "active"
+      "status": "active",
+      "image_file": "certificates/cert_03_valid.png"
     },
     {
       "id": 4,
@@ -80,8 +80,8 @@
         "Vanilla Essence",
         "Vegetable Oil"
       ],
-      "image": "certificates/cert_04_expired.png",
-      "status": "superseded"
+      "status": "superseded",
+      "image_file": "certificates/cert_04_expired.png"
     }
   ],
   "materials": [

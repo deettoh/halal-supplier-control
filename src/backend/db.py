@@ -87,7 +87,6 @@ class Certificate(Base):
     image_bytes: Mapped[bytes | None] = mapped_column(
         LargeBinary, deferred=True
     )
-    image_content_type: Mapped[str | None] = mapped_column(String(100))
     status: Mapped[str] = mapped_column(String(20), default="active")
 
 
@@ -146,7 +145,6 @@ class Delivery(Base):
     image_bytes: Mapped[bytes | None] = mapped_column(
         LargeBinary, deferred=True
     )
-    image_content_type: Mapped[str | None] = mapped_column(String(100))
     extracted: Mapped[dict[str, Any] | None] = mapped_column(
         JSON(none_as_null=True), nullable=True
     )
@@ -269,7 +267,7 @@ def _initialize_schema(connection: Connection) -> None:
             for column in inspect(connection).get_columns(table_name, schema)
         }
         qualified = qualified_table_name(connection, table_name)
-        for column_name in ("image_bytes", "image_content_type"):
+        for column_name in ("image_bytes",):
             if column_name in columns:
                 continue
             column = Base.metadata.tables[table_name].c[column_name]

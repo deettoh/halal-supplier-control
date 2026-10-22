@@ -1,8 +1,8 @@
-"""Validated seed-file boundary; inserts only into empty tables."""
+"""Validated seed rows and startup backfill of missing certificate PNGs."""
 
 from datetime import date
 from pathlib import Path
-from typing import Any, Literal
+from typing import Any
 
 from pydantic import AwareDatetime, Field, field_validator, model_validator
 from sqlalchemy import Table, func, select, text
@@ -23,21 +23,11 @@ from backend.schemas import (
 )
 
 DEFAULT_SEED_PATH = Path(__file__).resolve().parents[1] / "seed" / "seed.json"
-ImageType = Literal["image/jpeg", "image/png", "image/webp"]
 
 
 class SeedImage(APIModel):
     image: str | None = None
     image_file: NonEmptyText | None = None
-    image_content_type: ImageType | None = None
-
-    @model_validator(mode="after")
-    def check_image_pair(self) -> "SeedImage":
-        if (self.image_file is None) != (self.image_content_type is None):
-            raise ValueError(
-                "image_file and image_content_type must be paired"
-            )
-        return self
 
 
 class SupplierSeed(APIModel):
@@ -137,21 +127,54 @@ def load_seed(path: Path) -> SeedData | None:
     return SeedData.model_validate_json(path.read_text(encoding="utf-8-sig"))
 
 
+def _read_seed_png(filename: str, base: Path) -> bytes | None:
+    root = base.resolve()
+    image_path = (root / filename).resolve()
+    if not image_path.is_relative_to(root):
+        raise ValueError("Seed images must be inside the seed directory")
+    if image_path.suffix.lower() != ".png":
+        raise ValueError("Seed images must use PNG files")
+    try:
+        payload = image_path.read_bytes()
+    except FileNotFoundError:
+        return None
+    if not payload.startswith(b"\x89PNG\r\n\x1a\n"):
+        raise ValueError("Seed image must have a PNG signature")
+    return payload
+
+
 def _image_values(row: SeedImage, base: Path, table: str) -> dict[str, Any]:
     values = row.model_dump(exclude={"image_file"})
     if row.image_file is not None:
-        root = base.resolve()
-        image_path = (root / row.image_file).resolve()
-        if not image_path.is_relative_to(root):
-            raise ValueError("Seed images must be inside the seed directory")
-        payload = image_path.read_bytes()
-        if not payload:
-            raise ValueError("Seed image must not be empty")
+        payload = _read_seed_png(row.image_file, base)
         values["image_bytes"] = payload
-        values["image"] = row.image or f"/api/{table}/{values['id']}/image"
+        if payload is not None or table == "deliveries":
+            values["image"] = f"/api/{table}/{values['id']}/image"
     if table == "deliveries" and not values.get("image"):
         raise ValueError("Seed deliveries require image or image_file")
     return values
+
+
+def _fill_certificate_photos(
+    session: Session, seed: SeedData, base: Path
+) -> None:
+    for row in seed.certificates:
+        if row.image_file is None:
+            continue
+        saved = session.scalar(
+            select(db.Certificate).where(
+                db.Certificate.id == row.id,
+                db.Certificate.supplier_id == row.supplier_id,
+                db.Certificate.cert_no == row.cert_no,
+                db.Certificate.image_bytes.is_(None),
+            )
+        )
+        if saved is None:
+            continue
+        payload = _read_seed_png(row.image_file, base)
+        if payload is not None:
+            saved.image_bytes = payload
+            saved.image = f"/api/certificates/{saved.id}/image"
 
 
 def _advance_sequence(session: Session, table: Table) -> None:
@@ -179,7 +202,10 @@ def _advance_sequence(session: Session, table: Table) -> None:
 def seed_empty_tables(
     session: Session, seed: SeedData, base: Path
 ) -> dict[str, int]:
-    """Caller owns the transaction and startup lock. Never overwrite rows."""
+    """Insert empty tables, then fill missing certificate photos only.
+
+    Caller owns the transaction and startup lock. Counts report new rows.
+    """
     counts: dict[str, int] = {}
     models: list[type[db.Base]] = [
         db.Supplier,
@@ -205,4 +231,5 @@ def seed_empty_tables(
         table = db.Base.metadata.tables[name]
         _advance_sequence(session, table)
         counts[name] = len(rows)
+    _fill_certificate_photos(session, seed, base)
     return counts
