@@ -3,9 +3,15 @@ from collections.abc import Mapping
 from datetime import date, datetime
 from typing import TypedDict
 
+from pydantic import ValidationError
 from rapidfuzz import fuzz
 
-from backend.schemas import RuleName, Verdict
+from backend.schemas import (
+    CertificateScopeItem,
+    LabelExtraction,
+    RuleName,
+    Verdict,
+)
 
 # Fictional issuer used only for the hackathon demo.
 RECOGNISED_ISSUERS = {"sample food certification council"}
@@ -46,8 +52,8 @@ def parse_date(value: object) -> date | None:
     return None
 
 
-def parse_scope(value: object) -> list[str]:
-    """Read the certificate's JSON-list scope."""
+def parse_scope(value: object) -> list[CertificateScopeItem]:
+    """Read API scope objects, accepting older string-list fixtures too."""
     if isinstance(value, str):
         try:
             value = json.loads(value)
@@ -57,7 +63,17 @@ def parse_scope(value: object) -> list[str]:
     if not isinstance(value, list):
         return []
 
-    return [normalize(item) for item in value if isinstance(item, str)]
+    try:
+        return [
+            CertificateScopeItem.model_validate(
+                {"product_name": item, "brand": None}
+                if isinstance(item, str)
+                else item
+            )
+            for item in value
+        ]
+    except ValidationError:
+        return []
 
 
 def evaluate(
@@ -81,7 +97,9 @@ def evaluate(
     The first failed rule determines the verdict.
     """
 
-    if isinstance(label, str):
+    if isinstance(label, LabelExtraction):
+        label = label.model_dump()
+    elif isinstance(label, str):
         try:
             label = json.loads(label)
         except (ValueError, TypeError):
@@ -152,18 +170,23 @@ def evaluate(
         r2 = None
         add("R2", None, "Not evaluated: label information incomplete.")
 
-    # R3 - Product must appear in certificate scope
+    # R3 - Match product and any explicit certificate brand restriction.
     scope = parse_scope(certificate.get("scope"))
 
     if r1:
         product = normalize(label_fields["product_name"])
-        r3 = product in scope
+        brand = normalize(label_fields["brand"])
+        r3 = any(
+            normalize(item.product_name) == product
+            and (item.brand is None or normalize(item.brand) == brand)
+            for item in scope
+        )
         add(
             "R3",
             r3,
-            "Product is included in certificate scope."
+            "Product and any brand restriction match certificate scope."
             if r3
-            else "Product is not included in certificate scope.",
+            else "Product or brand is not included in certificate scope.",
         )
     else:
         r3 = None
