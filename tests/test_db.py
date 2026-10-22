@@ -1,19 +1,32 @@
 """Run the same persistence checks on SQLite and opt-in PostgreSQL."""
 
+import json
 import os
 from collections.abc import Generator
+from concurrent.futures import ThreadPoolExecutor
 from datetime import date
+from pathlib import Path
 from typing import Any
 from uuid import uuid4
 
 import pytest
-from sqlalchemy import Engine, create_engine, event, func, inspect, select
+from sqlalchemy import (
+    Engine,
+    create_engine,
+    event,
+    func,
+    inspect,
+    select,
+    text,
+)
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session, sessionmaker
 from sqlalchemy.schema import CreateSchema, DropSchema
 
 from backend import db
 from backend.db import ActivityLog, Certificate, Delivery, Material, Supplier
+from backend.seed import SeedData
+from backend.startup import bootstrap_database
 
 
 @pytest.fixture(
@@ -304,3 +317,216 @@ def test_url_configuration_is_lazy_and_preserves_ssl(
 def test_schema_does_not_persist_computed_coverage() -> None:
     assert "coverage_status" not in inspect(Material).columns
     assert "tenant" not in inspect(Certificate).columns
+
+
+def seed_file(tmp_path: Path, **updates: Any) -> Path:
+    data = {
+        "suppliers": [{"id": 20, "name": "SAMPLE Supplier"}],
+        "materials": [
+            {
+                "id": 20,
+                "tenant": "bakery",
+                "name": "Flour",
+                "supplier_id": 20,
+                "approved_brand": "SAMPLE Brand",
+                "approved_manufacturer": "SAMPLE Maker",
+            }
+        ],
+        **updates,
+    }
+    path = tmp_path / "seed.json"
+    path.write_text(json.dumps(data), encoding="utf-8")
+    return path
+
+
+def test_binary_photos_survive_new_session(engine: Engine) -> None:
+    photo = Path(__file__).parent / "fixtures" / "synthetic_label.png"
+    payload = photo.read_bytes()
+    with Session(engine) as session:
+        supplier, material = catalog(session)
+        cert = certificate(
+            supplier.id, image_bytes=payload, image_content_type="image/png"
+        )
+        item = delivery(
+            material.id, image_bytes=payload, image_content_type="image/png"
+        )
+        session.add_all([cert, item])
+        session.commit()
+        ids = (cert.id, item.id)
+    with Session(engine) as session:
+        saved_cert = session.get(Certificate, ids[0])
+        saved_delivery = session.get(Delivery, ids[1])
+        assert saved_cert is not None and saved_delivery is not None
+        # Bulk list queries do not eagerly retrieve photo payloads.
+        assert "image_bytes" in inspect(saved_delivery).unloaded
+        assert saved_delivery.image_bytes == payload
+        assert saved_cert.image_bytes == payload
+        assert saved_delivery.image_content_type == "image/png"
+
+
+def test_legacy_image_column_upgrade_preserves_records(engine: Engine) -> None:
+    with Session(engine) as session:
+        supplier, material = catalog(session)
+        session.add(delivery(material.id))
+        session.add(certificate(supplier.id))
+        session.commit()
+    # Simulate the previous committed schema in this test-only database/schema.
+    with engine.begin() as connection:
+        for table in ("certificates", "deliveries"):
+            name = db.qualified_table_name(connection, table)
+            for column in ("image_bytes", "image_content_type"):
+                connection.execute(
+                    text(f"ALTER TABLE {name} DROP COLUMN {column}")
+                )
+    db.init_db(engine)
+    db.init_db(engine)
+    with Session(engine) as session:
+        item = session.scalar(select(Delivery))
+        assert item is not None
+        assert item.image == "/images/sample-label.png"
+        assert item.image_bytes is None
+        assert (
+            session.scalar(select(func.count()).select_from(Certificate)) == 1
+        )
+
+
+def test_bootstrap_creates_empty_database(
+    engine: Engine, tmp_path: Path
+) -> None:
+    # Only the isolated fixture's own tables are dropped here.
+    db.Base.metadata.drop_all(engine)
+    assert bootstrap_database(engine, tmp_path / "missing.json") == {}
+    with Session(engine) as session:
+        assert session.scalar(select(func.count()).select_from(Supplier)) == 0
+
+
+def test_seed_is_repeatable_and_does_not_overwrite(
+    engine: Engine, tmp_path: Path
+) -> None:
+    path = seed_file(tmp_path)
+    assert bootstrap_database(engine, path)["suppliers"] == 1
+    with Session(engine) as session:
+        supplier = session.get(Supplier, 20)
+        assert supplier is not None
+        supplier.name = "Keep edited name"
+        session.commit()
+    assert bootstrap_database(engine, path)["suppliers"] == 0
+    with Session(engine) as session:
+        assert session.scalar(select(Supplier.name)) == "Keep edited name"
+        assert session.scalar(select(func.count()).select_from(Material)) == 1
+
+
+def test_seed_advances_ids_for_later_writes(
+    engine: Engine, tmp_path: Path
+) -> None:
+    bootstrap_database(engine, seed_file(tmp_path))
+    with Session(engine) as session:
+        new_supplier = Supplier(name="Another supplier")
+        session.add(new_supplier)
+        session.commit()
+        assert new_supplier.id > 20
+
+
+def test_invalid_foreign_key_rolls_back_entire_seed(
+    engine: Engine, tmp_path: Path
+) -> None:
+    path = seed_file(
+        tmp_path,
+        materials=[
+            {
+                "id": 1,
+                "tenant": "bakery",
+                "name": "Flour",
+                "supplier_id": 999,
+                "approved_brand": "Brand",
+                "approved_manufacturer": "Maker",
+            }
+        ],
+    )
+    with pytest.raises(IntegrityError):
+        bootstrap_database(engine, path)
+    with Session(engine) as session:
+        assert session.scalar(select(func.count()).select_from(Supplier)) == 0
+
+
+def test_seed_photos_are_copied_into_postgresql(
+    engine: Engine, tmp_path: Path
+) -> None:
+    photo = tmp_path / "sample.png"
+    payload = (
+        Path(__file__).parent / "fixtures" / "synthetic_label.png"
+    ).read_bytes()
+    photo.write_bytes(payload)
+    path = seed_file(
+        tmp_path,
+        certificates=[
+            {
+                "id": 20,
+                "supplier_id": 20,
+                "issuer": "SAMPLE",
+                "cert_no": "SAMPLE-001",
+                "holder_name": "SAMPLE Supplier",
+                "expiry_date": "2027-12-31",
+                "scope": [{"product_name": "Flour"}],
+                "image_file": "sample.png",
+                "image_content_type": "image/png",
+            }
+        ],
+    )
+    bootstrap_database(engine, path)
+    photo.unlink()  # Only a disposable test fixture; storage must stand alone.
+    with Session(engine) as session:
+        saved = session.get(Certificate, 20)
+        assert saved is not None
+        assert saved.image_bytes == payload
+        assert saved.image == "/api/certificates/20/image"
+
+
+def test_missing_seed_image_rolls_back_inserts(
+    engine: Engine, tmp_path: Path
+) -> None:
+    path = seed_file(
+        tmp_path,
+        certificates=[
+            {
+                "id": 20,
+                "supplier_id": 20,
+                "issuer": "SAMPLE",
+                "cert_no": "SAMPLE-001",
+                "holder_name": "SAMPLE Supplier",
+                "expiry_date": "2027-12-31",
+                "scope": [{"product_name": "Flour"}],
+                "image_file": "absent.png",
+                "image_content_type": "image/png",
+            }
+        ],
+    )
+    with pytest.raises(FileNotFoundError):
+        bootstrap_database(engine, path)
+    with Session(engine) as session:
+        assert session.scalar(select(func.count()).select_from(Supplier)) == 0
+
+
+def test_concurrent_postgres_startup_does_not_duplicate_seed(
+    engine: Engine, tmp_path: Path
+) -> None:
+    if engine.dialect.name != "postgresql":
+        pytest.skip("PostgreSQL advisory-lock behavior")
+    path = seed_file(tmp_path)
+    with ThreadPoolExecutor(max_workers=2) as executor:
+        futures = [
+            executor.submit(bootstrap_database, engine, path) for _ in range(2)
+        ]
+        counts = [future.result(timeout=15) for future in futures]
+    assert sum(result["suppliers"] for result in counts) == 1
+    with Session(engine) as session:
+        assert session.scalar(select(func.count()).select_from(Supplier)) == 1
+
+
+def test_seed_rejects_duplicate_ids() -> None:
+    from pydantic import ValidationError
+
+    with pytest.raises(ValidationError, match="Duplicate IDs"):
+        SeedData.model_validate(
+            {"suppliers": [{"id": 1, "name": "A"}, {"id": 1, "name": "B"}]}
+        )
