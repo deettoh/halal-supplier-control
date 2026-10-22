@@ -3,7 +3,6 @@
 import base64
 import functools
 import hashlib
-import io
 import logging
 import os
 from collections.abc import Mapping
@@ -14,7 +13,6 @@ from typing import Annotated
 from openai import APIError, OpenAI
 from openai.types.chat import ChatCompletionUserMessageParam
 from openai.types.shared_params import ResponseFormatJSONSchema
-from PIL import Image, ImageOps, UnidentifiedImageError
 from pydantic import (
     BaseModel,
     ConfigDict,
@@ -26,6 +24,9 @@ from pydantic import (
     ValidationError,
 )
 
+from backend.images import IMAGE_FORMAT as IMAGE_FORMAT
+from backend.images import JPEG_QUALITY as JPEG_QUALITY
+from backend.images import as_jpeg
 from backend.schemas import LabelExtraction
 
 __all__ = [
@@ -63,9 +64,7 @@ RESPONSE_FORMAT: ResponseFormatJSONSchema = {
     "json_schema": {"name": "label_extraction", "schema": LABEL_JSON_SCHEMA},
 }
 MODEL_ID = "qwen/qwen3-vl-8b-instruct"
-IMAGE_FORMAT = "JPEG"
 IMAGE_MIME_TYPE = "image/jpeg"
-JPEG_QUALITY = 85
 TEMPERATURE = 0
 TIMEOUT_SECONDS = 180
 MAX_RETRIES = 0
@@ -123,15 +122,9 @@ def _compressed(image: bytes) -> bytes:
         ValueError: If Pillow cannot identify image as a picture.
     """
     try:
-        photo = Image.open(io.BytesIO(image))
-    except UnidentifiedImageError as exc:
-        raise ValueError("label image is not a readable image") from exc
-    upright = ImageOps.exif_transpose(photo).convert("RGB")
-    # in place is safe because convert returned a new image
-    upright.thumbnail((MAX_IMAGE_SIDE, MAX_IMAGE_SIDE))
-    buffer = io.BytesIO()
-    upright.save(buffer, format=IMAGE_FORMAT, quality=JPEG_QUALITY)
-    return buffer.getvalue()
+        return as_jpeg(image, max_side=MAX_IMAGE_SIDE)
+    except ValueError as error:
+        raise ValueError("label image is not a readable image") from error
 
 
 def _label_message(image: bytes) -> ChatCompletionUserMessageParam:
