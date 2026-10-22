@@ -4,6 +4,11 @@ These are the agreed wire formats for the MVP. All core workflows are
 implemented; certificate extraction remains a stretch scaffold.
 The executable reference is FastAPI `/docs`, backed by `/openapi.json`.
 
+`ActivityResponse.action` accepts exactly `auto_accepted`, `pending_review`,
+`accepted`, `rejected`, or `certificate_renewed`. The same restriction applies
+to seed rows and database writes. Certificate statuses remain
+`active`/`superseded`; renewal is recorded as `certificate_renewed`.
+
 ## Requests and responses
 
 Every business endpoint requires `X-Demo-Role` (`staff`, `supervisor`, or
@@ -103,8 +108,8 @@ Let the browser set multipart Content-Type including its boundary.
 HTTP errors use `{detail: "message"}`. Validation errors use FastAPI's
 `{detail: [{loc, msg, type, ...}]}` shape, returning 422. Wrong permitted
 role returns 403; missing/invalid header values return 422. Required reasons
-are validated. Certificate uploads use PNG; delivery uploads accept PNG or
-JPEG. Images must decode correctly and be at most 10 MiB (413 when larger).
+are validated. Certificate and delivery uploads accept PNG or JPEG; seed certificate
+files remain PNG. Images must decode correctly and be at most 10 MiB (413 when larger).
 Both are stored/served as JPEG. Invalid images and invalid supplier IDs return
 422 with `{detail: "message"}`; FastAPI schema validation retains its list-shaped
 detail. `/docs` documents both 422 response shapes.

@@ -75,6 +75,8 @@ LabelExtraction. `error`, `decided_by`, `reason`, and `created_at` are optional;
 terminal decisions must satisfy the database's actor/reason constraint.
 
 Activity rows require `tenant`, `actor`, `role`, and `action`.
+Allowed actions are `auto_accepted`, `pending_review`, `accepted`, `rejected`,
+and `certificate_renewed`. Other values fail seed validation.
 `delivery_id`, `reason`, and `created_at` are optional. Omitted timestamps
 are assigned UTC startup time; use explicit timestamps for historical demos.
 

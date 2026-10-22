@@ -34,7 +34,7 @@ extractor has been supplied. All other business routes have real services.
 3. Release the database connection while the plain `def` route calls
    `extract_label` in a FastAPI worker thread.
 4. Re-read the current material and active certificate, then evaluate R1-R5.
-5. Save extraction, full checklist, verdict/status and `delivery_checked`
+5. Save extraction, full checklist, verdict/status and matching delivery status
    activity. Covered/expiring are auto-accepted; others are pending review.
 
 The user confirmed that supervisors wait until extraction completes or times
@@ -75,6 +75,10 @@ uses the latest active certificate, so linked SMEs see renewal immediately.
 Demo actors use role labels (`staff`, `supervisor`) or `supplier:{id}`. These
 headers simulate identity; the contract supplies no individual user ID.
 
+Activity actions are exactly `auto_accepted`, `pending_review`, `accepted`,
+`rejected`, and `certificate_renewed`, enforced in API/seed validation and
+database constraints. Certificate statuses remain `active`/`superseded`.
+
 ## Architecture alignment and remaining scope
 
 Compared with `Halal Supplier Control - Architecture.pdf` (Oct 20, 2026),
@@ -113,10 +117,11 @@ real RunPod availability and Replit deployment are not established by them.
 
 ## PNG sources, JPEG storage
 
-Certificate source files and seed paths remain PNG. Certificate uploads use
-PNG; delivery uploads accept PNG or JPEG. `images.py` stores both as JPEG at
-quality 85, preserving resolution, correcting orientation, and flattening
-transparency onto white. Model resizing stays in main's extractor.
+Certificate source files and seed paths remain PNG. Certificate and delivery
+uploads both accept PNG or JPEG. `images.py` provides one shared JPEG encoder and quality constant. Storage
+uses quality 85 without reducing resolution; model input uses the same
+encoder with a 1280px size limit. Both correct orientation and flatten
+transparency onto white.
 
 Startup converts existing stored PNGs inside the same transaction/startup
 lock, even if seed.json is absent. It skips existing JPEGs so repeated startups

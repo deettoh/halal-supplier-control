@@ -20,8 +20,8 @@ Photo bytes live in the database; `image` is a URL rather than a local file.
 Binary columns are loaded only when explicitly accessed, keeping list reads
 small. JSON columns store scope, extracted fields and the checklist. Existing
 reference-only records remain valid; their new image columns start as null.
-Certificate uploads/source assets use PNG. Delivery uploads accept PNG or
-JPEG. Both are decoded and stored as JPEG (quality 85) with full resolution,
+Certificate seed assets remain PNG. Certificate and delivery uploads
+accept PNG or JPEG. Both are decoded and stored as JPEG (quality 85) with full resolution,
 upright orientation and a white background for transparency. Uploads are
 limited to 10 MiB. Source certificate PNG files in the repo are preserved.
 The extractor separately applies main's 1280-pixel maximum for model input.
@@ -158,6 +158,16 @@ does not implement that workflow or concurrent-renewal handling.
 Material coverage is calculated from the active registry entry, never stored.
 
 ## Later on Replit
+
+Activity actions are restricted by a database check constraint to
+`auto_accepted`, `pending_review`, `accepted`, `rejected`, and
+`certificate_renewed`. PostgreSQL startup adds the constraint to existing
+tables and translates legacy `delivery_accepted`/`delivery_rejected` events.
+Legacy `delivery_checked` becomes `auto_accepted` for a covered/expiring
+verdict, otherwise `pending_review`, preserving the original check outcome
+even if a supervisor has since decided. Unknown actions stop startup and
+roll back the upgrade; no history is deleted. Existing databases are upgraded
+when this version next starts, rather than when code is pushed.
 
 Push/merge the code and pull it into the Replit project. Install the updated
 requirements and use Replit's injected DATABASE_URL instead of the local
