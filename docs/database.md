@@ -13,8 +13,9 @@ return 501 until their workflows are implemented.
 | deliveries | Label reference, extraction JSON, checklist, verdict and decision | One SME |
 | activity_log | Who did what, role, time and reason | One SME |
 
-Certificates and deliveries have `image_bytes` (PostgreSQL BYTEA) and
-`image_content_type`, alongside the existing `image` reference. Photo bytes
+Certificates and deliveries have `image_bytes` (PostgreSQL BYTEA), alongside
+the existing `image` reference. Images use PNG; no content-type column is
+needed. Future image responses use the fixed MIME type `image/png`. Photo bytes
 live in the database; `image` can be a future API URL rather than a local file.
 Binary columns are loaded only when explicitly accessed, keeping list reads
 small. JSON columns store scope, extracted fields and the checklist. Existing
@@ -58,7 +59,8 @@ uv run --env-file .env python src/backend/db.py
 
 Expected output: `Connected to PostgreSQL. All five tables are ready.`
 Both paths are repeatable and preserve existing records. The initializer adds
-missing `image_bytes` and `image_content_type` columns to the earlier schema.
+missing `image_bytes` columns to the earlier schema. Any legacy
+`image_content_type` columns remain unused; startup does not drop columns.
 This is a narrow additive upgrade, not a general migration system: changing
 other existing columns/constraints requires a separate reviewed migration.
 The standalone db.py command initializes tables only; application startup
@@ -69,7 +71,9 @@ also performs optional seeding.
 With DATABASE_URL configured, FastAPI waits for database bootstrap to finish
 before serving requests. Startup runs the blocking database work in a thread
 pool, initializes the schema, then loads `src/seed/seed.json` if present.
-Only empty tables receive supplied rows; existing records are never replaced.
+Only empty tables receive supplied rows. On every startup, existing seed
+certificates with no photo also receive their PNG if it has become available.
+Existing photos and other certificate fields are never replaced.
 PostgreSQL startup workers are serialized by a transaction-scoped advisory
 lock. A seed constraint/file error rolls back all inserts from that attempt
 and stops startup with a sanitized error. No database credentials or raw seed
@@ -77,12 +81,14 @@ contents are logged. Connections are disposed on application shutdown.
 
 The merged seed file contains 2 fictional suppliers, 4 certificates and 16
 materials. Its product-name scope lists are normalized to structured API
-scope entries. Certificate image paths are references; the image assets are
-not supplied by this merge, so those rows initially have no image bytes.
+scope entries. Certificate `image_file` paths identify future PNG assets. Missing files
+are skipped, so those rows initially have no image bytes. Add the PNGs under
+`src/seed/` and restart/redeploy to fill them automatically. Matching uses
+certificate ID, supplier ID and certificate number to avoid unrelated rows.
 Missing seed.json is allowed and skips seeding; malformed/incompatible
 existing JSON fails startup. See [the seed format](seed-format.md).
 The loader can copy fictional seed images into the binary columns, but it
-does not decode/resize images. It is not a dataset reset tool.
+checks the PNG signature but does not decode/resize images. It is not a dataset reset tool.
 
 Without DATABASE_URL, startup logs a warning and skips the database so `/docs`
 can still be used as a contract preview. If DATABASE_URL is configured but

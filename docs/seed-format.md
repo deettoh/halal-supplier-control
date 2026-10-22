@@ -2,7 +2,9 @@
 
 The fictional dataset merged from main is at `src/seed/seed.json`.
 Missing file means skip seeding; an existing but invalid file fails startup.
-The JSON supplies certificate image references, but no image assets yet.
+The JSON supplies certificate `image_file` paths, but no PNG assets yet.
+Missing PNGs are allowed; later startups fill photos for existing matching
+certificates whose `image_bytes` is still null. Existing photos are preserved.
 
 The top-level object accepts five arrays: `suppliers`, `certificates`,
 `materials`, `deliveries`, and `activity_log`. Omitted arrays default to empty.
@@ -28,8 +30,7 @@ Minimal fictional format example (not the final seed dataset):
     "expiry_date": "2027-12-31",
     "scope": [{"product_name": "Flour", "brand": "SAMPLE Brand"}],
     "status": "active",
-    "image_file": "images/sample-certificate.png",
-    "image_content_type": "image/png"
+    "image_file": "images/sample-certificate.png"
   }],
   "materials": [{
     "id": 1,
@@ -42,12 +43,23 @@ Minimal fictional format example (not the final seed dataset):
 }
 ```
 
-`image_file` is optional, relative to seed.json, and must stay within the seed
-directory. When supplied, it requires `image_content_type` (`image/png`,
-`image/jpeg`, or `image/webp`); the referenced nonempty bytes are stored in
-PostgreSQL. File/type pairing is validated; actual image decoding/resizing is
-not performed by the loader. Without `image_file`, certificates may omit
-the image. Existing reference-only seed rows may use the legacy `image` field.
+`image_file` is optional and relative to seed.json. It must stay within the
+seed directory and use a `.png` extension. Missing files are skipped; present
+files must have a PNG signature. The bytes are stored in PostgreSQL and `image`
+is set to the future `/api/certificates/{id}/image` URL (or deliveries URL).
+An image-serving endpoint still needs to be implemented. No
+`image_content_type` field is needed: image responses will use `image/png`.
+Actual image decoding/resizing is not performed by the loader.
+Without `image_file`, certificates may omit the image. Reference-only rows
+may use `image`, which stores text and does not load any file.
+
+On every startup, missing certificate photos are filled from available seed
+PNGs, including when the certificates table is populated. The existing row
+must match the seed ID, supplier ID and certificate number. Only null
+`image_bytes` is filled; stored photos and other fields are left unchanged.
+This is a startup action, not a continuous file watcher. For a new certificate
+added after the table was populated, use the normal backend workflow; this
+photo backfill does not insert new rows into populated tables.
 
 Deliveries additionally require `tenant`, `material_id`, `extracted`, the five
 ordered `rule_results`, `verdict`, `status`, and an image reference/file.
@@ -59,11 +71,12 @@ Activity rows require `tenant`, `actor`, `role`, and `action`.
 `delivery_id`, `reason`, and `created_at` are optional. Omitted timestamps
 are assigned UTC startup time; use explicit timestamps for historical demos.
 
-Each nonempty table is left untouched. Empty tables receive their supplied
+Each nonempty table skips row insertion (apart from the photo fill above). Empty tables receive their supplied
 rows in dependency order, inside one transaction. Therefore IDs in seed data
 must match any existing parent records; the loader does not silently remap,
-merge, or replace them. A missing parent/file or failed constraint rolls back
-all inserts from that attempt. PostgreSQL startup workers use a transaction
+merge, or replace them. A missing parent, invalid existing PNG or failed
+constraint rolls back all inserts and photo fills from that attempt.
+PostgreSQL startup workers use a transaction
 advisory lock to prevent duplicate concurrent seeding.
 
 PostgreSQL ID sequences advance past seeded IDs without moving an already
