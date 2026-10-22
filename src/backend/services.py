@@ -31,16 +31,15 @@ INCOMPLETE_EXTRACTION = (
 )
 
 
-def read_photo(upload: UploadFile, *, png_only: bool = False) -> bytes:
+def read_photo(upload: UploadFile) -> bytes:
     """Bound uploads; preserve source bytes for main's demo-cache hashes."""
     payload = upload.file.read(MAX_IMAGE_BYTES + 1)
     if len(payload) > MAX_IMAGE_BYTES:
         raise HTTPException(413, "Photo must be at most 10 MiB")
     is_png = payload.startswith(b"\x89PNG\r\n\x1a\n")
     is_jpeg = payload.startswith(b"\xff\xd8\xff")
-    if not is_png and not (is_jpeg and not png_only):
-        expected = "PNG" if png_only else "PNG or JPEG"
-        raise HTTPException(422, f"Upload must be a nonempty {expected} image")
+    if not is_png and not is_jpeg:
+        raise HTTPException(422, "Upload must be a nonempty PNG or JPEG image")
     return payload
 
 
@@ -341,7 +340,7 @@ def create_delivery(
             tenant=context.tenant,
             actor=context.role,
             role=context.role,
-            action="delivery_checked",
+            action=saved.status,
             delivery_id=saved.id,
         )
     )
@@ -378,7 +377,7 @@ def decide_delivery(
                 tenant=context.tenant,
                 actor="staff",
                 role="staff",
-                action="delivery_checked",
+                action="pending_review",
                 delivery_id=row.id,
             )
         )
@@ -390,7 +389,7 @@ def decide_delivery(
             tenant=context.tenant,
             actor=context.role,
             role=context.role,
-            action=f"delivery_{row.status}",
+            action=row.status,
             delivery_id=row.id,
             reason=request.reason,
         )

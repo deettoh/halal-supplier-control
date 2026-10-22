@@ -10,6 +10,7 @@ from sqlalchemy.orm import Session, undefer
 
 from backend import db, images
 from backend.schemas import (
+    ActivityAction,
     APIModel,
     CertificateScopeItem,
     CertificateStatus,
@@ -99,7 +100,7 @@ class ActivitySeed(APIModel):
     tenant: NonEmptyText
     actor: NonEmptyText
     role: DemoRole
-    action: NonEmptyText
+    action: ActivityAction
     delivery_id: RecordId | None = None
     reason: str | None = None
     created_at: AwareDatetime = Field(default_factory=db.utc_now)

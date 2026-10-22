@@ -113,7 +113,7 @@ def test_upload_stores_photo_checks_and_audit(
         row = session.get(db.Delivery, result["id"])
         assert row is not None and row.image_bytes == JPEG
         log = session.scalar(select(db.ActivityLog))
-        assert log is not None and log.action == "delivery_checked"
+        assert log is not None and log.action == "auto_accepted"
         assert log.delivery_id == row.id and log.tenant == BAKERY
 
 
@@ -389,30 +389,28 @@ def test_substitution_is_pending_and_auto_accepted_is_not_decidable(
     assert flagged["status"] == "pending_review"
 
 
-@pytest.mark.parametrize("with_image", [True, False])
+@pytest.mark.parametrize("image_format", ["PNG", "JPEG", None])
 def test_renewal_supersedes_and_updates_both_smes(
     api_client: TestClient,
     api_engine: Engine,
-    with_image: bool,
+    image_format: str | None,
 ) -> None:
+    source = JPEG if image_format == "JPEG" else PNG
     response = api_client.post(
         "/api/certificates",
         headers=headers("supplier", "1"),
         data=renewal_form(),
-        files={"image": ("certificate.png", PNG, "image/png")}
-        if with_image
+        files={"image": ("certificate", source, "application/octet-stream")}
+        if image_format is not None
         else None,
     )
     assert response.status_code == 201
     renewed = response.json()
     assert renewed["supplier_id"] == 1 and renewed["status"] == "active"
-    if with_image:
-        assert (
-            api_client.get(
-                renewed["image"], headers=headers("supplier", "1")
-            ).content
-            == JPEG
-        )
+    if image_format is not None:
+        assert api_client.get(
+            renewed["image"], headers=headers("supplier", "1")
+        ).content == images.as_jpeg(source)
     else:
         assert renewed["image"] is None
     with Session(api_engine) as session:

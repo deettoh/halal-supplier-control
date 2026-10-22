@@ -123,6 +123,7 @@ PhotoReader = Annotated[
     DemoContext, Depends(require_roles("staff", "supervisor", "supplier"))
 ]
 DeliveryId = Annotated[int, Path(gt=0)]
+CertificateId = Annotated[int, Path(gt=0)]
 
 
 def not_implemented() -> NoReturn:
@@ -257,11 +258,7 @@ def renew_certificate(
 
     Supplier ID comes from X-Demo-Tenant, never from this form.
     """
-    payload = (
-        services.read_photo(request.image, png_only=True)
-        if request.image
-        else None
-    )
+    payload = services.read_photo(request.image) if request.image else None
     return services.renew_certificate(session, context, request, payload)
 
 
@@ -332,7 +329,7 @@ def delivery_image(
     tags=["Images"],
 )
 def certificate_image(
-    id: DeliveryId, context: PhotoReader, session: Database
+    id: CertificateId, context: PhotoReader, session: Database
 ) -> Response:
     """Stored JPEG for the owning supplier or a staff/supervisor linked SME."""
     return jpeg_response(services.certificate_photo(session, context, id))

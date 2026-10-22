@@ -144,7 +144,7 @@ def test_all_five_tables_round_trip(session: Session, engine: Engine) -> None:
         tenant="bakery",
         actor="demo:bakery:staff",
         role="staff",
-        action="delivery_checked",
+        action="pending_review",
         delivery_id=item.id,
     )
     session.add(log)
@@ -224,7 +224,7 @@ def test_activity_cannot_reference_another_sme(session: Session) -> None:
             tenant="caterer",
             actor="demo:caterer:staff",
             role="staff",
-            action="delivery_checked",
+            action="pending_review",
             delivery_id=item.id,
         )
     )
@@ -245,6 +245,124 @@ def test_renewal_log_can_have_no_delivery(session: Session) -> None:
     session.commit()
     assert session.scalar(select(ActivityLog.delivery_id)) is None
     assert session.scalar(select(func.count()).select_from(ActivityLog)) == 1
+
+
+@pytest.mark.parametrize(
+    "action",
+    [
+        "auto_accepted",
+        "pending_review",
+        "accepted",
+        "rejected",
+        "certificate_renewed",
+        "invented",
+        "cert_renewed",
+        "delivery_checked",
+    ],
+)
+def test_activity_action_database_constraint(
+    session: Session,
+    action: str,
+) -> None:
+    session.add(
+        ActivityLog(
+            tenant="bakery",
+            actor="staff",
+            role="staff",
+            action=action,
+        )
+    )
+    if action in {"invented", "cert_renewed", "delivery_checked"}:
+        with pytest.raises(IntegrityError):
+            session.flush()
+    else:
+        session.flush()
+
+
+@pytest.mark.parametrize("unknown", [False, True])
+@pytest.mark.parametrize("verdict", ["needs_human", "covered", "expiring"])
+def test_existing_postgres_activity_upgrade(
+    engine: Engine,
+    unknown: bool,
+    verdict: str,
+) -> None:
+    if engine.dialect.name != "postgresql":
+        pytest.skip("PostgreSQL startup constraint upgrade")
+    with Session(engine) as session:
+        _, material = catalog(session)
+        item = delivery(
+            material.id,
+            status="accepted",
+            decided_by="supervisor",
+            reason="Reviewed",
+            verdict=verdict,
+        )
+        session.add(item)
+        session.flush()
+        item_id = item.id
+        session.commit()
+    with engine.begin() as connection:
+        table = db.qualified_table_name(connection, "activity_log")
+        connection.execute(
+            text(f"ALTER TABLE {table} DROP CONSTRAINT ck_activity_action")
+        )
+    old_actions = [
+        "delivery_checked",
+        "delivery_accepted",
+        "delivery_rejected",
+        "certificate_renewed",
+    ]
+    if unknown:
+        old_actions.append("unexpected")
+    with Session(engine) as session:
+        session.add_all(
+            [
+                ActivityLog(
+                    tenant="bakery",
+                    actor="staff",
+                    role="staff",
+                    action=action,
+                    delivery_id=item_id,
+                )
+                for action in old_actions
+            ]
+        )
+        session.commit()
+    if unknown:
+        with pytest.raises(ValueError, match="unsupported actions"):
+            db.init_db(engine)
+        expected = old_actions
+    else:
+        db.init_db(engine)
+        db.init_db(engine)
+        expected = [
+            "auto_accepted"
+            if verdict in {"covered", "expiring"}
+            else "pending_review",
+            "accepted",
+            "rejected",
+            "certificate_renewed",
+        ]
+    with Session(engine) as session:
+        assert (
+            list(
+                session.scalars(
+                    select(ActivityLog.action).order_by(ActivityLog.id)
+                )
+            )
+            == expected
+        )
+        if not unknown:
+            session.add(
+                ActivityLog(
+                    tenant="bakery",
+                    actor="staff",
+                    role="staff",
+                    action="unexpected",
+                )
+            )
+            with pytest.raises(IntegrityError):
+                session.flush()
 
 
 @pytest.mark.parametrize("field", ["status", "verdict"])

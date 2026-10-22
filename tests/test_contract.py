@@ -16,14 +16,71 @@ from backend import db
 from backend.extract import LabelExtraction as ExtractLabel
 from backend.main import app, database
 from backend.schemas import (
+    ActivityResponse,
     CertificateResponse,
     DeliveryDecisionRequest,
     DeliveryResponse,
     LabelExtraction,
 )
+from backend.seed import ActivitySeed
 
 client = TestClient(app)
 PNG = (Path(__file__).parent / "fixtures/synthetic_label.png").read_bytes()
+
+
+@pytest.mark.parametrize(
+    "action",
+    [
+        "auto_accepted",
+        "pending_review",
+        "accepted",
+        "rejected",
+        "certificate_renewed",
+        "cert_renewed",
+        "delivery_checked",
+        "invented",
+    ],
+)
+def test_activity_action_contract_and_seed(action: str) -> None:
+    payload = {
+        "id": 1,
+        "actor": "staff",
+        "role": "staff",
+        "action": action,
+        "delivery_id": None,
+        "reason": None,
+        "created_at": datetime.now(UTC),
+    }
+    valid = {
+        "auto_accepted",
+        "pending_review",
+        "accepted",
+        "rejected",
+        "certificate_renewed",
+    }
+    for model, values in (
+        (ActivityResponse, payload),
+        (ActivitySeed, {**payload, "tenant": "bakery"}),
+    ):
+        if action in valid:
+            assert model.model_validate(values).action == action
+        else:
+            with pytest.raises(ValidationError):
+                model.model_validate(values)
+
+
+def test_openapi_lists_only_five_activity_actions() -> None:
+    spec = client.get("/openapi.json").json()
+    action = spec["components"]["schemas"]["ActivityResponse"]["properties"][
+        "action"
+    ]
+    assert set(action["enum"]) == {
+        "auto_accepted",
+        "pending_review",
+        "accepted",
+        "rejected",
+        "certificate_renewed",
+    }
 
 
 @pytest.fixture(autouse=True)

@@ -196,9 +196,9 @@ def test_activity_is_scoped_newest_first_and_reads_do_not_write(
 ) -> None:
     with Session(api_engine) as session:
         for tenant, day, action in (
-            (BAKERY, 20, "delivery_checked"),
+            (BAKERY, 20, "pending_review"),
             (CATERER, 22, "certificate_renewed"),
-            (BAKERY, 22, "delivery_accepted"),
+            (BAKERY, 22, "accepted"),
         ):
             session.add(
                 db.ActivityLog(
@@ -213,8 +213,8 @@ def test_activity_is_scoped_newest_first_and_reads_do_not_write(
     for _ in range(2):
         rows = api_client.get("/api/activity", headers=headers()).json()
         assert [row["action"] for row in rows] == [
-            "delivery_accepted",
-            "delivery_checked",
+            "accepted",
+            "pending_review",
         ]
     with Session(api_engine) as session:
         assert (

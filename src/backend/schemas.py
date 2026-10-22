@@ -32,6 +32,13 @@ DeliveryStatus = Literal[
     "auto_accepted", "pending_review", "accepted", "rejected"
 ]
 CertificateStatus = Literal["active", "superseded"]
+ActivityAction = Literal[
+    "auto_accepted",
+    "pending_review",
+    "accepted",
+    "rejected",
+    "certificate_renewed",
+]
 RuleName = Literal["R1", "R2", "R3", "R4", "R5"]
 
 
@@ -167,7 +174,8 @@ class CertificateCreateRequest(APIModel):
         )
     )
     image: UploadFile | None = Field(
-        default=None, description="Optional certificate PNG; stored as JPEG"
+        default=None,
+        description="Optional certificate PNG or JPEG; stored as JPEG",
     )
 
 
@@ -208,8 +216,8 @@ class ActivityResponse(APIModel):
     id: RecordId
     actor: NonEmptyText
     role: DemoRole
-    action: NonEmptyText = Field(
-        description="Action name, e.g. delivery_checked or certificate_renewed"
+    action: ActivityAction = Field(
+        description="Delivery status event or certificate_renewed"
     )
     delivery_id: RecordId | None
     reason: str | None
