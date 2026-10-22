@@ -13,9 +13,13 @@ return 501 until their workflows are implemented.
 | deliveries | Label reference, extraction JSON, checklist, verdict and decision | One SME |
 | activity_log | Who did what, role, time and reason | One SME |
 
-Certificate images and label images are references, not image bytes. JSON
-columns store scope, extracted fields, and the R1-R5 checklist, including
-nullable results. Timestamps are timezone-aware on PostgreSQL.
+Certificates and deliveries have `image_bytes` (PostgreSQL BYTEA) and
+`image_content_type`, alongside the existing `image` reference. Photo bytes
+live in the database; `image` can be a future API URL rather than a local file.
+Binary columns are loaded only when explicitly accessed, keeping list reads
+small. JSON columns store scope, extracted fields and the checklist. Existing
+reference-only records remain valid; their new image columns start as null.
+Upload validation and image-serving endpoints remain later backend work.
 
 ## Start locally (PowerShell in the repository root)
 
@@ -40,16 +44,46 @@ and TEST_DATABASE_URL entries from `.env.example`. `.env` is ignored by Git.
 The plain Python module reads environment variables; it does not auto-load
 `.env`. `uv run --env-file .env` loads that file explicitly for local commands.
 
-Create the five empty tables:
+Start the backend; with DATABASE_URL configured it initializes automatically:
+
+```powershell
+uv run --env-file .env uvicorn backend.main:app --app-dir src --reload
+```
+
+Alternatively, create/upgrade the five tables without starting the server:
 
 ```powershell
 uv run --env-file .env python src/backend/db.py
 ```
 
 Expected output: `Connected to PostgreSQL. All five tables are ready.`
-The command is repeatable: it creates missing tables without deleting rows.
-It is not a migration tool: changes to existing columns/constraints need a
-separate reviewed migration later. No seed dataset is installed by this step.
+Both paths are repeatable and preserve existing records. The initializer adds
+missing `image_bytes` and `image_content_type` columns to the earlier schema.
+This is a narrow additive upgrade, not a general migration system: changing
+other existing columns/constraints requires a separate reviewed migration.
+The standalone db.py command initializes tables only; application startup
+also performs optional seeding.
+
+## Automatic startup and seeding
+
+With DATABASE_URL configured, FastAPI waits for database bootstrap to finish
+before serving requests. Startup runs the blocking database work in a thread
+pool, initializes the schema, then loads `src/seed/seed.json` if present.
+Only empty tables receive supplied rows; existing records are never replaced.
+PostgreSQL startup workers are serialized by a transaction-scoped advisory
+lock. A seed constraint/file error rolls back all inserts from that attempt
+and stops startup with a sanitized error. No database credentials or raw seed
+contents are logged. Connections are disposed on application shutdown.
+
+No approved seed file is currently supplied. Missing seed.json is allowed
+and skips seeding; malformed/incompatible existing JSON fails startup.
+See [the proposed seed format](seed-format.md) before preparing Member 5's data.
+The loader can copy fictional seed images into the binary columns, but it
+does not decode/resize images. It is not a dataset reset tool.
+
+Without DATABASE_URL, startup logs a warning and skips the database so `/docs`
+can still be used as a contract preview. If DATABASE_URL is configured but
+unreachable, startup fails rather than pretending persistence is available.
 
 Inspect the database:
 
@@ -92,7 +126,7 @@ DatabaseSession = Annotated[Session, Depends(get_db)]
 Each request gets its own session. Successful writes must explicitly call
 `session.commit()` (or use a transaction block); closing the dependency rolls
 back uncommitted work. Importing db.py and starting `/docs` do not require a
-database and do not create any tables.
+database. Starting the application with DATABASE_URL does initialize tables.
 
 Database constraints enforce valid stored statuses, at most one active
 certificate per supplier, and matching tenant IDs on linked deliveries,
@@ -114,13 +148,8 @@ Docker URL. Ordinary `postgresql://` URLs are adapted to the psycopg driver;
 any SSL query options are preserved. The engine is cached per process, so
 restart the app after changing the URL.
 
-In the intended Replit environment, initialise the database explicitly:
-
-```bash
-python src/backend/db.py
-```
-
-The application still starts with the existing command:
+With Replit's DATABASE_URL injected, initialization/seeding runs automatically
+before the app serves requests. The application keeps the existing command:
 
 ```bash
 uvicorn backend.main:app --app-dir src --host 0.0.0.0 --port 8000
@@ -128,4 +157,6 @@ uvicorn backend.main:app --app-dir src --host 0.0.0.0 --port 8000
 
 Docker Compose is local tooling; do not start it on Replit. Git transfers
 models/code, not the contents of your local database or its volume. A Replit
-database needs its own initialisation and, later, the agreed synthetic seed.
+database is initialized on startup and later receives the agreed synthetic
+seed from `src/seed/seed.json`. Restarting/redeploying keeps database photos;
+uploaded images must never depend on runtime filesystem files.
