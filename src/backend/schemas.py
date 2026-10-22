@@ -154,9 +154,9 @@ class CertificateScopeItem(APIModel):
 class CertificateCreateRequest(APIModel):
     """multipart fields; scope is a JSON-encoded list, not repeated fields."""
 
-    issuer: NonEmptyText
-    cert_no: NonEmptyText
-    holder_name: NonEmptyText
+    issuer: NonEmptyText = Field(max_length=200)
+    cert_no: NonEmptyText = Field(max_length=100)
+    holder_name: NonEmptyText = Field(max_length=200)
     expiry_date: date
     scope: Json[Annotated[list[CertificateScopeItem], Field(min_length=1)]] = (
         Field(

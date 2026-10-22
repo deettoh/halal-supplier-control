@@ -1,14 +1,19 @@
 """Exercise the published contract without a database or model endpoint."""
 
+from collections.abc import Generator
 from datetime import UTC, datetime
 from typing import Any
 
 import pytest
 from fastapi.testclient import TestClient
 from pydantic import ValidationError
+from sqlalchemy import create_engine
+from sqlalchemy.orm import Session
+from sqlalchemy.pool import StaticPool
 
+from backend import db
 from backend.extract import LabelExtraction as ExtractLabel
-from backend.main import app
+from backend.main import app, database
 from backend.schemas import (
     CertificateResponse,
     DeliveryDecisionRequest,
@@ -19,8 +24,33 @@ from backend.schemas import (
 client = TestClient(app)
 
 
+@pytest.fixture(autouse=True)
+def contract_database() -> Generator[None, None, None]:
+    """Validation/OpenAPI tests need no configured production database."""
+    engine = create_engine(
+        "sqlite://",
+        connect_args={"check_same_thread": False},
+        poolclass=StaticPool,
+    )
+    db.init_db(engine)
+
+    def session() -> Generator[Session, None, None]:
+        with Session(engine) as current:
+            yield current
+
+    app.dependency_overrides[database] = session
+    try:
+        yield
+    finally:
+        app.dependency_overrides.pop(database, None)
+        engine.dispose()
+
+
 def headers(role: str = "supervisor") -> dict[str, str]:
-    return {"X-Demo-Role": role, "X-Demo-Tenant": "bakery"}
+    return {
+        "X-Demo-Role": role,
+        "X-Demo-Tenant": "1" if role == "supplier" else "bakery",
+    }
 
 
 def delivery_payload() -> dict[str, Any]:
@@ -84,13 +114,13 @@ def test_only_supervisor_can_decide(role: str) -> None:
     assert response.status_code == 403
 
 
-def test_valid_decision_is_explicitly_unimplemented() -> None:
+def test_valid_decision_for_unknown_delivery_returns_404() -> None:
     response = client.post(
         "/api/deliveries/1/decision",
         headers=headers(),
         json={"decision": "reject", "reason": "Wrong brand"},
     )
-    assert response.status_code == 501
+    assert response.status_code == 404
 
 
 def test_upload_accepts_flat_multipart_fields() -> None:
@@ -98,9 +128,9 @@ def test_upload_accepts_flat_multipart_fields() -> None:
         "/api/deliveries",
         headers=headers("staff"),
         data={"material_id": "1"},
-        files={"image": ("label.png", b"fake image", "image/png")},
+        files={"image": ("label.png", b"\x89PNG\r\n\x1a\n", "image/png")},
     )
-    assert response.status_code == 501
+    assert response.status_code == 404  # Valid form; unknown material.
 
 
 @pytest.mark.parametrize("material_id", ["0", "-1", "abc"])
@@ -138,7 +168,7 @@ def test_certificate_form_accepts_json_scope_and_optional_image(
     with_image: bool,
 ) -> None:
     files = (
-        {"image": ("certificate.png", b"fake image", "image/png")}
+        {"image": ("certificate.png", b"\x89PNG\r\n\x1a\n", "image/png")}
         if with_image
         else None
     )
@@ -148,7 +178,7 @@ def test_certificate_form_accepts_json_scope_and_optional_image(
         data=certificate_form(),
         files=files,
     )
-    assert response.status_code == 501
+    assert response.status_code == 404  # Valid form; unknown supplier.
 
 
 @pytest.mark.parametrize("scope", ["not JSON", "[]", '[{"brand":"Only"}]'])
@@ -257,7 +287,7 @@ def test_openapi_documents_all_eight_business_routes() -> None:
         (path, method)
         for path, methods in spec["paths"].items()
         for method in methods
-        if path != "/api/health"
+        if path != "/api/health" and not path.endswith("/image")
     }
     assert actual == expected
     for path, method in expected:
@@ -266,7 +296,9 @@ def test_openapi_documents_all_eight_business_routes() -> None:
             p["name"] for p in operation["parameters"] if p["in"] == "header"
         }
         assert header_names == {"X-Demo-Role", "X-Demo-Tenant"}
-        assert "501" in operation["responses"]
+        assert ("501" in operation["responses"]) == (
+            path == "/api/certificates/extract"
+        )
         success = (
             operation["responses"].get("201") or operation["responses"]["200"]
         )
@@ -274,6 +306,9 @@ def test_openapi_documents_all_eight_business_routes() -> None:
     for path in ["/api/deliveries", "/api/certificates"]:
         content = spec["paths"][path]["post"]["requestBody"]["content"]
         assert "multipart/form-data" in content
+    for path in ["/api/deliveries/{id}/image", "/api/certificates/{id}/image"]:
+        operation = spec["paths"][path]["get"]
+        assert "image/png" in operation["responses"]["200"]["content"]
     assert client.get("/docs").status_code == 200
     assert client.get("/api/health").json() == {
         "status": "ok",

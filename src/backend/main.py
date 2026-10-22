@@ -1,16 +1,28 @@
-"""Executable API contract; business routes deliberately return HTTP 501."""
+"""Database-backed API workflows; certificate extraction remains stretch."""
 
 import logging
 import os
-from collections.abc import AsyncIterator, Callable
+from collections.abc import AsyncIterator, Callable, Generator
 from contextlib import asynccontextmanager
 from typing import Annotated, Any, NoReturn
 
-from fastapi import Depends, FastAPI, Form, Header, HTTPException, Path, Query
+from fastapi import (
+    Depends,
+    FastAPI,
+    Form,
+    Header,
+    HTTPException,
+    Path,
+    Query,
+    Request,
+)
+from fastapi.responses import JSONResponse, Response
 from sqlalchemy.exc import SQLAlchemyError
+from sqlalchemy.orm import Session
 from starlette.concurrency import run_in_threadpool
 
-from backend.db import dispose_db
+from backend import services
+from backend.db import dispose_db, get_session_factory
 from backend.schemas import (
     ActivityResponse,
     CertificateCreateRequest,
@@ -59,7 +71,6 @@ app = FastAPI(
     title="Halal Supplier Control",
     version="0.1.0",
     description=(
-        "Contract scaffold. Business endpoints return 501 until implemented. "
         "Reports document coverage only, never a halal ruling. Demo headers "
         "simulate identity. Certificate extraction is a stretch feature."
     ),
@@ -67,9 +78,29 @@ app = FastAPI(
 
 ERRORS: dict[int | str, dict[str, Any]] = {
     403: {"model": ErrorResponse, "description": "Demo role not permitted"},
-    422: {"model": ValidationErrorResponse},
-    501: {"model": ErrorResponse, "description": "Not implemented yet"},
+    422: {"model": ValidationErrorResponse | ErrorResponse},
+    503: {"model": ErrorResponse, "description": "Database unavailable"},
 }
+
+
+@app.exception_handler(SQLAlchemyError)
+def database_error(request: Request, error: SQLAlchemyError) -> JSONResponse:
+    logger.error("Database request failed (%s)", type(error).__name__)
+    return JSONResponse(
+        status_code=503, content={"detail": "Database unavailable"}
+    )
+
+
+def database() -> Generator[Session, None, None]:
+    try:
+        factory = get_session_factory()
+    except ValueError:
+        raise HTTPException(503, "Database is not configured") from None
+    with factory() as session:
+        yield session
+
+
+Database = Annotated[Session, Depends(database)]
 
 
 def require_roles(*roles: DemoRole) -> Callable[..., DemoContext]:
@@ -88,6 +119,9 @@ Staff = Annotated[DemoContext, Depends(require_roles("staff"))]
 Supervisor = Annotated[DemoContext, Depends(require_roles("supervisor"))]
 Supplier = Annotated[DemoContext, Depends(require_roles("supplier"))]
 Reader = Annotated[DemoContext, Depends(require_roles("staff", "supervisor"))]
+PhotoReader = Annotated[
+    DemoContext, Depends(require_roles("staff", "supervisor", "supplier"))
+]
 DeliveryId = Annotated[int, Path(gt=0)]
 
 
@@ -106,16 +140,22 @@ def health() -> HealthResponse:
     responses=ERRORS,
     tags=["Materials"],
 )
-def list_materials(context: Reader) -> list[MaterialResponse]:
+def list_materials(
+    context: Reader, session: Database
+) -> list[MaterialResponse]:
     """Chosen SME's masterlist with coverage computed on every read."""
-    not_implemented()
+    return services.materials(session, context)
 
 
 @app.post(
     "/api/deliveries",
     response_model=DeliveryResponse,
     status_code=201,
-    responses={**ERRORS, 404: {"model": ErrorResponse}},
+    responses={
+        **ERRORS,
+        404: {"model": ErrorResponse},
+        413: {"model": ErrorResponse, "description": "PNG exceeds 10 MiB"},
+    },
     tags=["Deliveries"],
 )
 def create_delivery(
@@ -123,9 +163,12 @@ def create_delivery(
     request: Annotated[
         DeliveryCreateRequest, Form(media_type="multipart/form-data")
     ],
+    session: Database,
 ) -> DeliveryResponse:
     """Photo + material_id; extraction failures will be saved for review."""
-    not_implemented()
+    return services.create_delivery(
+        session, context, request.material_id, services.read_png(request.image)
+    )
 
 
 @app.get(
@@ -137,9 +180,10 @@ def create_delivery(
 def list_deliveries(
     context: Supervisor,
     query: Annotated[DeliveryListQuery, Query()],
+    session: Database,
 ) -> list[DeliveryResponse]:
     """Pending review queue for the chosen SME."""
-    not_implemented()
+    return services.delivery_queue(session, context)
 
 
 @app.post(
@@ -156,9 +200,10 @@ def decide_delivery(
     id: DeliveryId,
     request: DeliveryDecisionRequest,
     context: Supervisor,
+    session: Database,
 ) -> DeliveryResponse:
     """Accept/reject a pending delivery with a nonblank reason."""
-    not_implemented()
+    return services.decide_delivery(session, context, id, request)
 
 
 @app.get(
@@ -167,27 +212,35 @@ def decide_delivery(
     responses=ERRORS,
     tags=["Activity"],
 )
-def list_activity(context: Supervisor) -> list[ActivityResponse]:
+def list_activity(
+    context: Supervisor, session: Database
+) -> list[ActivityResponse]:
     """Chosen SME's audit activity, newest first."""
-    not_implemented()
+    return services.activity(session, context)
 
 
 @app.get(
     "/api/certificates",
     response_model=list[CertificateResponse],
-    responses=ERRORS,
+    responses={**ERRORS, 404: {"model": ErrorResponse}},
     tags=["Certificates"],
 )
-def list_certificates(context: Supplier) -> list[CertificateResponse]:
+def list_certificates(
+    context: Supplier, session: Database
+) -> list[CertificateResponse]:
     """Supplier's own active and superseded certificates."""
-    not_implemented()
+    return services.certificates(session, context)
 
 
 @app.post(
     "/api/certificates",
     response_model=CertificateResponse,
     status_code=201,
-    responses=ERRORS,
+    responses={
+        **ERRORS,
+        404: {"model": ErrorResponse},
+        413: {"model": ErrorResponse, "description": "PNG exceeds 10 MiB"},
+    },
     tags=["Certificates"],
 )
 def renew_certificate(
@@ -195,18 +248,20 @@ def renew_certificate(
     request: Annotated[
         CertificateCreateRequest, Form(media_type="multipart/form-data")
     ],
+    session: Database,
 ) -> CertificateResponse:
     """Renew using form fields, JSON-encoded scope, and an optional image.
 
     Supplier ID comes from X-Demo-Tenant, never from this form.
     """
-    not_implemented()
+    payload = services.read_png(request.image) if request.image else None
+    return services.renew_certificate(session, context, request, payload)
 
 
 @app.post(
     "/api/certificates/extract",
     response_model=CertificateExtractResponse,
-    responses=ERRORS,
+    responses={**ERRORS, 501: {"model": ErrorResponse}},
     tags=["Certificates (stretch)"],
 )
 def extract_certificate(
@@ -217,3 +272,56 @@ def extract_certificate(
 ) -> CertificateExtractResponse:
     """Stretch: pre-fill only; extraction does not submit a renewal."""
     not_implemented()
+
+
+def png_response(payload: bytes) -> Response:
+    return Response(
+        content=payload,
+        media_type="image/png",
+        headers={
+            "Cache-Control": "no-store",
+            "X-Content-Type-Options": "nosniff",
+        },
+    )
+
+
+@app.get(
+    "/api/deliveries/{id}/image",
+    responses={
+        **ERRORS,
+        404: {"model": ErrorResponse},
+        200: {
+            "content": {
+                "image/png": {"schema": {"type": "string", "format": "binary"}}
+            }
+        },
+    },
+    response_class=Response,
+    tags=["Images"],
+)
+def delivery_image(
+    id: DeliveryId, context: Reader, session: Database
+) -> Response:
+    """Stored PNG; available only to staff/supervisor of the delivery's SME."""
+    return png_response(services.delivery_photo(session, context, id))
+
+
+@app.get(
+    "/api/certificates/{id}/image",
+    responses={
+        **ERRORS,
+        404: {"model": ErrorResponse},
+        200: {
+            "content": {
+                "image/png": {"schema": {"type": "string", "format": "binary"}}
+            }
+        },
+    },
+    response_class=Response,
+    tags=["Images"],
+)
+def certificate_image(
+    id: DeliveryId, context: PhotoReader, session: Database
+) -> Response:
+    """Stored PNG for the owning supplier or a staff/supervisor linked SME."""
+    return png_response(services.certificate_photo(session, context, id))
