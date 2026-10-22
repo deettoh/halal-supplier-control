@@ -1,6 +1,7 @@
 """Tests for the label extraction schema and RunPod extractor."""
 
 import base64
+import io
 import json
 from collections.abc import Callable
 from typing import Any
@@ -8,10 +9,12 @@ from typing import Any
 import httpx2
 import pytest
 from openai import APIStatusError, APITimeoutError, OpenAI
+from PIL import ExifTags, Image
 from pydantic import ValidationError
 
 from backend.extract import (
     LABEL_JSON_SCHEMA,
+    MAX_IMAGE_SIDE,
     MAX_RETRIES,
     TIMEOUT_SECONDS,
     ExtractionError,
@@ -20,7 +23,9 @@ from backend.extract import (
 )
 
 LABEL_FIELDS = {"product_name", "brand", "manufacturer", "halal_mark_present"}
-IMAGE = b"\x89PNG fake image bytes"
+IMAGE_SIZE = (64, 32)
+LARGE_PHOTO_SIZE = (3000, 2000)
+EXIF_ROTATED_90 = 6
 LABEL = {
     "product_name": "Kicap Manis",
     "brand": "Seri Melur",
@@ -30,6 +35,16 @@ LABEL = {
 
 RequestBody = dict[str, Any]
 Handler = Callable[[httpx2.Request], httpx2.Response]
+
+
+def png(size: tuple[int, int], mode: str = "RGB") -> bytes:
+    """Return a blank PNG of size in mode."""
+    buffer = io.BytesIO()
+    Image.new(mode, size).save(buffer, format="PNG")
+    return buffer.getvalue()
+
+
+IMAGE = png(IMAGE_SIZE)
 
 
 def mock_client(handle: Handler) -> OpenAI:
@@ -76,12 +91,29 @@ def fake_client(
     return mock_client(handle), requests
 
 
-def sent_request() -> RequestBody:
-    """Return the JSON body extract_label sends for IMAGE."""
+def sent_request(image: bytes = IMAGE) -> RequestBody:
+    """Return the JSON body extract_label sends for image."""
     client, requests = fake_client(json.dumps(LABEL))
-    extract_label(IMAGE, client=client)
+    extract_label(image, client=client)
     body: RequestBody = json.loads(requests[0].content)
     return body
+
+
+def image_urls(body: RequestBody) -> list[str]:
+    """Return the image URLs in a chat completion request body."""
+    return [
+        part["image_url"]["url"]
+        for message in body["messages"]
+        if isinstance(message["content"], list)
+        for part in message["content"]
+        if part["type"] == "image_url"
+    ]
+
+
+def sent_image(image: bytes) -> Image.Image:
+    """Return the image extract_label sends for image."""
+    data = image_urls(sent_request(image))[0].split(",", 1)[1]
+    return Image.open(io.BytesIO(base64.b64decode(data)))
 
 
 def test_model_accepts_all_nulls() -> None:
@@ -117,18 +149,40 @@ def test_request_sets_temperature_zero() -> None:
 
 
 def test_request_attaches_image_as_base64_data_url() -> None:
-    urls = [
-        part["image_url"]["url"]
-        for message in sent_request()["messages"]
-        if isinstance(message["content"], list)
-        for part in message["content"]
-        if part["type"] == "image_url"
-    ]
+    urls = image_urls(sent_request())
     assert len(urls) == 1
     header, data = urls[0].split(",", 1)
     assert header.startswith("data:image/")
     assert header.endswith(";base64")
-    assert base64.b64decode(data) == IMAGE
+    assert Image.open(io.BytesIO(base64.b64decode(data))).size == IMAGE_SIZE
+
+
+def test_sent_image_format_matches_data_url_type() -> None:
+    url = image_urls(sent_request())[0]
+    mime_type = url.removeprefix("data:").split(";", 1)[0]
+    sent_format = sent_image(IMAGE).format
+    assert sent_format is not None
+    assert Image.MIME[sent_format] == mime_type
+
+
+def test_large_photo_is_scaled_to_max_side() -> None:
+    width, height = sent_image(png(LARGE_PHOTO_SIZE)).size
+    assert max(width, height) == MAX_IMAGE_SIDE
+    assert round(width / height, 2) == round(
+        LARGE_PHOTO_SIZE[0] / LARGE_PHOTO_SIZE[1], 2
+    )
+
+
+def test_photo_is_turned_upright_from_exif_orientation() -> None:
+    exif = Image.Exif()
+    exif[ExifTags.Base.Orientation] = EXIF_ROTATED_90
+    buffer = io.BytesIO()
+    Image.new("RGB", IMAGE_SIZE).save(buffer, format="JPEG", exif=exif)
+    assert sent_image(buffer.getvalue()).size == IMAGE_SIZE[::-1]
+
+
+def test_transparent_png_is_sent_without_alpha() -> None:
+    assert sent_image(png(IMAGE_SIZE, "RGBA")).mode == "RGB"
 
 
 def test_returns_label_from_response() -> None:
@@ -182,6 +236,13 @@ def test_rejects_empty_image_before_request() -> None:
     client, requests = fake_client(json.dumps(LABEL))
     with pytest.raises(ValueError, match="empty"):
         extract_label(b"", client=client)
+    assert requests == []
+
+
+def test_rejects_unreadable_image_before_request() -> None:
+    client, requests = fake_client(json.dumps(LABEL))
+    with pytest.raises(ValueError, match="not a readable image"):
+        extract_label(b"not an image", client=client)
     assert requests == []
 
 

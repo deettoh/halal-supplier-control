@@ -1,11 +1,13 @@
 """RunPod extractor using the shared label schema."""
 
 import base64
+import io
 import os
 
 from openai import APIError, OpenAI
 from openai.types.chat import ChatCompletionUserMessageParam
 from openai.types.shared_params import ResponseFormatJSONSchema
+from PIL import Image, ImageOps, UnidentifiedImageError
 from pydantic import (
     BaseModel,
     ConfigDict,
@@ -49,10 +51,13 @@ RESPONSE_FORMAT: ResponseFormatJSONSchema = {
     "json_schema": {"name": "label_extraction", "schema": LABEL_JSON_SCHEMA},
 }
 MODEL_ID = "qwen/qwen3-vl-8b-instruct"
+IMAGE_FORMAT = "JPEG"
 IMAGE_MIME_TYPE = "image/jpeg"
+JPEG_QUALITY = 85
 TEMPERATURE = 0
 TIMEOUT_SECONDS = 180
 MAX_RETRIES = 0
+MAX_IMAGE_SIDE = 1280
 EXTRACTION_PROMPT = (
     "Read this delivery label. Return the product name, brand, "
     "manufacturer, and whether a halal mark is printed on it. Use null "
@@ -67,6 +72,30 @@ def _runpod_client() -> OpenAI:
         base_url=str(config.endpoint_url),
         api_key=config.api_key.get_secret_value(),
     )
+
+
+def _compressed(image: bytes) -> bytes:
+    """Return image as an upright, downscaled JPEG.
+
+    Args:
+        image: Delivery label photo in any format Pillow reads.
+
+    Returns:
+        JPEG bytes with the longest side at most MAX_IMAGE_SIDE.
+
+    Raises:
+        ValueError: If Pillow cannot identify image as a picture.
+    """
+    try:
+        photo = Image.open(io.BytesIO(image))
+    except UnidentifiedImageError as exc:
+        raise ValueError("label image is not a readable image") from exc
+    upright = ImageOps.exif_transpose(photo).convert("RGB")
+    # in place is safe because convert returned a new image
+    upright.thumbnail((MAX_IMAGE_SIDE, MAX_IMAGE_SIDE))
+    buffer = io.BytesIO()
+    upright.save(buffer, format=IMAGE_FORMAT, quality=JPEG_QUALITY)
+    return buffer.getvalue()
 
 
 def _label_message(image: bytes) -> ChatCompletionUserMessageParam:
@@ -99,20 +128,21 @@ def extract_label(
         Fields parsed from the model's JSON reply.
 
     Raises:
-        ValueError: If image is empty.
+        ValueError: If image is empty or not a readable image.
         ExtractionError: If the request fails or the reply is invalid.
         pydantic.ValidationError: If a RunPod environment variable is
             missing or invalid.
     """
     if not image:
         raise ValueError("label image is empty")
+    message = _label_message(_compressed(image))
     endpoint = _runpod_client() if client is None else client
     try:
         completion = endpoint.with_options(
             timeout=TIMEOUT_SECONDS, max_retries=MAX_RETRIES
         ).chat.completions.create(
             model=MODEL_ID,
-            messages=[_label_message(image)],
+            messages=[message],
             response_format=RESPONSE_FORMAT,
             temperature=TEMPERATURE,
         )

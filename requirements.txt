@@ -35,6 +35,8 @@ openai==3.35.1
     # via halal-supplier-control
 opentelemetry-api==1.45.1
     # via fastapi
+pillow==13.0.0
+    # via halal-supplier-control
 psycopg==3.3.6
     # via halal-supplier-control
 psycopg-binary==3.3.6 ; implementation_name != 'pypy'
