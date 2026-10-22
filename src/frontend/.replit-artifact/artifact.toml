@@ -1,0 +1,28 @@
+kind = "web"
+previewPath = "/"
+title = "Halal Supplier Control"
+description = "Frontend for Halal Supplier Control, an Orbyte module for halal-certified micro F&B SMEs. Receiving staff photograph delivery labels and get a rule checklist verdict; the Halal Supervisor reviews flagged deliveries; suppliers renew certificates in a shared registry that updates every buyer's masterlist coverage."
+version = "1.0.0"
+id = "artifacts/halal-supplier-control"
+router = "path"
+
+[[services]]
+name = "web"
+paths = [ "/" ]
+localPort = 19495
+
+[services.development]
+run = "pnpm --filter @workspace/halal-supplier-control run dev"
+
+[services.production]
+build = [ "pnpm", "--filter", "@workspace/halal-supplier-control", "run", "build" ]
+serve = "static"
+publicDir = "artifacts/halal-supplier-control/dist/public"
+
+[[services.production.rewrites]]
+from = "/*"
+to = "/index.html"
+
+[services.env]
+PORT = "19495"
+BASE_PATH = "/"
