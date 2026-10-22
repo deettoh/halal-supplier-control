@@ -1,15 +1,18 @@
-# Proposed startup seed format
+# Startup seed format
 
-Member 5's agreed file belongs at `src/seed/seed.json`. There is intentionally
-no fabricated/approved dataset in this branch. Missing file means skip
-seeding; an existing but invalid file fails startup. Agree this format before
-creating the final dataset.
+The fictional dataset merged from main is at `src/seed/seed.json`.
+Missing file means skip seeding; an existing but invalid file fails startup.
+The JSON supplies certificate image references, but no image assets yet.
 
 The top-level object accepts five arrays: `suppliers`, `certificates`,
 `materials`, `deliveries`, and `activity_log`. Omitted arrays default to empty.
 Each row needs an explicit positive integer `id`, unique within its array.
 Fields match the database and shared API contract; unknown fields are rejected.
 Dates use YYYY-MM-DD; supplied timestamps require a timezone.
+
+Certificate scope also accepts product-name strings, as used by the merged
+Member 5 seed. The loader normalizes each string to a `{product_name, brand}`
+object with a null brand. Rules accept both string and structured scope lists.
 
 Minimal fictional format example (not the final seed dataset):
 

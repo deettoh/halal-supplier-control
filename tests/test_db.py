@@ -25,7 +25,9 @@ from sqlalchemy.schema import CreateSchema, DropSchema
 
 from backend import db
 from backend.db import ActivityLog, Certificate, Delivery, Material, Supplier
-from backend.seed import SeedData
+from backend.rules import evaluate
+from backend.schemas import CertificateResponse
+from backend.seed import DEFAULT_SEED_PATH, SeedData
 from backend.startup import bootstrap_database
 
 
@@ -530,3 +532,42 @@ def test_seed_rejects_duplicate_ids() -> None:
         SeedData.model_validate(
             {"suppliers": [{"id": 1, "name": "A"}, {"id": 1, "name": "B"}]}
         )
+
+
+def test_merged_seed_matches_loader_api_and_rules(engine: Engine) -> None:
+    counts = bootstrap_database(engine, DEFAULT_SEED_PATH)
+    assert counts["suppliers"] == 2
+    assert counts["certificates"] == 4
+    assert counts["materials"] == 16
+    assert all(
+        count == 0
+        for count in bootstrap_database(engine, DEFAULT_SEED_PATH).values()
+    )
+    with Session(engine) as session:
+        material = session.get(Material, 1)
+        cert = session.get(Certificate, 1)
+        assert material is not None and cert is not None
+        response = CertificateResponse.model_validate(
+            cert, from_attributes=True
+        )
+        assert response.scope[0].product_name == "Wheat Flour"
+        result = evaluate(
+            {
+                "product_name": material.name,
+                "brand": material.approved_brand,
+                "manufacturer": material.approved_manufacturer,
+                "halal_mark_present": True,
+            },
+            {
+                "approved_brand": material.approved_brand,
+                "approved_manufacturer": material.approved_manufacturer,
+            },
+            {
+                "scope": cert.scope,
+                "expiry_date": cert.expiry_date,
+                "issuer": cert.issuer,
+            },
+            date(2026, 10, 22),
+        )
+        assert result["verdict"] == "expiring"
+        assert all(check["passed"] for check in result["rule_results"])

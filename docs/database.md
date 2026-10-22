@@ -75,9 +75,12 @@ lock. A seed constraint/file error rolls back all inserts from that attempt
 and stops startup with a sanitized error. No database credentials or raw seed
 contents are logged. Connections are disposed on application shutdown.
 
-No approved seed file is currently supplied. Missing seed.json is allowed
-and skips seeding; malformed/incompatible existing JSON fails startup.
-See [the proposed seed format](seed-format.md) before preparing Member 5's data.
+The merged seed file contains 2 fictional suppliers, 4 certificates and 16
+materials. Its product-name scope lists are normalized to structured API
+scope entries. Certificate image paths are references; the image assets are
+not supplied by this merge, so those rows initially have no image bytes.
+Missing seed.json is allowed and skips seeding; malformed/incompatible
+existing JSON fails startup. See [the seed format](seed-format.md).
 The loader can copy fictional seed images into the binary columns, but it
 does not decode/resize images. It is not a dataset reset tool.
 

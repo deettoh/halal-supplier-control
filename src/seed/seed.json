@@ -1,0 +1,219 @@
+{
+  "suppliers": [
+    {
+      "id": 1,
+      "name": "Golden Grain Supplies SAMPLE"
+    },
+    {
+      "id": 2,
+      "name": "Silver Valley Ingredients SAMPLE"
+    }
+  ],
+  "certificates": [
+    {
+      "id": 1,
+      "supplier_id": 1,
+      "issuer": "SAMPLE Food Certification Council",
+      "cert_no": "SAMPLE-GGS-2026-001",
+      "holder_name": "Golden Grain Supplies SAMPLE",
+      "expiry_date": "2026-11-30",
+      "scope": [
+        "Wheat Flour",
+        "Bread Flour",
+        "Cake Flour",
+        "Corn Starch",
+        "Rice Flour",
+        "Baking Powder",
+        "Fine Sugar",
+        "Brown Sugar",
+        "Semolina",
+        "Potato Starch"
+      ],
+      "image": "certificates/cert_01_expiring.png",
+      "status": "active"
+    },
+    {
+      "id": 2,
+      "supplier_id": 1,
+      "issuer": "SAMPLE Food Certification Council",
+      "cert_no": "SAMPLE-GGS-2025-001",
+      "holder_name": "Golden Grain Supplies SAMPLE",
+      "expiry_date": "2025-11-30",
+      "scope": [
+        "Wheat Flour",
+        "Bread Flour",
+        "Cake Flour",
+        "Corn Starch"
+      ],
+      "image": "certificates/cert_02_expired.png",
+      "status": "superseded"
+    },
+    {
+      "id": 3,
+      "supplier_id": 2,
+      "issuer": "SAMPLE Food Certification Council",
+      "cert_no": "SAMPLE-SVI-2026-001",
+      "holder_name": "Silver Valley Ingredients SAMPLE",
+      "expiry_date": "2027-09-30",
+      "scope": [
+        "Cocoa Powder",
+        "Vanilla Essence",
+        "Cooking Chocolate",
+        "Vegetable Oil",
+        "Coconut Milk",
+        "Chocolate Chips",
+        "Salt",
+        "Spice Mix"
+      ],
+      "image": "certificates/cert_03_valid.png",
+      "status": "active"
+    },
+    {
+      "id": 4,
+      "supplier_id": 2,
+      "issuer": "SAMPLE Food Certification Council",
+      "cert_no": "SAMPLE-SVI-2025-001",
+      "holder_name": "Silver Valley Ingredients SAMPLE",
+      "expiry_date": "2025-09-30",
+      "scope": [
+        "Cocoa Powder",
+        "Vanilla Essence",
+        "Vegetable Oil"
+      ],
+      "image": "certificates/cert_04_expired.png",
+      "status": "superseded"
+    }
+  ],
+  "materials": [
+    {
+      "id": 1,
+      "tenant": "Sunrise Bakery SAMPLE",
+      "name": "Wheat Flour",
+      "supplier_id": 1,
+      "approved_brand": "GoldenMill",
+      "approved_manufacturer": "Golden Grain Foods"
+    },
+    {
+      "id": 2,
+      "tenant": "Sunrise Bakery SAMPLE",
+      "name": "Bread Flour",
+      "supplier_id": 1,
+      "approved_brand": "GoldenMill",
+      "approved_manufacturer": "Golden Grain Foods"
+    },
+    {
+      "id": 3,
+      "tenant": "Sunrise Bakery SAMPLE",
+      "name": "Cake Flour",
+      "supplier_id": 1,
+      "approved_brand": "GoldenMill",
+      "approved_manufacturer": "Golden Grain Foods"
+    },
+    {
+      "id": 4,
+      "tenant": "Sunrise Bakery SAMPLE",
+      "name": "Fine Sugar",
+      "supplier_id": 1,
+      "approved_brand": "SweetGold",
+      "approved_manufacturer": "Golden Grain Foods"
+    },
+    {
+      "id": 5,
+      "tenant": "Sunrise Bakery SAMPLE",
+      "name": "Corn Starch",
+      "supplier_id": 1,
+      "approved_brand": "GoldenMill",
+      "approved_manufacturer": "Golden Grain Foods"
+    },
+    {
+      "id": 6,
+      "tenant": "Sunrise Bakery SAMPLE",
+      "name": "Cocoa Powder",
+      "supplier_id": 2,
+      "approved_brand": "SilverCocoa",
+      "approved_manufacturer": "Silver Valley Foods"
+    },
+    {
+      "id": 7,
+      "tenant": "Sunrise Bakery SAMPLE",
+      "name": "Vanilla Essence",
+      "supplier_id": 2,
+      "approved_brand": "SilverVanilla",
+      "approved_manufacturer": "Silver Valley Foods"
+    },
+    {
+      "id": 8,
+      "tenant": "Sunrise Bakery SAMPLE",
+      "name": "Cooking Chocolate",
+      "supplier_id": 2,
+      "approved_brand": "SilverCocoa",
+      "approved_manufacturer": "Silver Valley Foods"
+    },
+    {
+      "id": 9,
+      "tenant": "Crescent Caterer SAMPLE",
+      "name": "Wheat Flour",
+      "supplier_id": 1,
+      "approved_brand": "GoldenMill",
+      "approved_manufacturer": "Golden Grain Foods"
+    },
+    {
+      "id": 10,
+      "tenant": "Crescent Caterer SAMPLE",
+      "name": "Rice Flour",
+      "supplier_id": 1,
+      "approved_brand": "GoldenMill",
+      "approved_manufacturer": "Golden Grain Foods"
+    },
+    {
+      "id": 11,
+      "tenant": "Crescent Caterer SAMPLE",
+      "name": "Brown Sugar",
+      "supplier_id": 1,
+      "approved_brand": "SweetGold",
+      "approved_manufacturer": "Golden Grain Foods"
+    },
+    {
+      "id": 12,
+      "tenant": "Crescent Caterer SAMPLE",
+      "name": "Semolina",
+      "supplier_id": 1,
+      "approved_brand": "GoldenMill",
+      "approved_manufacturer": "Golden Grain Foods"
+    },
+    {
+      "id": 13,
+      "tenant": "Crescent Caterer SAMPLE",
+      "name": "Vegetable Oil",
+      "supplier_id": 2,
+      "approved_brand": "SilverPure",
+      "approved_manufacturer": "Silver Valley Foods"
+    },
+    {
+      "id": 14,
+      "tenant": "Crescent Caterer SAMPLE",
+      "name": "Coconut Milk",
+      "supplier_id": 2,
+      "approved_brand": "SilverCoco",
+      "approved_manufacturer": "Silver Valley Foods"
+    },
+    {
+      "id": 15,
+      "tenant": "Crescent Caterer SAMPLE",
+      "name": "Salt",
+      "supplier_id": 2,
+      "approved_brand": "SilverSalt",
+      "approved_manufacturer": "Silver Valley Foods"
+    },
+    {
+      "id": 16,
+      "tenant": "Crescent Caterer SAMPLE",
+      "name": "Spice Mix",
+      "supplier_id": 2,
+      "approved_brand": "SilverSpice",
+      "approved_manufacturer": "Silver Valley Foods"
+    }
+  ],
+  "deliveries": [],
+  "activity_log": []
+}

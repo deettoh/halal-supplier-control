@@ -4,7 +4,7 @@ from datetime import date
 from pathlib import Path
 from typing import Any, Literal
 
-from pydantic import AwareDatetime, Field, model_validator
+from pydantic import AwareDatetime, Field, field_validator, model_validator
 from sqlalchemy import Table, func, select, text
 from sqlalchemy.orm import Session
 
@@ -54,6 +54,19 @@ class CertificateSeed(SeedImage):
     expiry_date: date
     scope: list[CertificateScopeItem] = Field(min_length=1)
     status: CertificateStatus = "active"
+
+    @field_validator("scope", mode="before")
+    @classmethod
+    def normalize_product_scope(cls, value: Any) -> Any:
+        """Keep the merged seed's product lists compatible with API scope."""
+        if not isinstance(value, list):
+            return value
+        return [
+            {"product_name": item, "brand": None}
+            if isinstance(item, str)
+            else item
+            for item in value
+        ]
 
 
 class MaterialSeed(APIModel):
@@ -155,7 +168,8 @@ def _advance_sequence(session: Session, table: Table) -> None:
         session.execute(
             text(
                 "SELECT setval(CAST(:sequence AS regclass), "
-                "GREATEST(pg_sequence_last_value(CAST(:sequence AS regclass)), "
+                "GREATEST(pg_sequence_last_value("
+                "CAST(:sequence AS regclass)), "
                 ":maximum), true)"
             ),
             {"sequence": sequence, "maximum": maximum},
