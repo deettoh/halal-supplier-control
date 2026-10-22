@@ -1,9 +1,11 @@
 """Tests for the label extraction schema and RunPod extractor."""
 
 import base64
+import hashlib
 import io
 import json
 from collections.abc import Callable
+from pathlib import Path
 from typing import Any
 
 import httpx2
@@ -20,6 +22,7 @@ from backend.extract import (
     ExtractionError,
     LabelExtraction,
     extract_label,
+    load_demo_cache,
 )
 
 LABEL_FIELDS = {"product_name", "brand", "manufacturer", "halal_mark_present"}
@@ -45,6 +48,8 @@ def png(size: tuple[int, int], mode: str = "RGB") -> bytes:
 
 
 IMAGE = png(IMAGE_SIZE)
+CACHED_LABEL = LabelExtraction.model_validate(LABEL | {"brand": "Cached"})
+DEMO_CACHE = {hashlib.sha256(IMAGE).hexdigest(): CACHED_LABEL}
 
 
 def mock_client(handle: Handler) -> OpenAI:
@@ -197,17 +202,63 @@ def test_request_uses_timeout_limit() -> None:
     assert requests[0].extensions["timeout"]["read"] == TIMEOUT_SECONDS
 
 
-def test_timeout_raises_extraction_error_without_retry() -> None:
+def timeout_client() -> tuple[OpenAI, list[httpx2.Request]]:
+    """Return a client whose endpoint times out and its requests."""
     requests: list[httpx2.Request] = []
 
     def handle(request: httpx2.Request) -> httpx2.Response:
         requests.append(request)
         raise httpx2.ReadTimeout("endpoint cold", request=request)
 
+    return mock_client(handle), requests
+
+
+def test_timeout_raises_extraction_error_without_retry() -> None:
+    client, requests = timeout_client()
     with pytest.raises(ExtractionError, match="APITimeoutError") as caught:
-        extract_label(IMAGE, client=mock_client(handle))
+        extract_label(IMAGE, client=client)
     assert isinstance(caught.value.__cause__, APITimeoutError)
     assert len(requests) == MAX_RETRIES + 1
+
+
+def test_timeout_serves_cached_label_for_demo_image() -> None:
+    client, requests = timeout_client()
+    label = extract_label(IMAGE, client=client, cache=DEMO_CACHE)
+    assert label == CACHED_LABEL
+    assert len(requests) == MAX_RETRIES + 1
+
+
+def test_model_reply_takes_precedence_over_cached_label() -> None:
+    client, _ = fake_client(json.dumps(LABEL))
+    label = extract_label(IMAGE, client=client, cache=DEMO_CACHE)
+    assert label == LabelExtraction.model_validate(LABEL)
+
+
+def test_committed_demo_cache_is_valid() -> None:
+    load_demo_cache()
+
+
+def test_demo_cache_loads_labels_by_digest(tmp_path: Path) -> None:
+    path = tmp_path / "demo_cache.json"
+    digest = hashlib.sha256(IMAGE).hexdigest()
+    path.write_text(json.dumps({digest: CACHED_LABEL.model_dump()}))
+    assert load_demo_cache(path) == DEMO_CACHE
+
+
+@pytest.mark.parametrize(
+    "entries",
+    [
+        {"not-a-sha256": LABEL},
+        {hashlib.sha256(IMAGE).hexdigest(): {"brand": LABEL["brand"]}},
+    ],
+)
+def test_demo_cache_rejects_malformed_entry(
+    tmp_path: Path, entries: dict[str, object]
+) -> None:
+    path = tmp_path / "demo_cache.json"
+    path.write_text(json.dumps(entries))
+    with pytest.raises(ValidationError):
+        load_demo_cache(path)
 
 
 def test_error_status_raises_extraction_error() -> None:
