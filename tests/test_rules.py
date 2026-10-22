@@ -75,3 +75,26 @@ def test_unknown_issuer_is_not_covered() -> None:
 def test_invalid_evaluation_date_is_rejected() -> None:
     with pytest.raises(ValueError, match="today must be a valid ISO date"):
         evaluate(LABEL, MATERIAL, None, "invalid")
+
+
+@pytest.mark.parametrize(
+    "scope",
+    [
+        ["Wheat Flour"],
+        [{"product_name": "Wheat Flour", "brand": None}],
+        '[{"product_name":"Wheat Flour","brand":null}]',
+    ],
+)
+def test_scope_formats_share_product_matching(scope: object) -> None:
+    result = evaluate(
+        LABEL,
+        MATERIAL,
+        {
+            "scope": scope,
+            "expiry_date": "2027-12-31",
+            "issuer": "SAMPLE Food Certification Council",
+        },
+        TODAY,
+    )
+    assert result["verdict"] == "covered"
+    assert result["rule_results"][2]["passed"] is True

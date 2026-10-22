@@ -1,10 +1,16 @@
 """Executable API contract; business routes deliberately return HTTP 501."""
 
-from collections.abc import Callable
+import logging
+import os
+from collections.abc import AsyncIterator, Callable
+from contextlib import asynccontextmanager
 from typing import Annotated, Any, NoReturn
 
 from fastapi import Depends, FastAPI, Form, Header, HTTPException, Path, Query
+from sqlalchemy.exc import SQLAlchemyError
+from starlette.concurrency import run_in_threadpool
 
+from backend.db import dispose_db
 from backend.schemas import (
     ActivityResponse,
     CertificateCreateRequest,
@@ -23,8 +29,33 @@ from backend.schemas import (
     NonEmptyText,
     ValidationErrorResponse,
 )
+from backend.startup import bootstrap_database
+
+logger = logging.getLogger(__name__)
+
+
+@asynccontextmanager
+async def lifespan(application: FastAPI) -> AsyncIterator[None]:
+    try:
+        if os.environ.get("DATABASE_URL"):
+            try:
+                counts = await run_in_threadpool(bootstrap_database)
+            except (OSError, ValueError, SQLAlchemyError) as exc:
+                raise RuntimeError(
+                    f"Database startup failed ({type(exc).__name__}). "
+                    "Check connectivity, permissions "
+                    "and seed data. No seed transaction was committed."
+                ) from None
+            logger.info("Database ready; seed rows inserted: %s", counts)
+        else:
+            logger.warning("DATABASE_URL unset; database startup skipped")
+        yield
+    finally:
+        await run_in_threadpool(dispose_db)
+
 
 app = FastAPI(
+    lifespan=lifespan,
     title="Halal Supplier Control",
     version="0.1.0",
     description=(

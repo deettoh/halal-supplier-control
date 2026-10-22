@@ -9,14 +9,17 @@ import pytest
 
 from backend.rules import evaluate
 from backend.schemas import CertificateResponse, LabelExtraction, Verdict
+from backend.seed import SeedData
 
 SEED_PATH = Path(__file__).parents[1] / "src" / "seed" / "seed.json"
 
 
 def test_seed_certificates_follow_api_schema() -> None:
-    seed = json.loads(SEED_PATH.read_text())
-    for certificate in seed["certificates"]:
-        parsed = CertificateResponse.model_validate(certificate)
+    seed = SeedData.model_validate_json(SEED_PATH.read_text())
+    for certificate in seed.certificates:
+        parsed = CertificateResponse.model_validate(
+            certificate.model_dump(exclude={"image_file"})
+        )
         assert parsed.scope
         assert all(item.brand for item in parsed.scope)
 
