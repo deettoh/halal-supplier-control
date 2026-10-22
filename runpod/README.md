@@ -59,3 +59,16 @@ uv run --env-file .env pytest -m live --run-live
 ```
 
 It takes under 5s when a worker is up.
+
+## Warm the endpoint before a dry run or the demo
+
+With 0 active workers, the first request after the idle timeout waits
+for a cold start. Before each dry run and before judging:
+
+1. Edit the endpoint in the RunPod console, set Active workers to 1 and
+   save.
+2. Run the health check above until `idle` or `ready` is nonzero.
+3. Run the live test above and confirm it passes.
+
+RunPod bills an active worker for every second it is up, idle or not.
+After the session, set Active workers back to 0.

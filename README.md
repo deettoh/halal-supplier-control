@@ -58,3 +58,35 @@ upload/retrieval endpoints will be implemented with the business workflows.
 See [the database guide](docs/database.md) and [seed format](docs/seed-format.md).
 The same models use Replit's DATABASE_URL later. Importing the models alone
 does not connect to a database, and business routes remain contract scaffolds.
+
+## Label extraction model
+
+`src/backend/extract.py` sends each label photo to a RunPod Serverless
+endpoint running Qwen3-VL-8B-Instruct on vLLM. Set `RUNPOD_ENDPOINT_URL`
+and `RUNPOD_API_KEY` in `.env`, then run the live test against the
+endpoint:
+
+```bash
+uv run --env-file .env pytest -m live --run-live
+```
+
+Endpoint settings, setup and the warm-up before a demo are in
+[the RunPod endpoint guide](runpod/README.md).
+
+## Deploy to Replit
+
+The app runs as a Replit Autoscale deployment. `.replit` holds the build
+command (`uv sync --frozen --no-dev`) and the run command. The deployment
+needs these Secrets:
+
+| Secret | Value |
+| --- | --- |
+| `DATABASE_URL` | Connection URL of the Replit PostgreSQL database |
+| `RUNPOD_ENDPOINT_URL` | Base URL of the endpoint's OpenAI-compatible API |
+| `RUNPOD_API_KEY` | RunPod API key |
+
+Replit doesn't deploy on a push to GitHub. To release a change merged
+into `main`:
+
+1. In the Replit workspace, open the Git pane and pull `main`.
+2. Open Publishing and select Republish.
