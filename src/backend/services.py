@@ -1,5 +1,6 @@
 """Tenant-scoped reads, delivery checks and atomic workflow writes."""
 
+import hashlib
 from datetime import UTC, datetime, timedelta
 
 from fastapi import HTTPException, UploadFile
@@ -7,7 +8,7 @@ from pydantic import ValidationError
 from sqlalchemy import or_, select
 from sqlalchemy.orm import Session
 
-from backend import db, extract, rules
+from backend import db, extract, images, rules
 from backend.schemas import (
     ActivityResponse,
     CertificateCreateRequest,
@@ -30,14 +31,24 @@ INCOMPLETE_EXTRACTION = (
 )
 
 
-def read_png(upload: UploadFile) -> bytes:
-    """Limit upload size and check PNG signature, without image resizing."""
+def read_photo(upload: UploadFile, *, png_only: bool = False) -> bytes:
+    """Bound uploads; preserve source bytes for main's demo-cache hashes."""
     payload = upload.file.read(MAX_IMAGE_BYTES + 1)
     if len(payload) > MAX_IMAGE_BYTES:
-        raise HTTPException(413, "PNG must be at most 10 MiB")
-    if not payload.startswith(b"\x89PNG\r\n\x1a\n"):
-        raise HTTPException(422, "Upload must be a nonempty PNG image")
+        raise HTTPException(413, "Photo must be at most 10 MiB")
+    is_png = payload.startswith(b"\x89PNG\r\n\x1a\n")
+    is_jpeg = payload.startswith(b"\xff\xd8\xff")
+    if not is_png and not (is_jpeg and not png_only):
+        expected = "PNG" if png_only else "PNG or JPEG"
+        raise HTTPException(422, f"Upload must be a nonempty {expected} image")
     return payload
+
+
+def _stored_photo(payload: bytes) -> bytes:
+    try:
+        return images.as_jpeg(payload)
+    except ValueError as error:
+        raise HTTPException(422, str(error)) from None
 
 
 def _processing_cutoff() -> datetime:
@@ -242,6 +253,16 @@ def _extract_label(
         return None, "Label extraction timed out; human review required."
 
 
+def _matches_demo_cache(payload: bytes, label: LabelExtraction) -> bool:
+    try:
+        cached = extract.load_demo_cache().get(
+            hashlib.sha256(payload).hexdigest()
+        )
+    except (OSError, ValueError):
+        return False
+    return cached == label
+
+
 def create_delivery(
     session: Session, context: DemoContext, material_id: int, payload: bytes
 ) -> DeliveryResponse:
@@ -257,7 +278,7 @@ def create_delivery(
         tenant=context.tenant,
         material_id=material.id,
         image="/api/deliveries/pending/image",
-        image_bytes=payload,
+        image_bytes=_stored_photo(payload),
         extracted=None,
         rule_results=_failed_checks(INCOMPLETE_EXTRACTION),
         verdict="needs_human",
@@ -270,10 +291,12 @@ def create_delivery(
     item.image = f"/api/deliveries/{item.id}/image"
     item_id = item.id
     started_at = _aware(item.created_at)
-    # Persist the PNG first, then release the connection for the model call.
+    # Persist JPEG evidence, then release the connection for the model call.
     session.commit()
     extracted, error = _extract_label(payload)
-    if started_at <= _processing_cutoff():
+    if started_at <= _processing_cutoff() and (
+        extracted is None or not _matches_demo_cache(payload, extracted)
+    ):
         extracted = None
         error = "Label extraction timed out; human review required."
     material = session.get(db.Material, material_id, populate_existing=True)
@@ -388,6 +411,7 @@ def renew_certificate(
     )
     if supplier is None:
         raise HTTPException(404, "Supplier not found")
+    stored = _stored_photo(payload) if payload is not None else None
     for old in session.scalars(
         select(db.Certificate).where(
             db.Certificate.supplier_id == owner,
@@ -399,7 +423,7 @@ def renew_certificate(
     row = db.Certificate(
         supplier_id=owner,
         **request.model_dump(exclude={"image"}),
-        image_bytes=payload,
+        image_bytes=stored,
         status="active",
     )
     session.add(row)

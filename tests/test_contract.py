@@ -2,6 +2,7 @@
 
 from collections.abc import Generator
 from datetime import UTC, datetime
+from pathlib import Path
 from typing import Any
 
 import pytest
@@ -22,6 +23,7 @@ from backend.schemas import (
 )
 
 client = TestClient(app)
+PNG = (Path(__file__).parent / "fixtures/synthetic_label.png").read_bytes()
 
 
 @pytest.fixture(autouse=True)
@@ -128,7 +130,7 @@ def test_upload_accepts_flat_multipart_fields() -> None:
         "/api/deliveries",
         headers=headers("staff"),
         data={"material_id": "1"},
-        files={"image": ("label.png", b"\x89PNG\r\n\x1a\n", "image/png")},
+        files={"image": ("label.png", PNG, "image/png")},
     )
     assert response.status_code == 404  # Valid form; unknown material.
 
@@ -168,7 +170,7 @@ def test_certificate_form_accepts_json_scope_and_optional_image(
     with_image: bool,
 ) -> None:
     files = (
-        {"image": ("certificate.png", b"\x89PNG\r\n\x1a\n", "image/png")}
+        {"image": ("certificate.png", PNG, "image/png")}
         if with_image
         else None
     )
@@ -308,7 +310,7 @@ def test_openapi_documents_all_eight_business_routes() -> None:
         assert "multipart/form-data" in content
     for path in ["/api/deliveries/{id}/image", "/api/certificates/{id}/image"]:
         operation = spec["paths"][path]["get"]
-        assert "image/png" in operation["responses"]["200"]["content"]
+        assert "image/jpeg" in operation["responses"]["200"]["content"]
     assert client.get("/docs").status_code == 200
     assert client.get("/api/health").json() == {
         "status": "ok",

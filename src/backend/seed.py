@@ -6,9 +6,9 @@ from typing import Any
 
 from pydantic import AwareDatetime, Field, field_validator, model_validator
 from sqlalchemy import Table, func, select, text
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, undefer
 
-from backend import db
+from backend import db, images
 from backend.schemas import (
     APIModel,
     CertificateScopeItem,
@@ -140,7 +140,24 @@ def _read_seed_png(filename: str, base: Path) -> bytes | None:
         return None
     if not payload.startswith(b"\x89PNG\r\n\x1a\n"):
         raise ValueError("Seed image must have a PNG signature")
-    return payload
+    return images.as_jpeg(payload)
+
+
+def upgrade_stored_photos(session: Session) -> None:
+    """Convert legacy PNG photo bytes in place; never re-encode JPEG rows."""
+    for model in (db.Certificate, db.Delivery):
+        rows = session.scalars(
+            select(model)
+            .where(
+                model.image_bytes.is_not(None),
+                func.substr(model.image_bytes, 1, 3) != b"\xff\xd8\xff",
+            )
+            .options(undefer(model.image_bytes))
+        )
+        for row in rows:
+            assert isinstance(row, (db.Certificate, db.Delivery))
+            assert row.image_bytes is not None
+            row.image_bytes = images.as_jpeg(row.image_bytes)
 
 
 def _image_values(row: SeedImage, base: Path, table: str) -> dict[str, Any]:

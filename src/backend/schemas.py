@@ -67,7 +67,9 @@ class DeliveryCreateRequest(APIModel):
     """multipart/form-data: material_id and image file."""
 
     material_id: RecordId
-    image: UploadFile = Field(description="Delivered item's label photo")
+    image: UploadFile = Field(
+        description="Delivered item's PNG or JPEG label photo"
+    )
 
 
 class DeliveryListQuery(APIModel):
@@ -165,7 +167,7 @@ class CertificateCreateRequest(APIModel):
         )
     )
     image: UploadFile | None = Field(
-        default=None, description="Optional renewed certificate image"
+        default=None, description="Optional certificate PNG; stored as JPEG"
     )
 
 

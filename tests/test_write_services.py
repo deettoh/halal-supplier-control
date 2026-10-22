@@ -1,5 +1,6 @@
 """Integration tests for writes; model calls are mocked, never live RunPod."""
 
+import hashlib
 import json
 from concurrent.futures import ThreadPoolExecutor
 from datetime import timedelta
@@ -12,13 +13,14 @@ from openai import OpenAI
 from sqlalchemy import Engine, event, func, select
 from sqlalchemy.orm import Session
 
-from backend import db, extract, services
+from backend import db, extract, images, services
 from backend.extract import extract_label as real_extract_label
 from backend.schemas import LabelExtraction
 
 BAKERY = "Sunrise Bakery SAMPLE"
 CATERER = "Crescent Caterer SAMPLE"
 PNG = (Path(__file__).parent / "fixtures/synthetic_label.png").read_bytes()
+JPEG = images.as_jpeg(PNG)
 
 
 def headers(role: str = "staff", tenant: str = BAKERY) -> dict[str, str]:
@@ -106,13 +108,54 @@ def test_upload_stores_photo_checks_and_audit(
     assert all(check["passed"] for check in result["rule_results"])
     assert counts(api_engine) == (1, 1)
     image = api_client.get(result["image"], headers=headers())
-    assert image.content == PNG
+    assert image.content == JPEG
     with Session(api_engine) as session:
         row = session.get(db.Delivery, result["id"])
-        assert row is not None and row.image_bytes == PNG
+        assert row is not None and row.image_bytes == JPEG
         log = session.scalar(select(db.ActivityLog))
         assert log is not None and log.action == "delivery_checked"
         assert log.delivery_id == row.id and log.tenant == BAKERY
+
+
+def test_jpeg_delivery_upload_is_stored_as_jpeg(
+    api_client: TestClient,
+) -> None:
+    result = upload(api_client, payload=JPEG)
+    assert result.status_code == 201
+    photo = api_client.get(result.json()["image"], headers=headers())
+    assert photo.headers["content-type"] == "image/jpeg"
+    assert photo.content.startswith(b"\xff\xd8\xff")
+
+
+def test_timeout_demo_cache_uses_original_upload_not_stored_jpeg(
+    api_client: TestClient,
+    api_engine: Engine,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    cached = {hashlib.sha256(PNG).hexdigest(): label()}
+    monkeypatch.setattr(extract, "load_demo_cache", lambda: cached)
+
+    def cached_reply(source: bytes) -> LabelExtraction:
+        assert source == PNG
+        deadline = db.utc_now() + timedelta(seconds=extract.TIMEOUT_SECONDS)
+        transport = httpx2.MockTransport(lambda _: httpx2.Response(503))
+        with OpenAI(
+            base_url="https://runpod.test/v1",
+            api_key="test-only",
+            http_client=httpx2.Client(transport=transport),
+        ) as client:
+            result = real_extract_label(source, client=client)
+        monkeypatch.setattr(db, "utc_now", lambda: deadline)
+        return result
+
+    monkeypatch.setattr(extract, "extract_label", cached_reply)
+    result = upload(api_client)
+    assert result.status_code == 201
+    assert result.json()["status"] == "auto_accepted"
+    assert result.json()["extracted"] == label().model_dump()
+    assert result.json()["error"] is None
+    with Session(api_engine) as session:
+        assert session.scalar(select(db.Delivery.image_bytes)) == JPEG
 
 
 @pytest.mark.parametrize("failure", ["timeout", "reply", "value", "config"])
@@ -212,7 +255,7 @@ def test_in_progress_photo_is_durable_but_not_reviewable(
     def inspecting(_: bytes) -> LabelExtraction:
         with Session(api_engine) as session:
             row = session.scalar(select(db.Delivery))
-            assert row is not None and row.image_bytes == PNG
+            assert row is not None and row.image_bytes == JPEG
             row_id = row.id
         assert (
             api_client.get(
@@ -368,7 +411,7 @@ def test_renewal_supersedes_and_updates_both_smes(
             api_client.get(
                 renewed["image"], headers=headers("supplier", "1")
             ).content
-            == PNG
+            == JPEG
         )
     else:
         assert renewed["image"] is None

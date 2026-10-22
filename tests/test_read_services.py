@@ -8,14 +8,18 @@ from fastapi.testclient import TestClient
 from sqlalchemy import Engine, func, select
 from sqlalchemy.orm import Session
 
-from backend import db
+from backend import db, images
 
 BAKERY = "Sunrise Bakery SAMPLE"
 CATERER = "Crescent Caterer SAMPLE"
 PNG = (Path(__file__).parent / "fixtures/synthetic_label.png").read_bytes()
-CERTIFICATE_PNG = (
-    Path(__file__).parents[1] / "src/seed/certificates/cert_01_expiring.png"
-).read_bytes()
+JPEG = images.as_jpeg(PNG)
+CERTIFICATE_JPEG = images.as_jpeg(
+    (
+        Path(__file__).parents[1]
+        / "src/seed/certificates/cert_01_expiring.png"
+    ).read_bytes()
+)
 
 
 def headers(role: str = "supervisor", tenant: str = BAKERY) -> dict[str, str]:
@@ -34,7 +38,7 @@ def add_delivery(
         tenant=tenant,
         material_id=material_id,
         image="/api/deliveries/pending/image",
-        image_bytes=PNG,
+        image_bytes=JPEG,
         extracted=None,
         rule_results=[
             {
@@ -270,8 +274,8 @@ def test_certificate_image_checks_supplier_or_linked_sme(
     )
     assert response.status_code == status
     if status == 200:
-        assert response.content == CERTIFICATE_PNG
-        assert response.headers["content-type"] == "image/png"
+        assert response.content == CERTIFICATE_JPEG
+        assert response.headers["content-type"] == "image/jpeg"
         assert response.headers["cache-control"] == "no-store"
         assert response.headers["x-content-type-options"] == "nosniff"
 
@@ -287,7 +291,7 @@ def test_delivery_image_checks_tenant_and_role(
     for role in ("staff", "supervisor"):
         response = api_client.get(path, headers=headers(role))
         assert response.status_code == 200
-        assert response.content == PNG
+        assert response.content == JPEG
     assert (
         api_client.get(path, headers=headers(tenant=CATERER)).status_code
         == 404

@@ -154,7 +154,7 @@ def list_materials(
     responses={
         **ERRORS,
         404: {"model": ErrorResponse},
-        413: {"model": ErrorResponse, "description": "PNG exceeds 10 MiB"},
+        413: {"model": ErrorResponse, "description": "Photo exceeds 10 MiB"},
     },
     tags=["Deliveries"],
 )
@@ -167,7 +167,10 @@ def create_delivery(
 ) -> DeliveryResponse:
     """Photo + material_id; extraction failures will be saved for review."""
     return services.create_delivery(
-        session, context, request.material_id, services.read_png(request.image)
+        session,
+        context,
+        request.material_id,
+        services.read_photo(request.image),
     )
 
 
@@ -239,7 +242,7 @@ def list_certificates(
     responses={
         **ERRORS,
         404: {"model": ErrorResponse},
-        413: {"model": ErrorResponse, "description": "PNG exceeds 10 MiB"},
+        413: {"model": ErrorResponse, "description": "Photo exceeds 10 MiB"},
     },
     tags=["Certificates"],
 )
@@ -254,7 +257,11 @@ def renew_certificate(
 
     Supplier ID comes from X-Demo-Tenant, never from this form.
     """
-    payload = services.read_png(request.image) if request.image else None
+    payload = (
+        services.read_photo(request.image, png_only=True)
+        if request.image
+        else None
+    )
     return services.renew_certificate(session, context, request, payload)
 
 
@@ -274,10 +281,10 @@ def extract_certificate(
     not_implemented()
 
 
-def png_response(payload: bytes) -> Response:
+def jpeg_response(payload: bytes) -> Response:
     return Response(
         content=payload,
-        media_type="image/png",
+        media_type="image/jpeg",
         headers={
             "Cache-Control": "no-store",
             "X-Content-Type-Options": "nosniff",
@@ -292,7 +299,9 @@ def png_response(payload: bytes) -> Response:
         404: {"model": ErrorResponse},
         200: {
             "content": {
-                "image/png": {"schema": {"type": "string", "format": "binary"}}
+                "image/jpeg": {
+                    "schema": {"type": "string", "format": "binary"}
+                }
             }
         },
     },
@@ -302,8 +311,8 @@ def png_response(payload: bytes) -> Response:
 def delivery_image(
     id: DeliveryId, context: Reader, session: Database
 ) -> Response:
-    """Stored PNG; available only to staff/supervisor of the delivery's SME."""
-    return png_response(services.delivery_photo(session, context, id))
+    """Stored JPEG for staff/supervisor of the delivery's SME."""
+    return jpeg_response(services.delivery_photo(session, context, id))
 
 
 @app.get(
@@ -313,7 +322,9 @@ def delivery_image(
         404: {"model": ErrorResponse},
         200: {
             "content": {
-                "image/png": {"schema": {"type": "string", "format": "binary"}}
+                "image/jpeg": {
+                    "schema": {"type": "string", "format": "binary"}
+                }
             }
         },
     },
@@ -323,5 +334,5 @@ def delivery_image(
 def certificate_image(
     id: DeliveryId, context: PhotoReader, session: Database
 ) -> Response:
-    """Stored PNG for the owning supplier or a staff/supervisor linked SME."""
-    return png_response(services.certificate_photo(session, context, id))
+    """Stored JPEG for the owning supplier or a staff/supervisor linked SME."""
+    return jpeg_response(services.certificate_photo(session, context, id))
