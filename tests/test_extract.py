@@ -126,8 +126,7 @@ def test_request_attaches_image_as_base64_data_url() -> None:
     ]
     assert len(urls) == 1
     header, data = urls[0].split(",", 1)
-    assert header.startswith("data:image/")
-    assert header.endswith(";base64")
+    assert header == "data:image/png;base64"
     assert base64.b64decode(data) == IMAGE
 
 
@@ -175,6 +174,23 @@ def test_rejects_response_missing_field() -> None:
 def test_rejects_response_without_content() -> None:
     client, _ = fake_client(None)
     with pytest.raises(ExtractionError, match="no content"):
+        extract_label(IMAGE, client=client)
+
+
+def test_rejects_response_without_choices() -> None:
+    client = mock_client(
+        lambda _: httpx2.Response(
+            httpx2.codes.OK,
+            json={
+                "id": "test",
+                "object": "chat.completion",
+                "created": 0,
+                "model": "test",
+                "choices": [],
+            },
+        )
+    )
+    with pytest.raises(ExtractionError, match="no choices"):
         extract_label(IMAGE, client=client)
 
 

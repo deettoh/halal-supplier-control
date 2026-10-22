@@ -49,7 +49,7 @@ RESPONSE_FORMAT: ResponseFormatJSONSchema = {
     "json_schema": {"name": "label_extraction", "schema": LABEL_JSON_SCHEMA},
 }
 MODEL_ID = "qwen/qwen3-vl-8b-instruct"
-IMAGE_MIME_TYPE = "image/jpeg"
+IMAGE_MIME_TYPE = "image/png"
 TEMPERATURE = 0
 TIMEOUT_SECONDS = 180
 MAX_RETRIES = 0
@@ -120,6 +120,8 @@ def extract_label(
         raise ExtractionError(
             f"RunPod request failed: {type(exc).__name__}"
         ) from exc
+    if not completion.choices:
+        raise ExtractionError("model reply has no choices")
     content = completion.choices[0].message.content
     if content is None:
         raise ExtractionError("model reply has no content")
