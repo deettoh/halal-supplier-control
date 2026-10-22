@@ -304,3 +304,20 @@ def test_missing_api_key_names_variable(
     monkeypatch.delenv("RUNPOD_API_KEY", raising=False)
     with pytest.raises(ValidationError, match="RUNPOD_API_KEY"):
         extract_label(IMAGE)
+
+
+def test_rejects_response_without_choices() -> None:
+    client = mock_client(
+        lambda _: httpx2.Response(
+            httpx2.codes.OK,
+            json={
+                "id": "test",
+                "object": "chat.completion",
+                "created": 0,
+                "model": "test",
+                "choices": [],
+            },
+        )
+    )
+    with pytest.raises(ExtractionError, match="no choices"):
+        extract_label(IMAGE, client=client)

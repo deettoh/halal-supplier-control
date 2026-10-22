@@ -32,6 +32,13 @@ DeliveryStatus = Literal[
     "auto_accepted", "pending_review", "accepted", "rejected"
 ]
 CertificateStatus = Literal["active", "superseded"]
+ActivityAction = Literal[
+    "auto_accepted",
+    "pending_review",
+    "accepted",
+    "rejected",
+    "certificate_renewed",
+]
 RuleName = Literal["R1", "R2", "R3", "R4", "R5"]
 
 
@@ -67,7 +74,9 @@ class DeliveryCreateRequest(APIModel):
     """multipart/form-data: material_id and image file."""
 
     material_id: RecordId
-    image: UploadFile = Field(description="Delivered item's label photo")
+    image: UploadFile = Field(
+        description="Delivered item's PNG or JPEG label photo"
+    )
 
 
 class DeliveryListQuery(APIModel):
@@ -154,9 +163,9 @@ class CertificateScopeItem(APIModel):
 class CertificateCreateRequest(APIModel):
     """multipart fields; scope is a JSON-encoded list, not repeated fields."""
 
-    issuer: NonEmptyText
-    cert_no: NonEmptyText
-    holder_name: NonEmptyText
+    issuer: NonEmptyText = Field(max_length=200)
+    cert_no: NonEmptyText = Field(max_length=100)
+    holder_name: NonEmptyText = Field(max_length=200)
     expiry_date: date
     scope: Json[Annotated[list[CertificateScopeItem], Field(min_length=1)]] = (
         Field(
@@ -165,7 +174,8 @@ class CertificateCreateRequest(APIModel):
         )
     )
     image: UploadFile | None = Field(
-        default=None, description="Optional renewed certificate image"
+        default=None,
+        description="Optional certificate PNG or JPEG; stored as JPEG",
     )
 
 
@@ -206,8 +216,8 @@ class ActivityResponse(APIModel):
     id: RecordId
     actor: NonEmptyText
     role: DemoRole
-    action: NonEmptyText = Field(
-        description="Action name, e.g. delivery_checked or certificate_renewed"
+    action: ActivityAction = Field(
+        description="Delivery status event or certificate_renewed"
     )
     delivery_id: RecordId | None
     reason: str | None

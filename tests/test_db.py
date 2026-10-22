@@ -23,7 +23,7 @@ from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session, sessionmaker
 from sqlalchemy.schema import CreateSchema, DropSchema
 
-from backend import db
+from backend import db, images
 from backend.db import ActivityLog, Certificate, Delivery, Material, Supplier
 from backend.rules import evaluate
 from backend.schemas import CertificateResponse
@@ -144,7 +144,7 @@ def test_all_five_tables_round_trip(session: Session, engine: Engine) -> None:
         tenant="bakery",
         actor="demo:bakery:staff",
         role="staff",
-        action="delivery_checked",
+        action="pending_review",
         delivery_id=item.id,
     )
     session.add(log)
@@ -224,7 +224,7 @@ def test_activity_cannot_reference_another_sme(session: Session) -> None:
             tenant="caterer",
             actor="demo:caterer:staff",
             role="staff",
-            action="delivery_checked",
+            action="pending_review",
             delivery_id=item.id,
         )
     )
@@ -245,6 +245,124 @@ def test_renewal_log_can_have_no_delivery(session: Session) -> None:
     session.commit()
     assert session.scalar(select(ActivityLog.delivery_id)) is None
     assert session.scalar(select(func.count()).select_from(ActivityLog)) == 1
+
+
+@pytest.mark.parametrize(
+    "action",
+    [
+        "auto_accepted",
+        "pending_review",
+        "accepted",
+        "rejected",
+        "certificate_renewed",
+        "invented",
+        "cert_renewed",
+        "delivery_checked",
+    ],
+)
+def test_activity_action_database_constraint(
+    session: Session,
+    action: str,
+) -> None:
+    session.add(
+        ActivityLog(
+            tenant="bakery",
+            actor="staff",
+            role="staff",
+            action=action,
+        )
+    )
+    if action in {"invented", "cert_renewed", "delivery_checked"}:
+        with pytest.raises(IntegrityError):
+            session.flush()
+    else:
+        session.flush()
+
+
+@pytest.mark.parametrize("unknown", [False, True])
+@pytest.mark.parametrize("verdict", ["needs_human", "covered", "expiring"])
+def test_existing_postgres_activity_upgrade(
+    engine: Engine,
+    unknown: bool,
+    verdict: str,
+) -> None:
+    if engine.dialect.name != "postgresql":
+        pytest.skip("PostgreSQL startup constraint upgrade")
+    with Session(engine) as session:
+        _, material = catalog(session)
+        item = delivery(
+            material.id,
+            status="accepted",
+            decided_by="supervisor",
+            reason="Reviewed",
+            verdict=verdict,
+        )
+        session.add(item)
+        session.flush()
+        item_id = item.id
+        session.commit()
+    with engine.begin() as connection:
+        table = db.qualified_table_name(connection, "activity_log")
+        connection.execute(
+            text(f"ALTER TABLE {table} DROP CONSTRAINT ck_activity_action")
+        )
+    old_actions = [
+        "delivery_checked",
+        "delivery_accepted",
+        "delivery_rejected",
+        "certificate_renewed",
+    ]
+    if unknown:
+        old_actions.append("unexpected")
+    with Session(engine) as session:
+        session.add_all(
+            [
+                ActivityLog(
+                    tenant="bakery",
+                    actor="staff",
+                    role="staff",
+                    action=action,
+                    delivery_id=item_id,
+                )
+                for action in old_actions
+            ]
+        )
+        session.commit()
+    if unknown:
+        with pytest.raises(ValueError, match="unsupported actions"):
+            db.init_db(engine)
+        expected = old_actions
+    else:
+        db.init_db(engine)
+        db.init_db(engine)
+        expected = [
+            "auto_accepted"
+            if verdict in {"covered", "expiring"}
+            else "pending_review",
+            "accepted",
+            "rejected",
+            "certificate_renewed",
+        ]
+    with Session(engine) as session:
+        assert (
+            list(
+                session.scalars(
+                    select(ActivityLog.action).order_by(ActivityLog.id)
+                )
+            )
+            == expected
+        )
+        if not unknown:
+            session.add(
+                ActivityLog(
+                    tenant="bakery",
+                    actor="staff",
+                    role="staff",
+                    action="unexpected",
+                )
+            )
+            with pytest.raises(IntegrityError):
+                session.flush()
 
 
 @pytest.mark.parametrize("field", ["status", "verdict"])
@@ -343,7 +461,7 @@ def seed_file(tmp_path: Path, **updates: Any) -> Path:
 
 def test_binary_photos_survive_new_session(engine: Engine) -> None:
     photo = Path(__file__).parent / "fixtures" / "synthetic_label.png"
-    payload = photo.read_bytes()
+    payload = images.as_jpeg(photo.read_bytes())
     with Session(engine) as session:
         supplier, material = catalog(session)
         cert = certificate(supplier.id, image_bytes=payload)
@@ -387,6 +505,46 @@ def test_legacy_image_column_upgrade_preserves_records(engine: Engine) -> None:
         assert (
             session.scalar(select(func.count()).select_from(Certificate)) == 1
         )
+
+
+def test_startup_converts_legacy_pngs_and_never_reencodes_jpegs(
+    engine: Engine,
+    tmp_path: Path,
+) -> None:
+    png = (Path(__file__).parent / "fixtures/synthetic_label.png").read_bytes()
+    with Session(engine) as session:
+        supplier, material = catalog(session)
+        session.add(certificate(supplier.id, image_bytes=png))
+        session.add(delivery(material.id, image_bytes=png))
+        session.commit()
+    bootstrap_database(engine, tmp_path / "missing.json")
+    with Session(engine) as session:
+        cert = session.scalar(select(Certificate))
+        item = session.scalar(select(Delivery))
+        assert cert is not None and item is not None
+        stored = cert.image_bytes
+        assert stored is not None and stored.startswith(b"\xff\xd8\xff")
+        assert item.image_bytes == stored
+        assert item.image == "/images/sample-label.png"
+    bootstrap_database(engine, tmp_path / "missing.json")
+    with Session(engine) as session:
+        assert session.scalar(select(Certificate.image_bytes)) == stored
+        assert session.scalar(select(Delivery.image_bytes)) == stored
+
+
+def test_invalid_legacy_photo_rolls_back_conversion(
+    engine: Engine, tmp_path: Path
+) -> None:
+    png = (Path(__file__).parent / "fixtures/synthetic_label.png").read_bytes()
+    with Session(engine) as session:
+        supplier, material = catalog(session)
+        session.add(certificate(supplier.id, image_bytes=png))
+        session.add(delivery(material.id, image_bytes=b"invalid image"))
+        session.commit()
+    with pytest.raises(ValueError, match="readable PNG or JPEG"):
+        bootstrap_database(engine, tmp_path / "missing.json")
+    with Session(engine) as session:
+        assert session.scalar(select(Certificate.image_bytes)) == png
 
 
 def test_bootstrap_creates_empty_database(
@@ -476,7 +634,7 @@ def test_seed_photos_are_copied_into_postgresql(
     with Session(engine) as session:
         saved = session.get(Certificate, 20)
         assert saved is not None
-        assert saved.image_bytes == payload
+        assert saved.image_bytes == images.as_jpeg(payload)
         assert saved.image == "/api/certificates/20/image"
 
 
@@ -515,7 +673,7 @@ def test_missing_seed_image_is_filled_on_later_startup(
     with Session(engine) as session:
         saved = session.get(Certificate, 20)
         assert saved is not None
-        assert saved.image_bytes == payload
+        assert saved.image_bytes == images.as_jpeg(payload)
         assert saved.image == "/api/certificates/20/image"
         assert saved.holder_name == "Keep edited holder"
     # Never replace a stored photo, even when the file changes or disappears.
@@ -524,7 +682,9 @@ def test_missing_seed_image_is_filled_on_later_startup(
     photo.unlink()
     bootstrap_database(engine, path)
     with Session(engine) as session:
-        assert session.scalar(select(Certificate.image_bytes)) == payload
+        assert session.scalar(
+            select(Certificate.image_bytes)
+        ) == images.as_jpeg(payload)
 
 
 @pytest.mark.parametrize(
@@ -626,9 +786,8 @@ def test_merged_seed_matches_loader_api_and_rules(engine: Engine) -> None:
             assert row.image_file is not None
             saved = session.get(Certificate, row.id)
             assert saved is not None
-            assert (
-                saved.image_bytes
-                == (DEFAULT_SEED_PATH.parent / row.image_file).read_bytes()
+            assert saved.image_bytes == images.as_jpeg(
+                (DEFAULT_SEED_PATH.parent / row.image_file).read_bytes()
             )
             assert saved.image == f"/api/certificates/{row.id}/image"
         material = session.get(Material, 1)

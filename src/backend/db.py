@@ -40,6 +40,10 @@ from sqlalchemy.schema import CreateColumn
 
 # Serialize schema creation and seeding across simultaneous PostgreSQL workers.
 STARTUP_LOCK = 0x48414C414C4442
+ACTIVITY_ACTION_CHECK = (
+    "action IN ('auto_accepted', 'pending_review', 'accepted', "
+    "'rejected', 'certificate_renewed')"
+)
 
 
 def utc_now() -> datetime:
@@ -168,6 +172,7 @@ class ActivityLog(Base):
             name="fk_activity_delivery_tenant",
         ),
         CheckConstraint("length(trim(tenant)) > 0", name="ck_activity_tenant"),
+        CheckConstraint(ACTIVITY_ACTION_CHECK, name="ck_activity_action"),
         CheckConstraint(
             "role IN ('staff', 'supervisor', 'supplier')",
             name="ck_activity_role",
@@ -255,6 +260,57 @@ def qualified_table_name(connection: Connection, table_name: str) -> str:
     )
 
 
+def _upgrade_activity_actions(connection: Connection) -> None:
+    """Upgrade existing PostgreSQL audit events without deleting history."""
+    if connection.dialect.name != "postgresql":
+        return
+    constraints = inspect(connection).get_check_constraints(
+        "activity_log", schema=database_schema(connection)
+    )
+    if any(item["name"] == "ck_activity_action" for item in constraints):
+        return
+    activity = qualified_table_name(connection, "activity_log")
+    deliveries = qualified_table_name(connection, "deliveries")
+    # A historical check records its original automatic outcome, even when
+    # a supervisor has subsequently changed the delivery's current status.
+    connection.execute(
+        text(
+            f"UPDATE {activity} AS a SET action = CASE "
+            "WHEN d.verdict IN ('covered', 'expiring') THEN 'auto_accepted' "
+            "ELSE 'pending_review' END "
+            f"FROM {deliveries} AS d WHERE a.action = 'delivery_checked' "
+            "AND a.delivery_id = d.id AND a.tenant = d.tenant"
+        )
+    )
+    for previous, current in (
+        ("delivery_accepted", "accepted"),
+        ("delivery_rejected", "rejected"),
+    ):
+        connection.execute(
+            text(f"UPDATE {activity} SET action = :new WHERE action = :old"),
+            {"new": current, "old": previous},
+        )
+    # Unexpected historical values need explicit correction, never deletion
+    # or guessed replacement. Failure rolls the entire upgrade back.
+    invalid = connection.scalar(
+        text(
+            f"SELECT count(*) FROM {activity} "
+            f"WHERE NOT ({ACTIVITY_ACTION_CHECK})"
+        )
+    )
+    if invalid:
+        raise ValueError(
+            "Activity history contains unsupported actions; "
+            "correct them before restarting"
+        )
+    connection.execute(
+        text(
+            f"ALTER TABLE {activity} ADD CONSTRAINT ck_activity_action "
+            f"CHECK ({ACTIVITY_ACTION_CHECK})"
+        )
+    )
+
+
 def _initialize_schema(connection: Connection) -> None:
     lock_startup(connection)
     Base.metadata.create_all(connection)
@@ -277,12 +333,13 @@ def _initialize_schema(connection: Connection) -> None:
             connection.execute(
                 text(f"ALTER TABLE {qualified} ADD COLUMN {definition}")
             )
+    _upgrade_activity_actions(connection)
 
 
 def init_db(engine: Engine | Connection | None = None) -> None:
-    """Create tables and add missing image columns, preserving existing data.
+    """Create tables and upgrade image columns and activity actions.
 
-    Only the documented image-column upgrade is automatic. Other schema
+    Only the documented image/action upgrades are automatic. Other schema
     changes still require an explicit migration.
     """
     target = get_engine() if engine is None else engine
