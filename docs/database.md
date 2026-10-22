@@ -80,15 +80,17 @@ and stops startup with a sanitized error. No database credentials or raw seed
 contents are logged. Connections are disposed on application shutdown.
 
 The merged seed file contains 2 fictional suppliers, 4 certificates and 16
-materials. Its product-name scope lists are normalized to structured API
-scope entries. Certificate `image_file` paths identify future PNG assets. Missing files
-are skipped, so those rows initially have no image bytes. Add the PNGs under
-`src/seed/` and restart/redeploy to fill them automatically. Matching uses
-certificate ID, supplier ID and certificate number to avoid unrelated rows.
+materials. Its structured scope entries include product and brand restrictions.
+The four demo PNGs are committed under `src/seed/certificates/`; `image_file`
+paths let startup copy their bytes into PostgreSQL. Missing files are skipped;
+add them and restart/redeploy to fill missing photos automatically. Matching
+uses certificate ID, supplier ID and certificate number to avoid unrelated
+rows. Existing stored photos and other certificate fields are preserved.
 Missing seed.json is allowed and skips seeding; malformed/incompatible
 existing JSON fails startup. See [the seed format](seed-format.md).
-The loader can copy fictional seed images into the binary columns, but it
-checks the PNG signature but does not decode/resize images. It is not a dataset reset tool.
+The loader copies fictional seed images into the binary columns and checks
+the PNG signature, but does not decode/resize images. It is not a dataset
+reset tool.
 
 Without DATABASE_URL, startup logs a warning and skips the database so `/docs`
 can still be used as a contract preview. If DATABASE_URL is configured but

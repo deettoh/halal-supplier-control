@@ -2,7 +2,8 @@
 
 The fictional dataset merged from main is at `src/seed/seed.json`.
 Missing file means skip seeding; an existing but invalid file fails startup.
-The JSON supplies certificate `image_file` paths, but no PNG assets yet.
+The JSON supplies certificate `image_file` paths. All four demo PNGs are
+committed under `src/seed/certificates/` and loaded into PostgreSQL at startup.
 Missing PNGs are allowed; later startups fill photos for existing matching
 certificates whose `image_bytes` is still null. Existing photos are preserved.
 
@@ -12,9 +13,10 @@ Each row needs an explicit positive integer `id`, unique within its array.
 Fields match the database and shared API contract; unknown fields are rejected.
 Dates use YYYY-MM-DD; supplied timestamps require a timezone.
 
-Certificate scope also accepts product-name strings, as used by the merged
-Member 5 seed. The loader normalizes each string to a `{product_name, brand}`
-object with a null brand. Rules accept both string and structured scope lists.
+The seed uses `{product_name, brand}` scope objects. Rules check the product
+and any explicit brand restriction; a null brand means no brand restriction.
+For compatibility, the loader also accepts product-name strings and converts
+them to scope objects with a null brand.
 
 Minimal fictional format example (not the final seed dataset):
 
@@ -71,8 +73,9 @@ Activity rows require `tenant`, `actor`, `role`, and `action`.
 `delivery_id`, `reason`, and `created_at` are optional. Omitted timestamps
 are assigned UTC startup time; use explicit timestamps for historical demos.
 
-Each nonempty table skips row insertion (apart from the photo fill above). Empty tables receive their supplied
-rows in dependency order, inside one transaction. Therefore IDs in seed data
+Each nonempty table skips row insertion (apart from the photo fill above).
+Empty tables receive their supplied rows in dependency order, inside one
+transaction. Therefore IDs in seed data
 must match any existing parent records; the loader does not silently remap,
 merge, or replace them. A missing parent, invalid existing PNG or failed
 constraint rolls back all inserts and photo fills from that attempt.

@@ -621,6 +621,16 @@ def test_merged_seed_matches_loader_api_and_rules(engine: Engine) -> None:
         for count in bootstrap_database(engine, DEFAULT_SEED_PATH).values()
     )
     with Session(engine) as session:
+        seed = SeedData.model_validate_json(DEFAULT_SEED_PATH.read_text())
+        for row in seed.certificates:
+            assert row.image_file is not None
+            saved = session.get(Certificate, row.id)
+            assert saved is not None
+            assert (
+                saved.image_bytes
+                == (DEFAULT_SEED_PATH.parent / row.image_file).read_bytes()
+            )
+            assert saved.image == f"/api/certificates/{row.id}/image"
         material = session.get(Material, 1)
         cert = session.get(Certificate, 1)
         assert material is not None and cert is not None
