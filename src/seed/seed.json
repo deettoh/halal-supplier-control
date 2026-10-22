@@ -18,18 +18,48 @@
       "holder_name": "Golden Grain Supplies SAMPLE",
       "expiry_date": "2026-11-30",
       "scope": [
-        "Wheat Flour",
-        "Bread Flour",
-        "Cake Flour",
-        "Corn Starch",
-        "Rice Flour",
-        "Baking Powder",
-        "Fine Sugar",
-        "Brown Sugar",
-        "Semolina",
-        "Potato Starch"
+        {
+          "product_name": "Wheat Flour",
+          "brand": "GoldenMill"
+        },
+        {
+          "product_name": "Bread Flour",
+          "brand": "GoldenMill"
+        },
+        {
+          "product_name": "Cake Flour",
+          "brand": "GoldenMill"
+        },
+        {
+          "product_name": "Corn Starch",
+          "brand": "GoldenMill"
+        },
+        {
+          "product_name": "Rice Flour",
+          "brand": "GoldenMill"
+        },
+        {
+          "product_name": "Baking Powder",
+          "brand": "GoldenMill"
+        },
+        {
+          "product_name": "Fine Sugar",
+          "brand": "SweetGold"
+        },
+        {
+          "product_name": "Brown Sugar",
+          "brand": "SweetGold"
+        },
+        {
+          "product_name": "Semolina",
+          "brand": "GoldenMill"
+        },
+        {
+          "product_name": "Potato Starch",
+          "brand": "GoldenMill"
+        }
       ],
-      "image": "certificates/cert_01_expiring.png",
+      "image": "src/seed/certificates/cert_01_expiring.png",
       "status": "active"
     },
     {
@@ -40,12 +70,24 @@
       "holder_name": "Golden Grain Supplies SAMPLE",
       "expiry_date": "2025-11-30",
       "scope": [
-        "Wheat Flour",
-        "Bread Flour",
-        "Cake Flour",
-        "Corn Starch"
+        {
+          "product_name": "Wheat Flour",
+          "brand": "GoldenMill"
+        },
+        {
+          "product_name": "Bread Flour",
+          "brand": "GoldenMill"
+        },
+        {
+          "product_name": "Cake Flour",
+          "brand": "GoldenMill"
+        },
+        {
+          "product_name": "Corn Starch",
+          "brand": "GoldenMill"
+        }
       ],
-      "image": "certificates/cert_02_expired.png",
+      "image": "src/seed/certificates/cert_02_expired.png",
       "status": "superseded"
     },
     {
@@ -56,16 +98,40 @@
       "holder_name": "Silver Valley Ingredients SAMPLE",
       "expiry_date": "2027-09-30",
       "scope": [
-        "Cocoa Powder",
-        "Vanilla Essence",
-        "Cooking Chocolate",
-        "Vegetable Oil",
-        "Coconut Milk",
-        "Chocolate Chips",
-        "Salt",
-        "Spice Mix"
+        {
+          "product_name": "Cocoa Powder",
+          "brand": "SilverCocoa"
+        },
+        {
+          "product_name": "Vanilla Essence",
+          "brand": "SilverVanilla"
+        },
+        {
+          "product_name": "Cooking Chocolate",
+          "brand": "SilverCocoa"
+        },
+        {
+          "product_name": "Vegetable Oil",
+          "brand": "SilverPure"
+        },
+        {
+          "product_name": "Coconut Milk",
+          "brand": "SilverCoco"
+        },
+        {
+          "product_name": "Chocolate Chips",
+          "brand": "SilverCocoa"
+        },
+        {
+          "product_name": "Salt",
+          "brand": "SilverSalt"
+        },
+        {
+          "product_name": "Spice Mix",
+          "brand": "SilverSpice"
+        }
       ],
-      "image": "certificates/cert_03_valid.png",
+      "image": "src/seed/certificates/cert_03_valid.png",
       "status": "active"
     },
     {
@@ -76,11 +142,20 @@
       "holder_name": "Silver Valley Ingredients SAMPLE",
       "expiry_date": "2025-09-30",
       "scope": [
-        "Cocoa Powder",
-        "Vanilla Essence",
-        "Vegetable Oil"
+        {
+          "product_name": "Cocoa Powder",
+          "brand": "SilverCocoa"
+        },
+        {
+          "product_name": "Vanilla Essence",
+          "brand": "SilverVanilla"
+        },
+        {
+          "product_name": "Vegetable Oil",
+          "brand": "SilverPure"
+        }
       ],
-      "image": "certificates/cert_04_expired.png",
+      "image": "src/seed/certificates/cert_04_expired.png",
       "status": "superseded"
     }
   ],
