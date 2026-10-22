@@ -2,14 +2,22 @@
 
 import base64
 import json
+from collections.abc import Callable
 from typing import Any
 
 import httpx2
 import pytest
-from openai import OpenAI
+from openai import APIStatusError, APITimeoutError, OpenAI
 from pydantic import ValidationError
 
-from backend.extract import LABEL_JSON_SCHEMA, LabelExtraction, extract_label
+from backend.extract import (
+    LABEL_JSON_SCHEMA,
+    MAX_RETRIES,
+    TIMEOUT_SECONDS,
+    ExtractionError,
+    LabelExtraction,
+    extract_label,
+)
 
 LABEL_FIELDS = {"product_name", "brand", "manufacturer", "halal_mark_present"}
 IMAGE = b"\x89PNG fake image bytes"
@@ -21,22 +29,33 @@ LABEL = {
 }
 
 RequestBody = dict[str, Any]
+Handler = Callable[[httpx2.Request], httpx2.Response]
 
 
-def fake_client(content: str | None) -> tuple[OpenAI, list[RequestBody]]:
+def mock_client(handle: Handler) -> OpenAI:
+    """Return a client whose requests go to handle."""
+    return OpenAI(
+        base_url="https://runpod.test/v1",
+        api_key="test-key",
+        http_client=httpx2.Client(transport=httpx2.MockTransport(handle)),
+    )
+
+
+def fake_client(
+    content: str | None,
+) -> tuple[OpenAI, list[httpx2.Request]]:
     """Return a client whose endpoint replies with fixed content.
 
     Args:
         content: Message content of every chat completion reply.
 
     Returns:
-        Client on a mock transport and each request's JSON body in send
-        order.
+        Client on a mock transport and each request in send order.
     """
-    bodies: list[RequestBody] = []
+    requests: list[httpx2.Request] = []
 
     def handle(request: httpx2.Request) -> httpx2.Response:
-        bodies.append(json.loads(request.content))
+        requests.append(request)
         return httpx2.Response(
             httpx2.codes.OK,
             json={
@@ -54,19 +73,15 @@ def fake_client(content: str | None) -> tuple[OpenAI, list[RequestBody]]:
             },
         )
 
-    client = OpenAI(
-        base_url="https://runpod.test/v1",
-        api_key="test-key",
-        http_client=httpx2.Client(transport=httpx2.MockTransport(handle)),
-    )
-    return client, bodies
+    return mock_client(handle), requests
 
 
 def sent_request() -> RequestBody:
     """Return the JSON body extract_label sends for IMAGE."""
-    client, bodies = fake_client(json.dumps(LABEL))
+    client, requests = fake_client(json.dumps(LABEL))
     extract_label(IMAGE, client=client)
-    return bodies[0]
+    body: RequestBody = json.loads(requests[0].content)
+    return body
 
 
 def test_model_accepts_all_nulls() -> None:
@@ -122,23 +137,52 @@ def test_returns_label_from_response() -> None:
     assert label == LabelExtraction.model_validate(LABEL)
 
 
+def test_request_uses_timeout_limit() -> None:
+    client, requests = fake_client(json.dumps(LABEL))
+    extract_label(IMAGE, client=client)
+    assert requests[0].extensions["timeout"]["read"] == TIMEOUT_SECONDS
+
+
+def test_timeout_raises_extraction_error_without_retry() -> None:
+    requests: list[httpx2.Request] = []
+
+    def handle(request: httpx2.Request) -> httpx2.Response:
+        requests.append(request)
+        raise httpx2.ReadTimeout("endpoint cold", request=request)
+
+    with pytest.raises(ExtractionError, match="APITimeoutError") as caught:
+        extract_label(IMAGE, client=mock_client(handle))
+    assert isinstance(caught.value.__cause__, APITimeoutError)
+    assert len(requests) == MAX_RETRIES + 1
+
+
+def test_error_status_raises_extraction_error() -> None:
+    client = mock_client(
+        lambda _: httpx2.Response(httpx2.codes.SERVICE_UNAVAILABLE)
+    )
+    with pytest.raises(ExtractionError) as caught:
+        extract_label(IMAGE, client=client)
+    assert isinstance(caught.value.__cause__, APIStatusError)
+
+
 def test_rejects_response_missing_field() -> None:
     client, _ = fake_client(json.dumps({"brand": LABEL["brand"]}))
-    with pytest.raises(ValidationError):
+    with pytest.raises(ExtractionError) as caught:
         extract_label(IMAGE, client=client)
+    assert isinstance(caught.value.__cause__, ValidationError)
 
 
 def test_rejects_response_without_content() -> None:
     client, _ = fake_client(None)
-    with pytest.raises(ValueError, match="no content"):
+    with pytest.raises(ExtractionError, match="no content"):
         extract_label(IMAGE, client=client)
 
 
 def test_rejects_empty_image_before_request() -> None:
-    client, bodies = fake_client(json.dumps(LABEL))
+    client, requests = fake_client(json.dumps(LABEL))
     with pytest.raises(ValueError, match="empty"):
         extract_label(b"", client=client)
-    assert bodies == []
+    assert requests == []
 
 
 def test_missing_api_key_names_variable(

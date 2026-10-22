@@ -3,13 +3,30 @@
 import base64
 import os
 
-from openai import OpenAI
+from openai import APIError, OpenAI
+from openai.types.chat import ChatCompletionUserMessageParam
 from openai.types.shared_params import ResponseFormatJSONSchema
-from pydantic import BaseModel, ConfigDict, Field, HttpUrl, SecretStr
+from pydantic import (
+    BaseModel,
+    ConfigDict,
+    Field,
+    HttpUrl,
+    SecretStr,
+    ValidationError,
+)
 
 from backend.schemas import LabelExtraction
 
-__all__ = ["LABEL_JSON_SCHEMA", "LabelExtraction", "extract_label"]
+__all__ = [
+    "LABEL_JSON_SCHEMA",
+    "ExtractionError",
+    "LabelExtraction",
+    "extract_label",
+]
+
+
+class ExtractionError(Exception):
+    """Label extraction failure with a message safe to store."""
 
 
 class RunPodConfig(BaseModel):
@@ -34,6 +51,8 @@ RESPONSE_FORMAT: ResponseFormatJSONSchema = {
 MODEL_ID = "qwen/qwen3-vl-8b-instruct"
 IMAGE_MIME_TYPE = "image/jpeg"
 TEMPERATURE = 0
+TIMEOUT_SECONDS = 180
+MAX_RETRIES = 0
 EXTRACTION_PROMPT = (
     "Read this delivery label. Return the product name, brand, "
     "manufacturer, and whether a halal mark is printed on it. Use null "
@@ -50,6 +69,23 @@ def _runpod_client() -> OpenAI:
     )
 
 
+def _label_message(image: bytes) -> ChatCompletionUserMessageParam:
+    """Return the user message carrying image and the prompt."""
+    encoded = base64.b64encode(image).decode("ascii")
+    return {
+        "role": "user",
+        "content": [
+            {
+                "type": "image_url",
+                "image_url": {
+                    "url": f"data:{IMAGE_MIME_TYPE};base64,{encoded}"
+                },
+            },
+            {"type": "text", "text": EXTRACTION_PROMPT},
+        ],
+    }
+
+
 def extract_label(
     image: bytes, *, client: OpenAI | None = None
 ) -> LabelExtraction:
@@ -63,34 +99,31 @@ def extract_label(
         Fields parsed from the model's JSON reply.
 
     Raises:
-        ValueError: If image is empty or the reply has no content.
+        ValueError: If image is empty.
+        ExtractionError: If the request fails or the reply is invalid.
         pydantic.ValidationError: If a RunPod environment variable is
-            missing or invalid, or the reply fails the label schema.
+            missing or invalid.
     """
     if not image:
         raise ValueError("label image is empty")
     endpoint = _runpod_client() if client is None else client
-    encoded = base64.b64encode(image).decode("ascii")
-    completion = endpoint.chat.completions.create(
-        model=MODEL_ID,
-        messages=[
-            {
-                "role": "user",
-                "content": [
-                    {
-                        "type": "image_url",
-                        "image_url": {
-                            "url": f"data:{IMAGE_MIME_TYPE};base64,{encoded}"
-                        },
-                    },
-                    {"type": "text", "text": EXTRACTION_PROMPT},
-                ],
-            }
-        ],
-        response_format=RESPONSE_FORMAT,
-        temperature=TEMPERATURE,
-    )
+    try:
+        completion = endpoint.with_options(
+            timeout=TIMEOUT_SECONDS, max_retries=MAX_RETRIES
+        ).chat.completions.create(
+            model=MODEL_ID,
+            messages=[_label_message(image)],
+            response_format=RESPONSE_FORMAT,
+            temperature=TEMPERATURE,
+        )
+    except APIError as exc:
+        raise ExtractionError(
+            f"RunPod request failed: {type(exc).__name__}"
+        ) from exc
     content = completion.choices[0].message.content
     if content is None:
-        raise ValueError("model reply has no content")
-    return LabelExtraction.model_validate_json(content)
+        raise ExtractionError("model reply has no content")
+    try:
+        return LabelExtraction.model_validate_json(content)
+    except ValidationError as exc:
+        raise ExtractionError("model reply failed the label schema") from exc
