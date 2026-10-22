@@ -14,15 +14,17 @@ Only stretch certificate extraction remains 501.
 | activity_log | Who did what, role, time and reason | One SME |
 
 Certificates and deliveries have `image_bytes` (PostgreSQL BYTEA), alongside
-the existing `image` reference. Images use PNG; no content-type column is
-needed. Future image responses use the fixed MIME type `image/png`. Photo bytes
-live in the database; `image` can be a future API URL rather than a local file.
+the existing `image` reference. Stored images use JPEG; no content-type
+column is needed. Image responses use the fixed MIME type `image/jpeg`.
+Photo bytes live in the database; `image` is a URL rather than a local file.
 Binary columns are loaded only when explicitly accessed, keeping list reads
 small. JSON columns store scope, extracted fields and the checklist. Existing
 reference-only records remain valid; their new image columns start as null.
-PNG uploads and protected image-serving endpoints are implemented. Uploads
-are limited to 10 MiB and checked for a PNG signature; decoding/resizing is
-not performed by the service layer.
+Certificate uploads/source assets use PNG. Delivery uploads accept PNG or
+JPEG. Both are decoded and stored as JPEG (quality 85) with full resolution,
+upright orientation and a white background for transparency. Uploads are
+limited to 10 MiB. Source certificate PNG files in the repo are preserved.
+The extractor separately applies main's 1280-pixel maximum for model input.
 
 ## Start locally (PowerShell in the repository root)
 
@@ -84,15 +86,17 @@ contents are logged. Connections are disposed on application shutdown.
 The merged seed file contains 2 fictional suppliers, 4 certificates and 16
 materials. Its structured scope entries include product and brand restrictions.
 The four demo PNGs are committed under `src/seed/certificates/`; `image_file`
-paths let startup copy their bytes into PostgreSQL. Missing files are skipped;
+paths let startup convert them to JPEG in PostgreSQL. Missing files are skipped;
 add them and restart/redeploy to fill missing photos automatically. Matching
 uses certificate ID, supplier ID and certificate number to avoid unrelated
 rows. Existing stored photos and other certificate fields are preserved.
 Missing seed.json is allowed and skips seeding; malformed/incompatible
 existing JSON fails startup. See [the seed format](seed-format.md).
-The loader copies fictional seed images into the binary columns and checks
-the PNG signature, but does not decode/resize images. It is not a dataset
-reset tool.
+The loader decodes seed PNGs and stores JPEG bytes without reducing their
+resolution. A transactionally protected startup upgrade also converts legacy
+stored PNGs in certificates and deliveries, leaving existing JPEGs untouched.
+An invalid legacy image fails startup and rolls back the upgrade rather than
+deleting or replacing it. This is not a dataset reset tool.
 
 Without DATABASE_URL, startup logs a warning and skips the database so `/docs`
 can still be used as a contract preview. If DATABASE_URL is configured but

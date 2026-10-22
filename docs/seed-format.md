@@ -3,9 +3,11 @@
 The fictional dataset merged from main is at `src/seed/seed.json`.
 Missing file means skip seeding; an existing but invalid file fails startup.
 The JSON supplies certificate `image_file` paths. All four demo PNGs are
-committed under `src/seed/certificates/` and loaded into PostgreSQL at startup.
+committed under `src/seed/certificates/` as PNG originals. Startup converts
+them to JPEG for PostgreSQL storage without changing the source files.
 Missing PNGs are allowed; later startups fill photos for existing matching
-certificates whose `image_bytes` is still null. Existing photos are preserved.
+certificates whose `image_bytes` is still null. Existing JPEGs are preserved;
+legacy stored PNGs are converted once to JPEG, retaining their image content.
 
 The top-level object accepts five arrays: `suppliers`, `certificates`,
 `materials`, `deliveries`, and `activity_log`. Omitted arrays default to empty.
@@ -47,18 +49,21 @@ Minimal fictional format example (not the final seed dataset):
 
 `image_file` is optional and relative to seed.json. It must stay within the
 seed directory and use a `.png` extension. Missing files are skipped; present
-files must have a PNG signature. The bytes are stored in PostgreSQL and `image`
+files must decode as PNG images. JPEG bytes are stored in PostgreSQL and `image`
 is set to the future `/api/certificates/{id}/image` URL (or deliveries URL).
-The image endpoints enforce SME/supplier access and return PNG bytes. No
-`image_content_type` field is needed: image responses will use `image/png`.
-Actual image decoding/resizing is not performed by the loader.
+The image endpoints enforce SME/supplier access and return JPEG bytes. No
+`image_content_type` field is needed: image responses use `image/jpeg`.
+Storage conversion uses quality 85, preserves resolution, applies EXIF
+orientation and flattens transparency onto white. Original PNGs stay intact.
 Without `image_file`, certificates may omit the image. Reference-only rows
 may use `image`, which stores text and does not load any file.
 
 On every startup, missing certificate photos are filled from available seed
 PNGs, including when the certificates table is populated. The existing row
 must match the seed ID, supplier ID and certificate number. Only null
-`image_bytes` is filled; stored photos and other fields are left unchanged.
+`image_bytes` is filled from seed files. Separate startup normalization
+converts existing stored PNGs to JPEG without replacing their content with
+new seed assets. Existing JPEGs are never re-encoded.
 This is a startup action, not a continuous file watcher. For a new certificate
 added after the table was populated, use the normal backend workflow; this
 photo backfill does not insert new rows into populated tables.

@@ -55,8 +55,8 @@ explicitly declared. This keeps frontend handling predictable.
   Issuer and holder name are limited to 200 characters; certificate number
   to 100, matching the database. Longer fields return 422 before any write.
 - **Images:** response `image` is a URL/path reference, not base64 data.
-  GET `/api/deliveries/{id}/image` serves the PNG to staff/supervisor of its
-  SME. GET `/api/certificates/{id}/image` serves it to its owning supplier or
+  GET `/api/deliveries/{id}/image` serves the JPEG to staff/supervisor of its
+  SME. GET `/api/certificates/{id}/image` serves the JPEG to its owning supplier or
   staff/supervisor of a linked SME. Unknown/not-owned/missing images return
   404. Both image routes require the same demo headers. Browser clients
   should fetch with those headers and display a blob URL.
@@ -103,13 +103,14 @@ Let the browser set multipart Content-Type including its boundary.
 HTTP errors use `{detail: "message"}`. Validation errors use FastAPI's
 `{detail: [{loc, msg, type, ...}]}` shape, returning 422. Wrong permitted
 role returns 403; missing/invalid header values return 422. Required reasons
-are validated. Uploads must have a PNG signature and be at most 10 MiB
-(413 when larger). Invalid PNGs and invalid supplier IDs return 422 with
-`{detail: "message"}`; FastAPI schema validation retains its list-shaped
+are validated. Certificate uploads use PNG; delivery uploads accept PNG or
+JPEG. Images must decode correctly and be at most 10 MiB (413 when larger).
+Both are stored/served as JPEG. Invalid images and invalid supplier IDs return
+422 with `{detail: "message"}`; FastAPI schema validation retains its list-shaped
 detail. `/docs` documents both 422 response shapes.
 
 GET materials, deliveries, activity and certificates use real database reads.
-PNG retrieval routes return stored bytes with access checks. Reads never call
+JPEG retrieval routes return stored bytes with access checks. Reads never call
 RunPod or write activity rows. Database unavailability returns 503 with a safe
 error message. Health and API documentation remain available without a
 configured database.
@@ -118,8 +119,12 @@ Delivery creation saves photo evidence before its blocking model call, with
 an internal error marker until processing completes. This row is excluded
 from the queue during the 180-second extraction window. A decision attempted
 before completion returns 409 without a write. After completion or timeout,
-normal verdict/status rules apply. An interrupted worker's fallback also
-becomes reviewable once that deadline expires. A late result cannot undo a
+normal verdict/status rules apply. Main's validated demo-cache result can
+still be used after an endpoint timeout, unless a supervisor has already
+resolved the deadline fallback. The demo cache is keyed by original upload
+bytes; JPEG storage conversion does not change cache lookup. An interrupted
+worker's fallback also becomes reviewable once that deadline expires.
+A late result cannot undo a
 supervisor decision. The public status vocabulary is unchanged.
 
 Decision writes and their logs are atomic. Renewal locks the supplier row,
