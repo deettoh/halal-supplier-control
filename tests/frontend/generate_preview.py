@@ -92,7 +92,7 @@ def generate() -> dict[str, Any]:
     for case_id, filename, brand, product, manufacturer, title in [
         (
             "alt-brand",
-            "label-alt-brand.png",
+            "label-alt-brand.jpg",
             "ALT SAMPLE BRAND",
             "Cocoa Powder",
             "Silver Valley Foods",
@@ -100,7 +100,7 @@ def generate() -> dict[str, Any]:
         ),
         (
             "covered",
-            "label-covered.png",
+            "label-covered.jpg",
             "SilverCocoa",
             "Cocoa Powder",
             "Silver Valley Foods",
@@ -108,7 +108,7 @@ def generate() -> dict[str, Any]:
         ),
         (
             "partial",
-            "label-partial.png",
+            "label-partial.jpg",
             "SilverCocoa",
             "Cocoa Powder",
             None,
@@ -116,7 +116,7 @@ def generate() -> dict[str, Any]:
         ),
         (
             "expiring",
-            "label-expiring.png",
+            "label-expiring.jpg",
             "GoldenMill",
             "Wheat Flour",
             "Golden Grain Foods",

@@ -916,8 +916,8 @@
     {
       "id": "alt-brand",
       "title": "Changed brand",
-      "image": "/media/label-alt-brand.png",
-      "sha256": "23ffdac7e78a157188d0e297198603f22828736279077f112103a5ab239ed12e",
+      "image": "/media/label-alt-brand.jpg",
+      "sha256": "6d0a6d654b189e6966fedf27f5395d308d60db9834dd1d357e033a195080f43e",
       "extracted": {
         "product_name": "Cocoa Powder",
         "brand": "ALT SAMPLE BRAND",
@@ -928,7 +928,7 @@
         "6": {
           "id": 500,
           "material_id": 6,
-          "image": "/media/label-alt-brand.png",
+          "image": "/media/label-alt-brand.jpg",
           "extracted": {
             "product_name": "Cocoa Powder",
             "brand": "ALT SAMPLE BRAND",
@@ -975,7 +975,7 @@
           "6": {
             "id": 500,
             "material_id": 6,
-            "image": "/media/label-alt-brand.png",
+            "image": "/media/label-alt-brand.jpg",
             "extracted": {
               "product_name": "Cocoa Powder",
               "brand": "ALT SAMPLE BRAND",
@@ -1021,7 +1021,7 @@
           "6": {
             "id": 500,
             "material_id": 6,
-            "image": "/media/label-alt-brand.png",
+            "image": "/media/label-alt-brand.jpg",
             "extracted": {
               "product_name": "Cocoa Powder",
               "brand": "ALT SAMPLE BRAND",
@@ -1067,7 +1067,7 @@
           "6": {
             "id": 500,
             "material_id": 6,
-            "image": "/media/label-alt-brand.png",
+            "image": "/media/label-alt-brand.jpg",
             "extracted": {
               "product_name": "Cocoa Powder",
               "brand": "ALT SAMPLE BRAND",
@@ -1113,7 +1113,7 @@
           "6": {
             "id": 500,
             "material_id": 6,
-            "image": "/media/label-alt-brand.png",
+            "image": "/media/label-alt-brand.jpg",
             "extracted": {
               "product_name": "Cocoa Powder",
               "brand": "ALT SAMPLE BRAND",
@@ -1160,8 +1160,8 @@
     {
       "id": "covered",
       "title": "Matching cocoa label",
-      "image": "/media/label-covered.png",
-      "sha256": "4c240cdcf7237f432d86317f65205fe2f2e03ec8f6b2c1c03858eb74d31e6054",
+      "image": "/media/label-covered.jpg",
+      "sha256": "8cc968ecdb164abca32ca1fab8576c85fbdd1a50ac0cde45f6b6bf9124ebcdd7",
       "extracted": {
         "product_name": "Cocoa Powder",
         "brand": "SilverCocoa",
@@ -1172,7 +1172,7 @@
         "6": {
           "id": 500,
           "material_id": 6,
-          "image": "/media/label-covered.png",
+          "image": "/media/label-covered.jpg",
           "extracted": {
             "product_name": "Cocoa Powder",
             "brand": "SilverCocoa",
@@ -1219,7 +1219,7 @@
           "6": {
             "id": 500,
             "material_id": 6,
-            "image": "/media/label-covered.png",
+            "image": "/media/label-covered.jpg",
             "extracted": {
               "product_name": "Cocoa Powder",
               "brand": "SilverCocoa",
@@ -1265,7 +1265,7 @@
           "6": {
             "id": 500,
             "material_id": 6,
-            "image": "/media/label-covered.png",
+            "image": "/media/label-covered.jpg",
             "extracted": {
               "product_name": "Cocoa Powder",
               "brand": "SilverCocoa",
@@ -1311,7 +1311,7 @@
           "6": {
             "id": 500,
             "material_id": 6,
-            "image": "/media/label-covered.png",
+            "image": "/media/label-covered.jpg",
             "extracted": {
               "product_name": "Cocoa Powder",
               "brand": "SilverCocoa",
@@ -1357,7 +1357,7 @@
           "6": {
             "id": 500,
             "material_id": 6,
-            "image": "/media/label-covered.png",
+            "image": "/media/label-covered.jpg",
             "extracted": {
               "product_name": "Cocoa Powder",
               "brand": "SilverCocoa",
@@ -1404,8 +1404,8 @@
     {
       "id": "partial",
       "title": "Manufacturer unreadable",
-      "image": "/media/label-partial.png",
-      "sha256": "7f84021e9c4b5760e727d58a37bdae7be67f0c94ce9ba0e511d317193256f2ff",
+      "image": "/media/label-partial.jpg",
+      "sha256": "f9c769c7f18e98c65191a699d6cadbbead55b6b9476ca649eb5ee1ee45caa4c2",
       "extracted": {
         "product_name": "Cocoa Powder",
         "brand": "SilverCocoa",
@@ -1416,7 +1416,7 @@
         "6": {
           "id": 500,
           "material_id": 6,
-          "image": "/media/label-partial.png",
+          "image": "/media/label-partial.jpg",
           "extracted": {
             "product_name": "Cocoa Powder",
             "brand": "SilverCocoa",
@@ -1463,7 +1463,7 @@
           "6": {
             "id": 500,
             "material_id": 6,
-            "image": "/media/label-partial.png",
+            "image": "/media/label-partial.jpg",
             "extracted": {
               "product_name": "Cocoa Powder",
               "brand": "SilverCocoa",
@@ -1509,7 +1509,7 @@
           "6": {
             "id": 500,
             "material_id": 6,
-            "image": "/media/label-partial.png",
+            "image": "/media/label-partial.jpg",
             "extracted": {
               "product_name": "Cocoa Powder",
               "brand": "SilverCocoa",
@@ -1555,7 +1555,7 @@
           "6": {
             "id": 500,
             "material_id": 6,
-            "image": "/media/label-partial.png",
+            "image": "/media/label-partial.jpg",
             "extracted": {
               "product_name": "Cocoa Powder",
               "brand": "SilverCocoa",
@@ -1601,7 +1601,7 @@
           "6": {
             "id": 500,
             "material_id": 6,
-            "image": "/media/label-partial.png",
+            "image": "/media/label-partial.jpg",
             "extracted": {
               "product_name": "Cocoa Powder",
               "brand": "SilverCocoa",
@@ -1648,8 +1648,8 @@
     {
       "id": "expiring",
       "title": "Expiring flour record",
-      "image": "/media/label-expiring.png",
-      "sha256": "400fd6af6cfff3cb6ec074431cf20f38b196723dd58a1245ef37f071c645d5c1",
+      "image": "/media/label-expiring.jpg",
+      "sha256": "d73ff44e34912b471607febe73221a08d203fac59f972f97ff426038cd1f3bc5",
       "extracted": {
         "product_name": "Wheat Flour",
         "brand": "GoldenMill",
@@ -1660,7 +1660,7 @@
         "1": {
           "id": 500,
           "material_id": 1,
-          "image": "/media/label-expiring.png",
+          "image": "/media/label-expiring.jpg",
           "extracted": {
             "product_name": "Wheat Flour",
             "brand": "GoldenMill",
@@ -1704,7 +1704,7 @@
         "9": {
           "id": 500,
           "material_id": 9,
-          "image": "/media/label-expiring.png",
+          "image": "/media/label-expiring.jpg",
           "extracted": {
             "product_name": "Wheat Flour",
             "brand": "GoldenMill",
@@ -1751,7 +1751,7 @@
           "1": {
             "id": 500,
             "material_id": 1,
-            "image": "/media/label-expiring.png",
+            "image": "/media/label-expiring.jpg",
             "extracted": {
               "product_name": "Wheat Flour",
               "brand": "GoldenMill",
@@ -1795,7 +1795,7 @@
           "9": {
             "id": 500,
             "material_id": 9,
-            "image": "/media/label-expiring.png",
+            "image": "/media/label-expiring.jpg",
             "extracted": {
               "product_name": "Wheat Flour",
               "brand": "GoldenMill",
@@ -1841,7 +1841,7 @@
           "1": {
             "id": 500,
             "material_id": 1,
-            "image": "/media/label-expiring.png",
+            "image": "/media/label-expiring.jpg",
             "extracted": {
               "product_name": "Wheat Flour",
               "brand": "GoldenMill",
@@ -1885,7 +1885,7 @@
           "9": {
             "id": 500,
             "material_id": 9,
-            "image": "/media/label-expiring.png",
+            "image": "/media/label-expiring.jpg",
             "extracted": {
               "product_name": "Wheat Flour",
               "brand": "GoldenMill",
@@ -1931,7 +1931,7 @@
           "1": {
             "id": 500,
             "material_id": 1,
-            "image": "/media/label-expiring.png",
+            "image": "/media/label-expiring.jpg",
             "extracted": {
               "product_name": "Wheat Flour",
               "brand": "GoldenMill",
@@ -1975,7 +1975,7 @@
           "9": {
             "id": 500,
             "material_id": 9,
-            "image": "/media/label-expiring.png",
+            "image": "/media/label-expiring.jpg",
             "extracted": {
               "product_name": "Wheat Flour",
               "brand": "GoldenMill",
@@ -2021,7 +2021,7 @@
           "1": {
             "id": 500,
             "material_id": 1,
-            "image": "/media/label-expiring.png",
+            "image": "/media/label-expiring.jpg",
             "extracted": {
               "product_name": "Wheat Flour",
               "brand": "GoldenMill",
@@ -2065,7 +2065,7 @@
           "9": {
             "id": 500,
             "material_id": 9,
-            "image": "/media/label-expiring.png",
+            "image": "/media/label-expiring.jpg",
             "extracted": {
               "product_name": "Wheat Flour",
               "brand": "GoldenMill",
@@ -2343,7 +2343,7 @@
       {
         "id": 102,
         "material_id": 6,
-        "image": "/media/label-alt-brand.png",
+        "image": "/media/label-alt-brand.jpg",
         "extracted": {
           "product_name": "Cocoa Powder",
           "brand": "ALT SAMPLE BRAND",
@@ -2387,7 +2387,7 @@
       {
         "id": 104,
         "material_id": 6,
-        "image": "/media/label-partial.png",
+        "image": "/media/label-partial.jpg",
         "extracted": {
           "product_name": "Cocoa Powder",
           "brand": "SilverCocoa",

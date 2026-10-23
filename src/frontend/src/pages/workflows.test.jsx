@@ -1,6 +1,6 @@
 import React from "react";
 import { it, expect, vi, beforeEach } from "vitest";
-import { render, screen, within } from "@testing-library/react";
+import { render, screen, within, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { SessionProvider } from "../lib/session.jsx";
 import { createPreviewGateway } from "../lib/preview/gateway.js";
@@ -45,6 +45,44 @@ it("blocks the previous photo after an unsupported replacement selection", async
   expect(
     screen.getByRole("button", { name: "Check delivery", exact: true }),
   ).toBeDisabled();
+});
+it("preserves a prepared JPEG's MIME type and bytes when submitting it", async () => {
+  const user = userEvent.setup();
+  const bytes = new Uint8Array([255, 216, 255, 217]);
+  const createDelivery = vi.fn(async () => data.deliveries[staff.tenant][0]);
+  vi.stubGlobal(
+    "fetch",
+    vi.fn(
+      async () =>
+        new Response(bytes, {
+          headers: { "Content-Type": "image/jpeg" },
+        }),
+    ),
+  );
+  try {
+    wrap(<CheckDelivery />, { ...createPreviewGateway(), createDelivery });
+    const input = await screen.findByRole("combobox", { name: "Material" });
+    await user.click(input);
+    await user.type(input, "Cocoa");
+    await user.keyboard("{ArrowDown}{Enter}");
+    await user.click(screen.getByText("Try a prepared label"));
+    await user.click(screen.getByRole("button", { name: "Changed brand" }));
+    await user.click(
+      screen.getByRole("button", { name: "Check delivery", exact: true }),
+    );
+    await waitFor(() => expect(createDelivery).toHaveBeenCalledOnce());
+    const file = createDelivery.mock.calls[0][1].image;
+    expect(file.type).toBe("image/jpeg");
+    const actual = await new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => resolve(new Uint8Array(reader.result));
+      reader.onerror = () => reject(reader.error);
+      reader.readAsArrayBuffer(file);
+    });
+    expect(actual).toEqual(bytes);
+  } finally {
+    vi.unstubAllGlobals();
+  }
 });
 it("keeps receiving staff out of the supervisor route without a queue request", () => {
   window.history.replaceState(null, "", "/review");

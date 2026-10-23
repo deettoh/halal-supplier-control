@@ -64,4 +64,4 @@ uv run pytest tests/frontend -q
 pnpm --dir src/frontend test --run
 ```
 
-Photographs are fictional SAMPLE assets and live only in `src/frontend/public/media/`. Embedded PNG provenance travels with each public image. Duplicate source plates, prompts, intermediate mockups and design-tool files are archived locally outside the repository. The implemented design tokens are in `src/frontend/src/styles/`; final review reports and application screenshots are in `docs/frontend/reviews/2026-10-23/`.
+Photographs are fictional SAMPLE assets and live only in `src/frontend/public/media/`. Full-resolution progressive JPEGs reduce download size; their EXIF descriptions identify them as AI-generated derivatives and retain the source PNG SHA-256. Preview hashes match the shipping JPEG bytes. Original PNGs, duplicate source plates, prompts, intermediate mockups and design-tool files are archived locally outside the repository. The implemented design tokens are in `src/frontend/src/styles/`; final review reports and application screenshots are in `docs/frontend/reviews/2026-10-23/`.
