@@ -9,6 +9,7 @@ import React, {
 } from "react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { installHistoryGuard } from "./history-guard.js";
+import { invalidateTransitions } from "./motion.js";
 const SessionContext = createContext(null);
 export const organisations = {
   sme: [
@@ -116,7 +117,10 @@ export function SessionProvider({ children, gateway, initialIdentity }) {
     (ticket) => ticket.epoch === serial.current,
     [],
   );
-  useEffect(() => installHistoryGuard(confirmDiscard), [confirmDiscard]);
+  useEffect(
+    () => installHistoryGuard(confirmDiscard, invalidateTransitions),
+    [confirmDiscard],
+  );
   useEffect(() => {
     function beforeUnload(event) {
       if (dirty.current) {

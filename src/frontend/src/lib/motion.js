@@ -2,6 +2,9 @@ import { flushSync } from "react-dom";
 
 let activeTransition;
 let latestUpdate = 0;
+export function invalidateTransitions() {
+  latestUpdate += 1;
+}
 export function transitionUpdate(update) {
   const ticket = ++latestUpdate;
   if (

@@ -48,6 +48,10 @@
   }
 }
 @media (max-width: 1200px) {
+  .renewal-form-section,
+  .renewal-receipt {
+    padding-left: 26px;
+  }
   .registry-layout {
     gap: 26px;
   }
@@ -63,6 +67,12 @@
   }
 }
 @media (max-width: 1000px) {
+  .renewal-form-section,
+  .renewal-receipt {
+    border-left: 0;
+    border-top: 1px solid var(--line);
+    padding: 28px 0 0;
+  }
   .registry-layout {
     grid-template-columns: 1fr;
     gap: 38px;
