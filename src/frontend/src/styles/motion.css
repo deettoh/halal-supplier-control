@@ -61,10 +61,10 @@ main:focus {
     animation-duration: 220ms;
     animation-timing-function: var(--motion-ease);
   }
-  @supports not (view-transition-name: none) {
-    .route-arrival {
-      animation: view-arrive 200ms var(--motion-ease);
-    }
+  /* A CSS property may exist while the snapshot API is unavailable. Keep
+     a brief arrival for those browsers and ordinary Back/Forward navigation. */
+  .route-arrival {
+    animation: view-arrive 200ms var(--motion-ease);
   }
 }
 @keyframes view-arrive {
