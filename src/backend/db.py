@@ -41,6 +41,7 @@ from sqlalchemy.schema import CreateColumn
 
 # Serialize schema creation and seeding across simultaneous PostgreSQL workers.
 STARTUP_LOCK = 0x48414C414C4442
+BUSINESS_TIMEZONE = ZoneInfo("Asia/Kuala_Lumpur")
 ACTIVITY_ACTION_CHECK = (
     "action IN ('auto_accepted', 'pending_review', 'accepted', "
     "'rejected', 'certificate_renewed')"
@@ -53,7 +54,7 @@ def utc_now() -> datetime:
 
 def business_today() -> date:
     """Calendar date for certificate rules in Malaysia, independent of host."""
-    return utc_now().astimezone(ZoneInfo("Asia/Kuala_Lumpur")).date()
+    return utc_now().astimezone(BUSINESS_TIMEZONE).date()
 
 
 class Base(DeclarativeBase):

@@ -1,6 +1,7 @@
 """Use the Malaysian calendar for expiry checks, retaining UTC audit times."""
 
 from datetime import UTC, date, datetime
+from pathlib import Path
 
 import pytest
 from fastapi.testclient import TestClient
@@ -40,8 +41,6 @@ def test_reads_and_delivery_rules_share_malaysian_date(
     coverage: str,
     verdict: str,
 ) -> None:
-    from pathlib import Path
-
     instant = datetime(2026, 10, 21, hour, 59, tzinfo=UTC)
     monkeypatch.setattr(db, "utc_now", lambda: instant)
     monkeypatch.setattr(
