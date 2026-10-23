@@ -11,6 +11,7 @@ from pathlib import Path
 from types import MappingProxyType
 from typing import Annotated
 
+import certifi
 from openai import APIError, DefaultHttpx2Client, OpenAI
 from openai.types.chat import ChatCompletionUserMessageParam
 from openai.types.shared_params import ResponseFormatJSONSchema
@@ -107,8 +108,10 @@ def _runpod_client() -> OpenAI:
     return OpenAI(
         base_url=str(config.endpoint_url),
         api_key=config.api_key.get_secret_value(),
-        # keep system CAs when Replit sets SSL_CERT_DIR
-        http_client=DefaultHttpx2Client(verify=ssl.create_default_context()),
+        # fixed roots since Replit's SSL_CERT_DIR lacks RunPod's root CA
+        http_client=DefaultHttpx2Client(
+            verify=ssl.create_default_context(cafile=certifi.where())
+        ),
     )
 
 

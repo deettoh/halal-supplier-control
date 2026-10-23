@@ -307,7 +307,7 @@ def test_missing_api_key_names_variable(
         extract_label(IMAGE)
 
 
-def test_client_trusts_system_cas_when_cert_dir_set(
+def test_client_trusts_root_cas_when_cert_dir_set(
     monkeypatch: pytest.MonkeyPatch, tmp_path: Path
 ) -> None:
     monkeypatch.setenv("RUNPOD_ENDPOINT_URL", "https://runpod.test/v1")
