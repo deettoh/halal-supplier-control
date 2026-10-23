@@ -103,7 +103,7 @@ def materials(
         .order_by(db.Material.id)
     )
     result = []
-    today = db.utc_now().date()
+    today = db.business_today()
     for material, supplier, certificate in rows:
         verdict = rules.evaluate(
             {
@@ -312,7 +312,7 @@ def create_delivery(
         extracted,
         _material_values(material),
         _certificate_values(certificate),
-        db.utc_now().date(),
+        db.business_today(),
     )
     saved = session.get(
         db.Delivery, item_id, populate_existing=True, with_for_update=True

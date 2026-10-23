@@ -31,7 +31,9 @@ These demo headers still simulate platform identity.
 
 GET routes have no request body. IDs are positive integers. Responses use
 plain arrays, not `{items: [...]}` wrappers. No pagination is defined yet.
-Dates use YYYY-MM-DD; timestamps include a timezone, preferably UTC `Z`.
+Dates use YYYY-MM-DD. Certificate expiry and the 60-day warning use today's
+calendar date in `Asia/Kuala_Lumpur`, independent of the server timezone.
+Audit timestamps remain timezone-aware UTC instants, serialized with `Z`.
 Response fields typed as nullable are still required unless a default is
 explicitly declared. This keeps frontend handling predictable.
 

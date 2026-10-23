@@ -99,9 +99,12 @@ especially diagrams on pages 5-6 and routes/statuses on pages 7-9:
   bytes, not the JPEG stored in PostgreSQL. The committed demo cache is
   currently empty; only explicitly populated matching images can use it.
   Unmatched failures follow the confirmed human-review fallback.
-- The PDF's demo reset command would explicitly restore seed records before
-  a presentation (and remove demo uploads/decisions/logs). It is not ordinary
-  startup and is outside this service change. No reset was run or added.
+- The manual `backend.reset_demo` command explicitly restores seed records
+  before a presentation, removing demo uploads/renewals/decisions/logs.
+  It requires `--confirm-reset-demo` and is never called by startup or an API.
+  Stop the application first. See the reset instructions in `database.md`.
+- Certificate expiry and coverage use `db.business_today()` in
+  `Asia/Kuala_Lumpur`. Audit timestamps and extraction deadlines remain UTC.
 
 ## Validation
 
