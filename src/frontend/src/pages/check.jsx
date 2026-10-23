@@ -53,9 +53,10 @@ export default function CheckDelivery() {
       const response = await fetch(example.image);
       if (!response.ok)
         throw new Error("We couldn't load this prepared photo. Try again.");
+      const photo = await response.blob();
       chooseFile(
-        new File([await response.blob()], example.image.split("/").at(-1), {
-          type: "image/png",
+        new File([photo], example.image.split("/").at(-1), {
+          type: photo.type,
         }),
       );
     } catch (error) {

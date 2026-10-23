@@ -25,6 +25,8 @@ uv run uvicorn backend.main:app --app-dir src --reload
 Open http://127.0.0.1:8000/docs. Without DATABASE_URL the app runs in contract
 preview mode. With DATABASE_URL it initializes the database at startup.
 No RunPod endpoint is needed for startup or the contract preview.
+Certificate expiry/coverage use the Kuala Lumpur calendar date; audit
+timestamps and extraction timeouts use UTC.
 The core backend is implemented: tenant-scoped reads, protected JPEG retrieval,
 label uploads and rule checks, supervisor decisions, and supplier renewal with
 transactional activity records. Extraction uses the current RunPod client
@@ -58,6 +60,17 @@ certificate source assets remain PNG; both certificate and delivery photos
 are converted to JPEG (quality 85) in the database and served as image/jpeg.
 Startup converts legacy stored PNGs once, without rewriting the source files.
 See [the database guide](docs/database.md) and [seed format](docs/seed-format.md).
+To manually restore the demo, stop the app and run from the repository root:
+
+```bash
+uv run --directory src --env-file ../.env python -m backend.reset_demo --confirm-reset-demo
+```
+
+This replaces all five tables' data from `src/seed/seed.json`, including stored
+seed photos, and removes demo uploads, renewals, decisions and activity logs.
+The command targets the configured `DATABASE_URL`; it never runs at startup.
+On Replit, omit `--env-file ../.env` to use the injected environment.
+
 The same models use Replit's DATABASE_URL later. Importing the models alone
 does not connect to a database. Read routes require a configured database;
 delivery uploads also need RunPod secrets for successful extraction.

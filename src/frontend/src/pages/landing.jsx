@@ -37,7 +37,7 @@ export default function Landing() {
               <h2>Label photo</h2>
               <div className="landing-photo-frame">
                 <img
-                  src="/media/label-alt-brand.png"
+                  src="/media/label-alt-brand.jpg"
                   width="1246"
                   height="1262"
                   alt="Fictional cocoa package. ALT SAMPLE BRAND, Cocoa Powder, manufactured by Silver Valley Foods."

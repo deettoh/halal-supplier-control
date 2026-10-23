@@ -10,6 +10,7 @@ from collections.abc import Generator
 from datetime import UTC, date, datetime
 from functools import lru_cache
 from typing import Any
+from zoneinfo import ZoneInfo
 
 from sqlalchemy import (
     JSON,
@@ -40,6 +41,7 @@ from sqlalchemy.schema import CreateColumn
 
 # Serialize schema creation and seeding across simultaneous PostgreSQL workers.
 STARTUP_LOCK = 0x48414C414C4442
+BUSINESS_TIMEZONE = ZoneInfo("Asia/Kuala_Lumpur")
 ACTIVITY_ACTION_CHECK = (
     "action IN ('auto_accepted', 'pending_review', 'accepted', "
     "'rejected', 'certificate_renewed')"
@@ -48,6 +50,11 @@ ACTIVITY_ACTION_CHECK = (
 
 def utc_now() -> datetime:
     return datetime.now(UTC)
+
+
+def business_today() -> date:
+    """Calendar date for certificate rules in Malaysia, independent of host."""
+    return utc_now().astimezone(BUSINESS_TIMEZONE).date()
 
 
 class Base(DeclarativeBase):

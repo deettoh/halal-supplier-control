@@ -12,6 +12,7 @@ dependencies = [
     "python-multipart>=0.0.18,<1",
     "rapidfuzz>=3,<4",
     "sqlalchemy>=2.0,<2.1",
+    "tzdata>=2026.5",
     "uvicorn>=0.30,<1",
 ]
 

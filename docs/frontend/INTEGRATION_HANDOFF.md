@@ -1,6 +1,6 @@
 # Frontend integration handoff — 23 October 2026
 
-The full frontend is implemented on `codex/frontend-redesign`. Member 3's `Frontend` branch at `27e96f8` remains a reference and is untouched. Main **95ab738** (including PR #70's uv packaging) was fetched, inspected and integrated into this personal branch. The evaluation checkout and deferred root README were not authored or reset by this work.
+The full frontend is implemented on `codex/frontend-redesign`. Member 3's `Frontend` branch at `27e96f8` remains a reference and is untouched. Main **7c556ff** (including PR #70's uv packaging and PR #71's business-date/manual-reset changes) was fetched, inspected and integrated into this personal branch. The evaluation checkout and deferred root README were not authored or reset by this work.
 
 ## API compatibility
 
@@ -29,11 +29,11 @@ Saved 201 `needs_human` is a successful saved-for-review result, including nulla
 - Certificate extraction/pre-fill remains stretch/501 and is not presented as a working core feature.
 - Inference responses do not distinguish live/cache provenance. The interface says **Inference source unreported**. An HTTP success is not proof of live model accuracy.
 - Production SPA hosting, API proxy/CORS, PostgreSQL and real RunPod availability need deployment-owner verification. Demo headers are simulated identity.
-- No database reset endpoint is invented. The preview reset affects only prepared examples in its own tab.
+- No database reset endpoint is invented. The preview reset affects only prepared examples in its own tab. Main now provides a separate, explicitly confirmed manual reset command; use the backend's database guide, stop the app first and never treat it as a UI action.
 
 ## Verification evidence
 
-At this checkpoint: **52 frontend tests**, lint and frozen install passed; production build passed with operational routes split into separate chunks. Updated merged Python checks: **231 passed / 105 skipped**, Ruff check/format and mypy passed. Skips include explicit PostgreSQL/live opt-ins; no real RunPod or PostgreSQL test was run.
+At this checkpoint: **53 frontend tests**, lint and frozen install passed; production build passed with operational routes split into separate chunks. Updated merged Python checks: **250 passed / 114 skipped**, Ruff check/format and mypy passed. Four preview-fixture checks confirm JPEG hashes and unchanged rule outputs. Local skips include explicit PostgreSQL/live opt-ins; no real RunPod or PostgreSQL test was run locally. Inherited GitHub CI now runs its separate PostgreSQL service and database tests alongside the frontend job.
 
 Browser checks covered landing/picker; original-byte upload; saved incomplete extraction; protected delivery and seed certificate photos; reason-required decision; actual activity; supplier scope preservation/renewal; both linked SME masterlists; role/tenant isolation; keyboard material selection; photo Escape/focus return; phone reflow and desktop workbench. Prepared preview and actual HTTP checks are separate evidence.
 

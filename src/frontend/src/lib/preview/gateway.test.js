@@ -21,7 +21,7 @@ const photo = (name) =>
   new File(
     [readFileSync(new URL("../../../public" + name, import.meta.url))],
     name.split("/").at(-1),
-    { type: "image/png" },
+    { type: "image/jpeg" },
   );
 describe("isolated prepared-example gateway", () => {
   it("uses the renewed certificate for the next prepared delivery without rewriting earlier checks", async () => {
