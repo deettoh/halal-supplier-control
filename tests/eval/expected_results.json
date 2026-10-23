@@ -1,0 +1,1295 @@
+{
+  "format_version": "1.1-review",
+  "status": "photos_and_visually_checked_expected_answers_ready_for_teammate_review",
+  "intended_use": "Image-grounded synthetic label evaluation; refresh uses merged structured seed scope. Human finished-asset review is pending.",
+  "member_5_approval": "pending",
+  "contract_owner_confirmation": "canonical_schema_and_seed_scope_merged; business_workflow_integration_pending",
+  "dataset_state": "eight_generated_photos_visually_checked_no_model_predictions_or_timings",
+  "proposed_evaluation_date": "2026-10-21",
+  "date_status": "confirmed_by_member_5_via_user_on_2026-10-22",
+  "label_text_status": "transcribed_and_checked_against_actual_generated_images_by_Codex",
+  "pending_decisions": [
+    "Teammate review of finished images and visible-field ground truth",
+    "Backend image-serving, workflow and isolated fixture/reset integration",
+    "PNG MIME/preprocessing and actual image inference/prompt trials",
+    "Real participant manual timing; assisted timing after app integration"
+  ],
+  "cases": [
+    {
+      "case_id": "L01",
+      "scenario": "Readable approved label and current in-scope certificate",
+      "asset_state": "generated_visually_checked_teammate_review_pending",
+      "image_path": "tests/eval/images/L01.png",
+      "tenant_id": null,
+      "material_id": 6,
+      "supplier_id": 2,
+      "certificate_id": 3,
+      "proposed_expected_extraction": {
+        "product_name": "Cocoa Powder",
+        "brand": "SilverCocoa",
+        "manufacturer": "Silver Valley Foods",
+        "halal_mark_present": true
+      },
+      "proposed_fixture_constraints": {
+        "approved_brand": "SilverCocoa",
+        "approved_manufacturer": "Silver Valley Foods",
+        "issuer": "SAMPLE Food Certification Council",
+        "issuer_must_be_in_demo_recognised_list": true,
+        "certificate_scope_relation": "included",
+        "proposed_expiry_date": "2027-09-30",
+        "expiry_offset_days": 344
+      },
+      "proposed_expected_verdict": "covered",
+      "proposed_expected_initial_status": "auto_accepted",
+      "proposed_first_failing_rule": null,
+      "conditions_requiring_review": [
+        "Teammate review of the actual image and expected visible/null values."
+      ],
+      "seed_tenant": "Sunrise Bakery SAMPLE",
+      "tenant_reference_note": "Seed identifies this SME with the tenant string above; no numeric tenant ID exists. This is evaluation metadata, not a new API field.",
+      "evaluation_certificate_override": {},
+      "fixture_kind": "unchanged_seed_record",
+      "image_sha256": "9169ed19be54b03518de7945a0ff859f09be2ec5664cf6bc19ee91a0d5c26aff",
+      "image_bytes": 2129994,
+      "image_format": "PNG",
+      "image_dimensions": [
+        1254,
+        1254
+      ],
+      "generation_prompt_id": "L01",
+      "visibility_notes": "Cocoa Powder, SilverCocoa and Silver Valley Foods are fully readable. Generic HALAL / SAMPLE stamp is visible.",
+      "visual_review": {
+        "reviewer": "Codex",
+        "date": "2026-10-22",
+        "result": "matches_expected_visible_or_null_values",
+        "teammate_review": "pending"
+      },
+      "evaluation_fixture": {
+        "material": {
+          "id": 6,
+          "tenant": "Sunrise Bakery SAMPLE",
+          "name": "Cocoa Powder",
+          "supplier_id": 2,
+          "approved_brand": "SilverCocoa",
+          "approved_manufacturer": "Silver Valley Foods"
+        },
+        "certificate": {
+          "id": 3,
+          "supplier_id": 2,
+          "issuer": "SAMPLE Food Certification Council",
+          "cert_no": "SAMPLE-SVI-2026-001",
+          "holder_name": "Silver Valley Ingredients SAMPLE",
+          "expiry_date": "2027-09-30",
+          "scope": [
+            {
+              "product_name": "Cocoa Powder",
+              "brand": "SilverCocoa"
+            },
+            {
+              "product_name": "Vanilla Essence",
+              "brand": "SilverVanilla"
+            },
+            {
+              "product_name": "Cooking Chocolate",
+              "brand": "SilverCocoa"
+            },
+            {
+              "product_name": "Vegetable Oil",
+              "brand": "SilverPure"
+            },
+            {
+              "product_name": "Coconut Milk",
+              "brand": "SilverCoco"
+            },
+            {
+              "product_name": "Chocolate Chips",
+              "brand": "SilverCocoa"
+            },
+            {
+              "product_name": "Salt",
+              "brand": "SilverSalt"
+            },
+            {
+              "product_name": "Spice Mix",
+              "brand": "SilverSpice"
+            }
+          ],
+          "status": "active",
+          "image": "/api/certificates/3/image"
+        },
+        "today": "2026-10-21"
+      },
+      "fixture_verification": {
+        "method": "visually checked expected label values through merged production rules; no model inference",
+        "code_commit": "8cc3b9f05347285fa1071dbe25c53ac1e93d4411",
+        "observed_verdict": "covered",
+        "observed_first_failing_rule": null,
+        "intended_outcome_matched": true,
+        "rule_results": [
+          {
+            "rule": "R1",
+            "passed": true,
+            "detail": "Required label fields are readable and valid."
+          },
+          {
+            "rule": "R2",
+            "passed": true,
+            "detail": "Brand score: 100.0; manufacturer score: 100.0. Both must be >= 90."
+          },
+          {
+            "rule": "R3",
+            "passed": true,
+            "detail": "Product and any brand restriction match certificate scope."
+          },
+          {
+            "rule": "R4",
+            "passed": true,
+            "detail": "Certificate expiry: 2027-09-30."
+          },
+          {
+            "rule": "R5",
+            "passed": true,
+            "detail": "Issuer is on the demo recognised list."
+          }
+        ],
+        "initial_status_observed": false
+      },
+      "registry_source": {
+        "certificate_image_file": "src/seed/certificates/cert_03_valid.png",
+        "image_serving_verified": false,
+        "note": "image is the canonical future API reference; serving is not implemented at this revision"
+      }
+    },
+    {
+      "case_id": "L02",
+      "scenario": "Brand changed; product category unchanged",
+      "asset_state": "generated_visually_checked_teammate_review_pending",
+      "image_path": "tests/eval/images/L02.png",
+      "tenant_id": null,
+      "material_id": 6,
+      "supplier_id": 2,
+      "certificate_id": 3,
+      "proposed_expected_extraction": {
+        "product_name": "Cocoa Powder",
+        "brand": "ALT SAMPLE BRAND",
+        "manufacturer": "Silver Valley Foods",
+        "halal_mark_present": true
+      },
+      "proposed_fixture_constraints": {
+        "approved_brand": "SilverCocoa",
+        "approved_manufacturer": "Silver Valley Foods",
+        "issuer": "SAMPLE Food Certification Council",
+        "issuer_must_be_in_demo_recognised_list": true,
+        "certificate_scope_relation": "product_included_but_label_brand_violates_explicit_scope_brand",
+        "proposed_expiry_date": "2027-09-30",
+        "expiry_offset_days": 344
+      },
+      "proposed_expected_verdict": "substitution",
+      "proposed_expected_initial_status": "pending_review",
+      "proposed_first_failing_rule": "R2",
+      "conditions_requiring_review": [
+        "Teammate review of the actual image and expected visible/null values."
+      ],
+      "seed_tenant": "Sunrise Bakery SAMPLE",
+      "tenant_reference_note": "Seed identifies this SME with the tenant string above; no numeric tenant ID exists. This is evaluation metadata, not a new API field.",
+      "evaluation_certificate_override": {},
+      "fixture_kind": "unchanged_seed_record",
+      "image_sha256": "0eaef5fca0e797913f6b9f2febadb762339f2bf1788698ad786d19dd2ab4e2bc",
+      "image_bytes": 2272818,
+      "image_format": "PNG",
+      "image_dimensions": [
+        1254,
+        1254
+      ],
+      "generation_prompt_id": "L02",
+      "visibility_notes": "Cocoa Powder, ALT SAMPLE BRAND and Silver Valley Foods are fully readable. Generic HALAL / SAMPLE stamp is visible.",
+      "visual_review": {
+        "reviewer": "Codex",
+        "date": "2026-10-22",
+        "result": "matches_expected_visible_or_null_values",
+        "teammate_review": "pending"
+      },
+      "evaluation_fixture": {
+        "material": {
+          "id": 6,
+          "tenant": "Sunrise Bakery SAMPLE",
+          "name": "Cocoa Powder",
+          "supplier_id": 2,
+          "approved_brand": "SilverCocoa",
+          "approved_manufacturer": "Silver Valley Foods"
+        },
+        "certificate": {
+          "id": 3,
+          "supplier_id": 2,
+          "issuer": "SAMPLE Food Certification Council",
+          "cert_no": "SAMPLE-SVI-2026-001",
+          "holder_name": "Silver Valley Ingredients SAMPLE",
+          "expiry_date": "2027-09-30",
+          "scope": [
+            {
+              "product_name": "Cocoa Powder",
+              "brand": "SilverCocoa"
+            },
+            {
+              "product_name": "Vanilla Essence",
+              "brand": "SilverVanilla"
+            },
+            {
+              "product_name": "Cooking Chocolate",
+              "brand": "SilverCocoa"
+            },
+            {
+              "product_name": "Vegetable Oil",
+              "brand": "SilverPure"
+            },
+            {
+              "product_name": "Coconut Milk",
+              "brand": "SilverCoco"
+            },
+            {
+              "product_name": "Chocolate Chips",
+              "brand": "SilverCocoa"
+            },
+            {
+              "product_name": "Salt",
+              "brand": "SilverSalt"
+            },
+            {
+              "product_name": "Spice Mix",
+              "brand": "SilverSpice"
+            }
+          ],
+          "status": "active",
+          "image": "/api/certificates/3/image"
+        },
+        "today": "2026-10-21"
+      },
+      "fixture_verification": {
+        "method": "visually checked expected label values through merged production rules; no model inference",
+        "code_commit": "8cc3b9f05347285fa1071dbe25c53ac1e93d4411",
+        "observed_verdict": "substitution",
+        "observed_first_failing_rule": "R2",
+        "intended_outcome_matched": true,
+        "rule_results": [
+          {
+            "rule": "R1",
+            "passed": true,
+            "detail": "Required label fields are readable and valid."
+          },
+          {
+            "rule": "R2",
+            "passed": false,
+            "detail": "Brand score: 37.0; manufacturer score: 100.0. Both must be >= 90."
+          },
+          {
+            "rule": "R3",
+            "passed": false,
+            "detail": "Product or brand is not included in certificate scope."
+          },
+          {
+            "rule": "R4",
+            "passed": true,
+            "detail": "Certificate expiry: 2027-09-30."
+          },
+          {
+            "rule": "R5",
+            "passed": true,
+            "detail": "Issuer is on the demo recognised list."
+          }
+        ],
+        "initial_status_observed": false
+      },
+      "registry_source": {
+        "certificate_image_file": "src/seed/certificates/cert_03_valid.png",
+        "image_serving_verified": false,
+        "note": "image is the canonical future API reference; serving is not implemented at this revision"
+      }
+    },
+    {
+      "case_id": "L03",
+      "scenario": "Manufacturer changed; approved brand unchanged",
+      "asset_state": "generated_visually_checked_teammate_review_pending",
+      "image_path": "tests/eval/images/L03.png",
+      "tenant_id": null,
+      "material_id": 6,
+      "supplier_id": 2,
+      "certificate_id": 3,
+      "proposed_expected_extraction": {
+        "product_name": "Cocoa Powder",
+        "brand": "SilverCocoa",
+        "manufacturer": "ALT SAMPLE MAKER",
+        "halal_mark_present": true
+      },
+      "proposed_fixture_constraints": {
+        "approved_brand": "SilverCocoa",
+        "approved_manufacturer": "Silver Valley Foods",
+        "issuer": "SAMPLE Food Certification Council",
+        "issuer_must_be_in_demo_recognised_list": true,
+        "certificate_scope_relation": "included",
+        "proposed_expiry_date": "2027-09-30",
+        "expiry_offset_days": 344
+      },
+      "proposed_expected_verdict": "substitution",
+      "proposed_expected_initial_status": "pending_review",
+      "proposed_first_failing_rule": "R2",
+      "conditions_requiring_review": [
+        "Teammate review of the actual image and expected visible/null values."
+      ],
+      "seed_tenant": "Sunrise Bakery SAMPLE",
+      "tenant_reference_note": "Seed identifies this SME with the tenant string above; no numeric tenant ID exists. This is evaluation metadata, not a new API field.",
+      "evaluation_certificate_override": {},
+      "fixture_kind": "unchanged_seed_record",
+      "image_sha256": "308f83d37335aec1131684a185bfc3c1e1d5c668aa896d1970ec599fc5f44dcc",
+      "image_bytes": 2363287,
+      "image_format": "PNG",
+      "image_dimensions": [
+        1254,
+        1254
+      ],
+      "generation_prompt_id": "L03",
+      "visibility_notes": "Cocoa Powder, SilverCocoa and ALT SAMPLE MAKER are fully readable. Generic HALAL / SAMPLE stamp is visible.",
+      "visual_review": {
+        "reviewer": "Codex",
+        "date": "2026-10-22",
+        "result": "matches_expected_visible_or_null_values",
+        "teammate_review": "pending"
+      },
+      "evaluation_fixture": {
+        "material": {
+          "id": 6,
+          "tenant": "Sunrise Bakery SAMPLE",
+          "name": "Cocoa Powder",
+          "supplier_id": 2,
+          "approved_brand": "SilverCocoa",
+          "approved_manufacturer": "Silver Valley Foods"
+        },
+        "certificate": {
+          "id": 3,
+          "supplier_id": 2,
+          "issuer": "SAMPLE Food Certification Council",
+          "cert_no": "SAMPLE-SVI-2026-001",
+          "holder_name": "Silver Valley Ingredients SAMPLE",
+          "expiry_date": "2027-09-30",
+          "scope": [
+            {
+              "product_name": "Cocoa Powder",
+              "brand": "SilverCocoa"
+            },
+            {
+              "product_name": "Vanilla Essence",
+              "brand": "SilverVanilla"
+            },
+            {
+              "product_name": "Cooking Chocolate",
+              "brand": "SilverCocoa"
+            },
+            {
+              "product_name": "Vegetable Oil",
+              "brand": "SilverPure"
+            },
+            {
+              "product_name": "Coconut Milk",
+              "brand": "SilverCoco"
+            },
+            {
+              "product_name": "Chocolate Chips",
+              "brand": "SilverCocoa"
+            },
+            {
+              "product_name": "Salt",
+              "brand": "SilverSalt"
+            },
+            {
+              "product_name": "Spice Mix",
+              "brand": "SilverSpice"
+            }
+          ],
+          "status": "active",
+          "image": "/api/certificates/3/image"
+        },
+        "today": "2026-10-21"
+      },
+      "fixture_verification": {
+        "method": "visually checked expected label values through merged production rules; no model inference",
+        "code_commit": "8cc3b9f05347285fa1071dbe25c53ac1e93d4411",
+        "observed_verdict": "substitution",
+        "observed_first_failing_rule": "R2",
+        "intended_outcome_matched": true,
+        "rule_results": [
+          {
+            "rule": "R1",
+            "passed": true,
+            "detail": "Required label fields are readable and valid."
+          },
+          {
+            "rule": "R2",
+            "passed": false,
+            "detail": "Brand score: 100.0; manufacturer score: 34.3. Both must be >= 90."
+          },
+          {
+            "rule": "R3",
+            "passed": true,
+            "detail": "Product and any brand restriction match certificate scope."
+          },
+          {
+            "rule": "R4",
+            "passed": true,
+            "detail": "Certificate expiry: 2027-09-30."
+          },
+          {
+            "rule": "R5",
+            "passed": true,
+            "detail": "Issuer is on the demo recognised list."
+          }
+        ],
+        "initial_status_observed": false
+      },
+      "registry_source": {
+        "certificate_image_file": "src/seed/certificates/cert_03_valid.png",
+        "image_serving_verified": false,
+        "note": "image is the canonical future API reference; serving is not implemented at this revision"
+      }
+    },
+    {
+      "case_id": "L04",
+      "scenario": "Required label text unreadable",
+      "asset_state": "generated_visually_checked_teammate_review_pending",
+      "image_path": "tests/eval/images/L04.png",
+      "tenant_id": null,
+      "material_id": 6,
+      "supplier_id": 2,
+      "certificate_id": 3,
+      "proposed_expected_extraction": {
+        "product_name": null,
+        "brand": null,
+        "manufacturer": null,
+        "halal_mark_present": null
+      },
+      "proposed_fixture_constraints": {
+        "approved_brand": "SilverCocoa",
+        "approved_manufacturer": "Silver Valley Foods",
+        "issuer": "SAMPLE Food Certification Council",
+        "issuer_must_be_in_demo_recognised_list": true,
+        "certificate_scope_relation": "included",
+        "proposed_expiry_date": "2027-09-30",
+        "expiry_offset_days": 344
+      },
+      "proposed_expected_verdict": "needs_human",
+      "proposed_expected_initial_status": "pending_review",
+      "proposed_first_failing_rule": "R1",
+      "conditions_requiring_review": [
+        "Teammate review of the actual image and expected visible/null values."
+      ],
+      "seed_tenant": "Sunrise Bakery SAMPLE",
+      "tenant_reference_note": "Seed identifies this SME with the tenant string above; no numeric tenant ID exists. This is evaluation metadata, not a new API field.",
+      "evaluation_certificate_override": {},
+      "fixture_kind": "unchanged_seed_record",
+      "image_sha256": "51e9bb957cb609cf951b8efbe5f6398d01150e512cff3c0ed7fd6c3eed20fae5",
+      "image_bytes": 2954379,
+      "image_format": "PNG",
+      "image_dimensions": [
+        1254,
+        1254
+      ],
+      "generation_prompt_id": "L04",
+      "visibility_notes": "The complete label and mark region are concealed by an opaque paper patch. No target text or mark fragment is visible. All four values are unknowable/null; the separate SAMPLE disclosure is not a target field.",
+      "visual_review": {
+        "reviewer": "Codex",
+        "date": "2026-10-22",
+        "result": "matches_expected_visible_or_null_values",
+        "teammate_review": "pending"
+      },
+      "evaluation_fixture": {
+        "material": {
+          "id": 6,
+          "tenant": "Sunrise Bakery SAMPLE",
+          "name": "Cocoa Powder",
+          "supplier_id": 2,
+          "approved_brand": "SilverCocoa",
+          "approved_manufacturer": "Silver Valley Foods"
+        },
+        "certificate": {
+          "id": 3,
+          "supplier_id": 2,
+          "issuer": "SAMPLE Food Certification Council",
+          "cert_no": "SAMPLE-SVI-2026-001",
+          "holder_name": "Silver Valley Ingredients SAMPLE",
+          "expiry_date": "2027-09-30",
+          "scope": [
+            {
+              "product_name": "Cocoa Powder",
+              "brand": "SilverCocoa"
+            },
+            {
+              "product_name": "Vanilla Essence",
+              "brand": "SilverVanilla"
+            },
+            {
+              "product_name": "Cooking Chocolate",
+              "brand": "SilverCocoa"
+            },
+            {
+              "product_name": "Vegetable Oil",
+              "brand": "SilverPure"
+            },
+            {
+              "product_name": "Coconut Milk",
+              "brand": "SilverCoco"
+            },
+            {
+              "product_name": "Chocolate Chips",
+              "brand": "SilverCocoa"
+            },
+            {
+              "product_name": "Salt",
+              "brand": "SilverSalt"
+            },
+            {
+              "product_name": "Spice Mix",
+              "brand": "SilverSpice"
+            }
+          ],
+          "status": "active",
+          "image": "/api/certificates/3/image"
+        },
+        "today": "2026-10-21"
+      },
+      "fixture_verification": {
+        "method": "visually checked expected label values through merged production rules; no model inference",
+        "code_commit": "8cc3b9f05347285fa1071dbe25c53ac1e93d4411",
+        "observed_verdict": "needs_human",
+        "observed_first_failing_rule": "R1",
+        "intended_outcome_matched": true,
+        "rule_results": [
+          {
+            "rule": "R1",
+            "passed": false,
+            "detail": "Invalid or incomplete label extraction; human review required."
+          },
+          {
+            "rule": "R2",
+            "passed": null,
+            "detail": "Not evaluated: label information incomplete."
+          },
+          {
+            "rule": "R3",
+            "passed": null,
+            "detail": "Not evaluated: product name unavailable."
+          },
+          {
+            "rule": "R4",
+            "passed": true,
+            "detail": "Certificate expiry: 2027-09-30."
+          },
+          {
+            "rule": "R5",
+            "passed": true,
+            "detail": "Issuer is on the demo recognised list."
+          }
+        ],
+        "initial_status_observed": false
+      },
+      "registry_source": {
+        "certificate_image_file": "src/seed/certificates/cert_03_valid.png",
+        "image_serving_verified": false,
+        "note": "image is the canonical future API reference; serving is not implemented at this revision"
+      }
+    },
+    {
+      "case_id": "L05",
+      "scenario": "Product and brand readable; manufacturer obscured",
+      "asset_state": "generated_visually_checked_teammate_review_pending",
+      "image_path": "tests/eval/images/L05.png",
+      "tenant_id": null,
+      "material_id": 6,
+      "supplier_id": 2,
+      "certificate_id": 3,
+      "proposed_expected_extraction": {
+        "product_name": "Cocoa Powder",
+        "brand": "SilverCocoa",
+        "manufacturer": null,
+        "halal_mark_present": true
+      },
+      "proposed_fixture_constraints": {
+        "approved_brand": "SilverCocoa",
+        "approved_manufacturer": "Silver Valley Foods",
+        "issuer": "SAMPLE Food Certification Council",
+        "issuer_must_be_in_demo_recognised_list": true,
+        "certificate_scope_relation": "included",
+        "proposed_expiry_date": "2027-09-30",
+        "expiry_offset_days": 344
+      },
+      "proposed_expected_verdict": "needs_human",
+      "proposed_expected_initial_status": "pending_review",
+      "proposed_first_failing_rule": "R1",
+      "conditions_requiring_review": [
+        "Teammate review of the actual image and expected visible/null values."
+      ],
+      "seed_tenant": "Sunrise Bakery SAMPLE",
+      "tenant_reference_note": "Seed identifies this SME with the tenant string above; no numeric tenant ID exists. This is evaluation metadata, not a new API field.",
+      "evaluation_certificate_override": {},
+      "fixture_kind": "unchanged_seed_record",
+      "image_sha256": "eeccb78e688424c59fc9e7811504ad1f43b35c7885006594f51830dea7b901ff",
+      "image_bytes": 2355700,
+      "image_format": "PNG",
+      "image_dimensions": [
+        1254,
+        1254
+      ],
+      "generation_prompt_id": "L05",
+      "visibility_notes": "Cocoa Powder and SilverCocoa are fully readable. Manufacturer heading is visible but its complete value is concealed by opaque black tape. Generic HALAL / SAMPLE stamp remains visible.",
+      "visual_review": {
+        "reviewer": "Codex",
+        "date": "2026-10-22",
+        "result": "matches_expected_visible_or_null_values",
+        "teammate_review": "pending"
+      },
+      "evaluation_fixture": {
+        "material": {
+          "id": 6,
+          "tenant": "Sunrise Bakery SAMPLE",
+          "name": "Cocoa Powder",
+          "supplier_id": 2,
+          "approved_brand": "SilverCocoa",
+          "approved_manufacturer": "Silver Valley Foods"
+        },
+        "certificate": {
+          "id": 3,
+          "supplier_id": 2,
+          "issuer": "SAMPLE Food Certification Council",
+          "cert_no": "SAMPLE-SVI-2026-001",
+          "holder_name": "Silver Valley Ingredients SAMPLE",
+          "expiry_date": "2027-09-30",
+          "scope": [
+            {
+              "product_name": "Cocoa Powder",
+              "brand": "SilverCocoa"
+            },
+            {
+              "product_name": "Vanilla Essence",
+              "brand": "SilverVanilla"
+            },
+            {
+              "product_name": "Cooking Chocolate",
+              "brand": "SilverCocoa"
+            },
+            {
+              "product_name": "Vegetable Oil",
+              "brand": "SilverPure"
+            },
+            {
+              "product_name": "Coconut Milk",
+              "brand": "SilverCoco"
+            },
+            {
+              "product_name": "Chocolate Chips",
+              "brand": "SilverCocoa"
+            },
+            {
+              "product_name": "Salt",
+              "brand": "SilverSalt"
+            },
+            {
+              "product_name": "Spice Mix",
+              "brand": "SilverSpice"
+            }
+          ],
+          "status": "active",
+          "image": "/api/certificates/3/image"
+        },
+        "today": "2026-10-21"
+      },
+      "fixture_verification": {
+        "method": "visually checked expected label values through merged production rules; no model inference",
+        "code_commit": "8cc3b9f05347285fa1071dbe25c53ac1e93d4411",
+        "observed_verdict": "needs_human",
+        "observed_first_failing_rule": "R1",
+        "intended_outcome_matched": true,
+        "rule_results": [
+          {
+            "rule": "R1",
+            "passed": false,
+            "detail": "Invalid or incomplete label extraction; human review required."
+          },
+          {
+            "rule": "R2",
+            "passed": null,
+            "detail": "Not evaluated: label information incomplete."
+          },
+          {
+            "rule": "R3",
+            "passed": null,
+            "detail": "Not evaluated: product name unavailable."
+          },
+          {
+            "rule": "R4",
+            "passed": true,
+            "detail": "Certificate expiry: 2027-09-30."
+          },
+          {
+            "rule": "R5",
+            "passed": true,
+            "detail": "Issuer is on the demo recognised list."
+          }
+        ],
+        "initial_status_observed": false
+      },
+      "registry_source": {
+        "certificate_image_file": "src/seed/certificates/cert_03_valid.png",
+        "image_serving_verified": false,
+        "note": "image is the canonical future API reference; serving is not implemented at this revision"
+      }
+    },
+    {
+      "case_id": "L06",
+      "scenario": "Readable matching label with expired certificate",
+      "asset_state": "generated_visually_checked_teammate_review_pending",
+      "image_path": "tests/eval/images/L06.png",
+      "tenant_id": null,
+      "material_id": 6,
+      "supplier_id": 2,
+      "certificate_id": 3,
+      "proposed_expected_extraction": {
+        "product_name": "Cocoa Powder",
+        "brand": "SilverCocoa",
+        "manufacturer": "Silver Valley Foods",
+        "halal_mark_present": true
+      },
+      "proposed_fixture_constraints": {
+        "approved_brand": "SilverCocoa",
+        "approved_manufacturer": "Silver Valley Foods",
+        "issuer": "SAMPLE Food Certification Council",
+        "issuer_must_be_in_demo_recognised_list": true,
+        "certificate_scope_relation": "included",
+        "proposed_expiry_date": "2026-10-20",
+        "expiry_offset_days": -1
+      },
+      "proposed_expected_verdict": "not_covered",
+      "proposed_expected_initial_status": "pending_review",
+      "proposed_first_failing_rule": "R4",
+      "conditions_requiring_review": [
+        "Teammate review of the actual image and expected visible/null values.",
+        "Isolated evaluation copy only; backend fixture selection/reset is a separate integration task."
+      ],
+      "seed_tenant": "Sunrise Bakery SAMPLE",
+      "tenant_reference_note": "Seed identifies this SME with the tenant string above; no numeric tenant ID exists. This is evaluation metadata, not a new API field.",
+      "evaluation_certificate_override": {
+        "expiry_date": "2026-10-20"
+      },
+      "fixture_kind": "isolated_evaluation_copy",
+      "image_sha256": "4f35d55d5f0231e552df883bceca540a0005018c6b6914f70675d7c61db88dea",
+      "image_bytes": 2639729,
+      "image_format": "PNG",
+      "image_dimensions": [
+        1254,
+        1254
+      ],
+      "generation_prompt_id": "L06",
+      "visibility_notes": "Cocoa Powder, SilverCocoa and Silver Valley Foods are fully readable. Generic HALAL / SAMPLE stamp is visible. Expiry is evaluation-certificate context, not visible package text.",
+      "visual_review": {
+        "reviewer": "Codex",
+        "date": "2026-10-22",
+        "result": "matches_expected_visible_or_null_values",
+        "teammate_review": "pending"
+      },
+      "evaluation_fixture": {
+        "material": {
+          "id": 6,
+          "tenant": "Sunrise Bakery SAMPLE",
+          "name": "Cocoa Powder",
+          "supplier_id": 2,
+          "approved_brand": "SilverCocoa",
+          "approved_manufacturer": "Silver Valley Foods"
+        },
+        "certificate": {
+          "id": 3,
+          "supplier_id": 2,
+          "issuer": "SAMPLE Food Certification Council",
+          "cert_no": "SAMPLE-SVI-2026-001",
+          "holder_name": "Silver Valley Ingredients SAMPLE",
+          "expiry_date": "2026-10-20",
+          "scope": [
+            {
+              "product_name": "Cocoa Powder",
+              "brand": "SilverCocoa"
+            },
+            {
+              "product_name": "Vanilla Essence",
+              "brand": "SilverVanilla"
+            },
+            {
+              "product_name": "Cooking Chocolate",
+              "brand": "SilverCocoa"
+            },
+            {
+              "product_name": "Vegetable Oil",
+              "brand": "SilverPure"
+            },
+            {
+              "product_name": "Coconut Milk",
+              "brand": "SilverCoco"
+            },
+            {
+              "product_name": "Chocolate Chips",
+              "brand": "SilverCocoa"
+            },
+            {
+              "product_name": "Salt",
+              "brand": "SilverSalt"
+            },
+            {
+              "product_name": "Spice Mix",
+              "brand": "SilverSpice"
+            }
+          ],
+          "status": "active",
+          "image": "/api/certificates/3/image"
+        },
+        "today": "2026-10-21"
+      },
+      "fixture_verification": {
+        "method": "visually checked expected label values through merged production rules; no model inference",
+        "code_commit": "8cc3b9f05347285fa1071dbe25c53ac1e93d4411",
+        "observed_verdict": "not_covered",
+        "observed_first_failing_rule": "R4",
+        "intended_outcome_matched": true,
+        "rule_results": [
+          {
+            "rule": "R1",
+            "passed": true,
+            "detail": "Required label fields are readable and valid."
+          },
+          {
+            "rule": "R2",
+            "passed": true,
+            "detail": "Brand score: 100.0; manufacturer score: 100.0. Both must be >= 90."
+          },
+          {
+            "rule": "R3",
+            "passed": true,
+            "detail": "Product and any brand restriction match certificate scope."
+          },
+          {
+            "rule": "R4",
+            "passed": false,
+            "detail": "Certificate expiry: 2026-10-20."
+          },
+          {
+            "rule": "R5",
+            "passed": true,
+            "detail": "Issuer is on the demo recognised list."
+          }
+        ],
+        "initial_status_observed": false
+      },
+      "registry_source": {
+        "certificate_image_file": "src/seed/certificates/cert_03_valid.png",
+        "image_serving_verified": false,
+        "note": "image is the canonical future API reference; serving is not implemented at this revision"
+      }
+    },
+    {
+      "case_id": "L07",
+      "scenario": "Readable matching label outside certificate scope",
+      "asset_state": "generated_visually_checked_teammate_review_pending",
+      "image_path": "tests/eval/images/L07.png",
+      "tenant_id": null,
+      "material_id": 6,
+      "supplier_id": 2,
+      "certificate_id": 3,
+      "proposed_expected_extraction": {
+        "product_name": "Cocoa Powder",
+        "brand": "SilverCocoa",
+        "manufacturer": "Silver Valley Foods",
+        "halal_mark_present": true
+      },
+      "proposed_fixture_constraints": {
+        "approved_brand": "SilverCocoa",
+        "approved_manufacturer": "Silver Valley Foods",
+        "issuer": "SAMPLE Food Certification Council",
+        "issuer_must_be_in_demo_recognised_list": true,
+        "certificate_scope_relation": "excluded",
+        "proposed_expiry_date": "2027-09-30",
+        "expiry_offset_days": 344
+      },
+      "proposed_expected_verdict": "not_covered",
+      "proposed_expected_initial_status": "pending_review",
+      "proposed_first_failing_rule": "R3",
+      "conditions_requiring_review": [
+        "Teammate review of the actual image and expected visible/null values.",
+        "Isolated evaluation copy only; backend fixture selection/reset is a separate integration task."
+      ],
+      "seed_tenant": "Sunrise Bakery SAMPLE",
+      "tenant_reference_note": "Seed identifies this SME with the tenant string above; no numeric tenant ID exists. This is evaluation metadata, not a new API field.",
+      "evaluation_certificate_override": {
+        "scope": [
+          {
+            "product_name": "Vanilla Essence",
+            "brand": "SilverVanilla"
+          },
+          {
+            "product_name": "Cooking Chocolate",
+            "brand": "SilverCocoa"
+          },
+          {
+            "product_name": "Vegetable Oil",
+            "brand": "SilverPure"
+          },
+          {
+            "product_name": "Coconut Milk",
+            "brand": "SilverCoco"
+          },
+          {
+            "product_name": "Chocolate Chips",
+            "brand": "SilverCocoa"
+          },
+          {
+            "product_name": "Salt",
+            "brand": "SilverSalt"
+          },
+          {
+            "product_name": "Spice Mix",
+            "brand": "SilverSpice"
+          }
+        ]
+      },
+      "fixture_kind": "isolated_evaluation_copy",
+      "image_sha256": "9083146c4c2bb1f3c01175c02c3aeef8a056dd0c5b6c5d3e7a893c8961b97065",
+      "image_bytes": 2294496,
+      "image_format": "PNG",
+      "image_dimensions": [
+        1254,
+        1254
+      ],
+      "generation_prompt_id": "L07",
+      "visibility_notes": "Cocoa Powder, SilverCocoa and Silver Valley Foods are fully readable. Generic HALAL / SAMPLE stamp is visible. Scope exclusion is evaluation-certificate context, not visible package text.",
+      "visual_review": {
+        "reviewer": "Codex",
+        "date": "2026-10-22",
+        "result": "matches_expected_visible_or_null_values",
+        "teammate_review": "pending"
+      },
+      "evaluation_fixture": {
+        "material": {
+          "id": 6,
+          "tenant": "Sunrise Bakery SAMPLE",
+          "name": "Cocoa Powder",
+          "supplier_id": 2,
+          "approved_brand": "SilverCocoa",
+          "approved_manufacturer": "Silver Valley Foods"
+        },
+        "certificate": {
+          "id": 3,
+          "supplier_id": 2,
+          "issuer": "SAMPLE Food Certification Council",
+          "cert_no": "SAMPLE-SVI-2026-001",
+          "holder_name": "Silver Valley Ingredients SAMPLE",
+          "expiry_date": "2027-09-30",
+          "scope": [
+            {
+              "product_name": "Vanilla Essence",
+              "brand": "SilverVanilla"
+            },
+            {
+              "product_name": "Cooking Chocolate",
+              "brand": "SilverCocoa"
+            },
+            {
+              "product_name": "Vegetable Oil",
+              "brand": "SilverPure"
+            },
+            {
+              "product_name": "Coconut Milk",
+              "brand": "SilverCoco"
+            },
+            {
+              "product_name": "Chocolate Chips",
+              "brand": "SilverCocoa"
+            },
+            {
+              "product_name": "Salt",
+              "brand": "SilverSalt"
+            },
+            {
+              "product_name": "Spice Mix",
+              "brand": "SilverSpice"
+            }
+          ],
+          "status": "active",
+          "image": "/api/certificates/3/image"
+        },
+        "today": "2026-10-21"
+      },
+      "fixture_verification": {
+        "method": "visually checked expected label values through merged production rules; no model inference",
+        "code_commit": "8cc3b9f05347285fa1071dbe25c53ac1e93d4411",
+        "observed_verdict": "not_covered",
+        "observed_first_failing_rule": "R3",
+        "intended_outcome_matched": true,
+        "rule_results": [
+          {
+            "rule": "R1",
+            "passed": true,
+            "detail": "Required label fields are readable and valid."
+          },
+          {
+            "rule": "R2",
+            "passed": true,
+            "detail": "Brand score: 100.0; manufacturer score: 100.0. Both must be >= 90."
+          },
+          {
+            "rule": "R3",
+            "passed": false,
+            "detail": "Product or brand is not included in certificate scope."
+          },
+          {
+            "rule": "R4",
+            "passed": true,
+            "detail": "Certificate expiry: 2027-09-30."
+          },
+          {
+            "rule": "R5",
+            "passed": true,
+            "detail": "Issuer is on the demo recognised list."
+          }
+        ],
+        "initial_status_observed": false
+      },
+      "registry_source": {
+        "certificate_image_file": "src/seed/certificates/cert_03_valid.png",
+        "image_serving_verified": false,
+        "note": "image is the canonical future API reference; serving is not implemented at this revision"
+      }
+    },
+    {
+      "case_id": "L08",
+      "scenario": "Readable matching Wheat Flour label; active seed certificate expires in 40 days",
+      "asset_state": "generated_visually_checked_teammate_review_pending",
+      "image_path": "tests/eval/images/L08.png",
+      "tenant_id": null,
+      "material_id": 1,
+      "supplier_id": 1,
+      "certificate_id": 1,
+      "proposed_expected_extraction": {
+        "product_name": "Wheat Flour",
+        "brand": "GoldenMill",
+        "manufacturer": "Golden Grain Foods",
+        "halal_mark_present": true
+      },
+      "proposed_fixture_constraints": {
+        "approved_brand": "GoldenMill",
+        "approved_manufacturer": "Golden Grain Foods",
+        "issuer": "SAMPLE Food Certification Council",
+        "issuer_must_be_in_demo_recognised_list": true,
+        "certificate_scope_relation": "included",
+        "proposed_expiry_date": "2026-11-30",
+        "expiry_offset_days": 40
+      },
+      "proposed_expected_verdict": "expiring",
+      "proposed_expected_initial_status": "auto_accepted",
+      "proposed_first_failing_rule": null,
+      "conditions_requiring_review": [
+        "Teammate review of the actual image and expected visible/null values."
+      ],
+      "seed_tenant": "Sunrise Bakery SAMPLE",
+      "tenant_reference_note": "Seed identifies this SME with the tenant string above; no numeric tenant ID exists. This is evaluation metadata, not a new API field.",
+      "evaluation_certificate_override": {},
+      "fixture_kind": "unchanged_seed_record",
+      "image_sha256": "a98d34e3f5f35938d89afc1d75fe42c75e8745d1337e156ff2e69396f42605a1",
+      "image_bytes": 2326911,
+      "image_format": "PNG",
+      "image_dimensions": [
+        1254,
+        1254
+      ],
+      "generation_prompt_id": "L08",
+      "visibility_notes": "Wheat Flour, GoldenMill and Golden Grain Foods are fully readable. Generic HALAL / SAMPLE stamp is visible.",
+      "visual_review": {
+        "reviewer": "Codex",
+        "date": "2026-10-22",
+        "result": "matches_expected_visible_or_null_values",
+        "teammate_review": "pending"
+      },
+      "evaluation_fixture": {
+        "material": {
+          "id": 1,
+          "tenant": "Sunrise Bakery SAMPLE",
+          "name": "Wheat Flour",
+          "supplier_id": 1,
+          "approved_brand": "GoldenMill",
+          "approved_manufacturer": "Golden Grain Foods"
+        },
+        "certificate": {
+          "id": 1,
+          "supplier_id": 1,
+          "issuer": "SAMPLE Food Certification Council",
+          "cert_no": "SAMPLE-GGS-2026-001",
+          "holder_name": "Golden Grain Supplies SAMPLE",
+          "expiry_date": "2026-11-30",
+          "scope": [
+            {
+              "product_name": "Wheat Flour",
+              "brand": "GoldenMill"
+            },
+            {
+              "product_name": "Bread Flour",
+              "brand": "GoldenMill"
+            },
+            {
+              "product_name": "Cake Flour",
+              "brand": "GoldenMill"
+            },
+            {
+              "product_name": "Corn Starch",
+              "brand": "GoldenMill"
+            },
+            {
+              "product_name": "Rice Flour",
+              "brand": "GoldenMill"
+            },
+            {
+              "product_name": "Baking Powder",
+              "brand": "GoldenMill"
+            },
+            {
+              "product_name": "Fine Sugar",
+              "brand": "SweetGold"
+            },
+            {
+              "product_name": "Brown Sugar",
+              "brand": "SweetGold"
+            },
+            {
+              "product_name": "Semolina",
+              "brand": "GoldenMill"
+            },
+            {
+              "product_name": "Potato Starch",
+              "brand": "GoldenMill"
+            }
+          ],
+          "status": "active",
+          "image": "/api/certificates/1/image"
+        },
+        "today": "2026-10-21"
+      },
+      "fixture_verification": {
+        "method": "visually checked expected label values through merged production rules; no model inference",
+        "code_commit": "8cc3b9f05347285fa1071dbe25c53ac1e93d4411",
+        "observed_verdict": "expiring",
+        "observed_first_failing_rule": null,
+        "intended_outcome_matched": true,
+        "rule_results": [
+          {
+            "rule": "R1",
+            "passed": true,
+            "detail": "Required label fields are readable and valid."
+          },
+          {
+            "rule": "R2",
+            "passed": true,
+            "detail": "Brand score: 100.0; manufacturer score: 100.0. Both must be >= 90."
+          },
+          {
+            "rule": "R3",
+            "passed": true,
+            "detail": "Product and any brand restriction match certificate scope."
+          },
+          {
+            "rule": "R4",
+            "passed": true,
+            "detail": "Certificate expiry: 2026-11-30."
+          },
+          {
+            "rule": "R5",
+            "passed": true,
+            "detail": "Issuer is on the demo recognised list."
+          }
+        ],
+        "initial_status_observed": false
+      },
+      "registry_source": {
+        "certificate_image_file": "src/seed/certificates/cert_01_expiring.png",
+        "image_serving_verified": false,
+        "note": "image is the canonical future API reference; serving is not implemented at this revision"
+      }
+    }
+  ],
+  "schema_reference": {
+    "path": "src/backend/schemas.py",
+    "model": "backend.schemas.LabelExtraction",
+    "contract_version": "0.1.0",
+    "git_commit": "bf22bce48e07325b31abb6316013412a63817245",
+    "branch": "main",
+    "pull_request": "https://github.com/deettoh/halal-supplier-control/pull/56",
+    "acceptance": "canonical four-field schema merged; product/brand scope aligned with API, loader and rules in PR #62"
+  },
+  "revision_note": "Packet revision 2 refreshes seed/code hashes and API-compatible product/brand scope against main 8cc3b9f. Eight original image bytes, visible/null answers, fixed date, case IDs and expected verdict/status values are unchanged. L07 keeps structured brand restrictions while removing Cocoa Powder. L02 now fails R2 and R3; R2 remains its first failure. Finished assets still await teammate review. No model or timing results are claimed.",
+  "agreement_record": {
+    "received_on": "2026-10-22",
+    "source": "Member 5 reply relayed by user in this chat; no direct teammate message sent by Codex.",
+    "case_scenarios": "confirmed; earlier reply cases no prob",
+    "expected_results_json_format": "confirmed",
+    "fixed_evaluation_date": "2026-10-21 confirmed",
+    "intended_verdicts": "unchanged confirmed",
+    "unreadable_manufacturer": "needs_human confirmed and implemented by R1",
+    "local_adaptation_authorization": "User permits small changes to adapt evaluation to merged seed, including isolated certificate fixture copies.",
+    "approval_flag_note": "Case/format/date/R1 agreement is complete. Finished-image/ground-truth review is pending; do not mark member_5_approval approved until that review is recorded."
+  },
+  "seed_reference": {
+    "path": "src/seed/seed.json",
+    "main_commit": "8cc3b9f05347285fa1071dbe25c53ac1e93d4411",
+    "pull_request": "https://github.com/deettoh/halal-supplier-control/pull/62",
+    "sha256": "bb317d3e7dd7839c62ab4e8e2027d0054293136d59a17676414c70f50f53cdce",
+    "initial_seed_pull_request": "https://github.com/deettoh/halal-supplier-control/pull/59"
+  },
+  "fixture_policy": "Select the stated material and base certificate. Deep-copy the certificate per case and apply evaluation_certificate_override only to that copy. Never mutate shared seed records or reuse an overridden certificate for another case. This describes offline rule fixtures, not an implemented backend reset/selection API.",
+  "dataset_id": "synthetic-labels-2026-10-22-v1",
+  "fixed_evaluation_date": "2026-10-21",
+  "image_path_base": "repository root; review HTML uses paths relative to tests/eval/",
+  "source_proposal_sha256": "43501b1408328b3363c2d20cf78b61ec6d46dc87fb3e8d7cb47d3be630d1fae0",
+  "code_reference": {
+    "commit": "8cc3b9f05347285fa1071dbe25c53ac1e93d4411",
+    "rules": "src/backend/rules.py",
+    "schemas": "src/backend/schemas.py"
+  },
+  "generation": {
+    "method": "OpenAI built-in image_gen tool; one independent call per case",
+    "model": "not surfaced by tool",
+    "created_on": "2026-10-22",
+    "originals": "native PNG files copied without pixel edits or conversion",
+    "prompt_manifest": "tests/eval/generation_prompts.json",
+    "camera_photographs": false,
+    "fictional_disclosure": "SAMPLE - FICTIONAL DEMO; generic HALAL / SAMPLE circle only"
+  },
+  "review": {
+    "Codex_visual_inspection": "completed for all eight displayed originals",
+    "teammate_asset_review": "pending",
+    "human_review_reference": null,
+    "checks": [
+      "visible text spelling/capitalization",
+      "occlusion and null treatment",
+      "generic mark visibility",
+      "no case/verdict/certificate hints in images",
+      "sample disclosure",
+      "seed and evaluation-only fixture linkage"
+    ]
+  },
+  "packet_revision": "2",
+  "previous_packet_reference": {
+    "packet_revision": "1",
+    "expected_results_sha256": "f2fa9f3616ef28aad41cb008921e5aa899446dcf0ba973678937b551bcf37769",
+    "seed_reference": {
+      "path": "src/seed/seed.json",
+      "main_commit": "7667f4bf85c0d94c6599e158a25562ebfec99ba3",
+      "pull_request": "https://github.com/deettoh/halal-supplier-control/pull/59",
+      "sha256": "acd12e005316bf0b022bd1e6e2fb2a421e63e3619b5dd7cc97f9282b7f314344"
+    },
+    "code_reference": {
+      "commit": "99a7a66d5f65c354a5d93e8384c5436e824f9c3f",
+      "rules": "src/backend/rules.py",
+      "schemas": "src/backend/schemas.py"
+    }
+  },
+  "certificate_artwork_note": "Source certificate PNGs are not participant inputs for L06/L07: their printed expiry/scope does not show evaluation-only copies. Use complete per-case registry records. Fictional-heading/generic-mark artwork correction is pending Member 5."
+}
