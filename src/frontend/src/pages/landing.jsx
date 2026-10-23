@@ -3,7 +3,16 @@ import { AppLink as Link } from "../lib/navigation.jsx";
 import { ArrowRight, FileText, Store } from "lucide-react";
 import { LandingEvidence } from "../components/landing-evidence.jsx";
 import { useIllustrationMotion } from "../lib/illustration-motion.js";
+import { OpeningIntro } from "../components/opening-intro.jsx";
 export default function Landing() {
+  return (
+    <OpeningIntro>
+      <LandingContent />
+    </OpeningIntro>
+  );
+}
+
+function LandingContent() {
   const renewalRef = useIllustrationMotion();
   return (
     <div className="landing">

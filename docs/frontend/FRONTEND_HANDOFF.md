@@ -1,5 +1,13 @@
 # Continue the frontend from GitHub
 
+## Opening intro — 23 October 2026
+
+The current `codex/landing-refinement` also adds the approved title entrance and orange panel reveal. The landing-only intro lasts at most 2.2 seconds, plays once per browser tab session, and supports Skip intro and Escape. It bypasses section deep links, reduced-motion preference and unavailable session storage. Preference changes, early unmounts and storage read/write failures release the page; keyboard focus continues into the existing landing. Evidence illustration animations pause while covered. No dependencies, raster assets, operational routes or API/backend behaviour changed.
+
+Implementation: `src/frontend/src/components/opening-intro.jsx`, its wrapper in `pages/landing.jsx`, and scoped `styles/landing.css` rules. Ten new lifecycle/accessibility tests live in `pages/opening-intro.test.jsx`; **81 frontend tests**, lint, formatting and the production build pass. Independent review found one storage-write restriction case; the regression failed before the fix and passes afterward. One design-detector pass reported zero findings. Actual browser checks covered desktop (1164/1309 CSS px), phone (355 CSS px), natural completion, Escape, focus/Tab continuation, Enter demo, return and reload without replay. Reduced motion is covered by tests/CSS; native browser media emulation was unavailable. This frontend-only change did not rerun backend integration or real inference.
+
+To review the opening again after it has played, visit the preview in a fresh private window. The normal session deliberately suppresses replay. Screenshots, plan and review notes stay outside the repository. PR #72 stays intentionally closed; this update is for review on the existing branch, with no merge into main.
+
 ## Current motion update — 23 October 2026
 
 Continue on **codex/landing-refinement**, which incorporates main **aec5d32** (the team's merged frontend PR #69 and frontend-serving PR #73). Nigel approved the two image concepts and their implementation. **PR #72 was intentionally closed by Nigel**; this update does not reopen it or merge the branch into main. The earlier checkpoint below is historical.
