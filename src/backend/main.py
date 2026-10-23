@@ -1,7 +1,8 @@
-"""Database-backed API workflows; certificate extraction remains stretch."""
+"""FastAPI app serving the business API and the frontend build."""
 
 import logging
 import os
+import pathlib
 from collections.abc import AsyncIterator, Callable, Generator
 from contextlib import asynccontextmanager
 from typing import Annotated, Any, NoReturn
@@ -17,9 +18,13 @@ from fastapi import (
     Request,
 )
 from fastapi.responses import JSONResponse, Response
+from fastapi.staticfiles import StaticFiles
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import Session
+from starlette import status
 from starlette.concurrency import run_in_threadpool
+from starlette.exceptions import HTTPException as StarletteHTTPException
+from starlette.types import Scope
 
 from backend import services
 from backend.db import dispose_db, get_session_factory
@@ -44,6 +49,12 @@ from backend.schemas import (
 from backend.startup import bootstrap_database
 
 logger = logging.getLogger(__name__)
+
+FRONTEND_DIR = (
+    pathlib.Path(__file__).parents[1] / "frontend" / "dist" / "public"
+)
+INDEX_FILE = "index.html"
+API_PREFIX = "api"
 
 
 @asynccontextmanager
@@ -333,3 +344,28 @@ def certificate_image(
 ) -> Response:
     """Stored JPEG for the owning supplier or a staff/supervisor linked SME."""
     return jpeg_response(services.certificate_photo(session, context, id))
+
+
+class SinglePageApp(StaticFiles):
+    """Frontend build files with index.html for client-side routes."""
+
+    async def get_response(self, path: str, scope: Scope) -> Response:
+        """Return the file or index.html for a missing non-API path."""
+        try:
+            return await super().get_response(path, scope)
+        except StarletteHTTPException as exc:
+            is_api = path.split("/", 1)[0] == API_PREFIX
+            if exc.status_code != status.HTTP_404_NOT_FOUND or is_api:
+                raise
+            return await super().get_response(INDEX_FILE, scope)
+
+
+def mount_frontend(application: FastAPI, directory: pathlib.Path) -> None:
+    """Serve the frontend build at the site root."""
+    application.mount("/", SinglePageApp(directory=directory), name="frontend")
+
+
+if FRONTEND_DIR.is_dir():
+    mount_frontend(app, FRONTEND_DIR)
+else:
+    logger.warning("Frontend build missing at %s; API only", FRONTEND_DIR)

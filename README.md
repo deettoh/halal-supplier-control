@@ -91,9 +91,11 @@ Endpoint settings, setup and the warm-up before a demo are in
 
 ## Deploy to Replit
 
-The app runs as a Replit Autoscale deployment. `.replit` holds the build
-command (`uv sync --frozen --no-dev`) and the run command. The deployment
-needs these Secrets:
+The app runs as a Replit Autoscale deployment. The `.replit` build
+command compiles the React app in `src/frontend` with pnpm and then
+installs the Python dependencies with uv. FastAPI serves the React app
+at the site root and the API under `/api`. Node is installed from the
+`nodejs_24` Nix package. The deployment needs these Secrets:
 
 | Secret | Value |
 | --- | --- |
