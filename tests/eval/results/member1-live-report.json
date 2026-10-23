@@ -1,0 +1,287 @@
+{
+  "report_version": "0.1",
+  "source": "saved_predictions",
+  "mode": "live",
+  "live_inference_verified": false,
+  "dataset_approved": false,
+  "limitations": [
+    "Modes are declared by the input, not independently verified.",
+    "Proposal or stub/cache scores are not live model accuracy.",
+    "No image reading, production rules or timing are run here."
+  ],
+  "counts": {
+    "expected_cases": 8,
+    "prediction_records": 8,
+    "missing_predictions": 0,
+    "upstream_errors": 0,
+    "unreadable_guesses": 1
+  },
+  "metrics": {
+    "schema_success": {
+      "correct": 8,
+      "total": 8,
+      "percent": 100.0
+    },
+    "field_accuracy": {
+      "correct": 27,
+      "total": 27,
+      "percent": 100.0
+    },
+    "text_literal_accuracy": {
+      "correct": 20,
+      "total": 20,
+      "percent": 100.0
+    },
+    "text_normalized_accuracy": {
+      "correct": 20,
+      "total": 20,
+      "percent": 100.0
+    },
+    "mark_accuracy": {
+      "correct": 7,
+      "total": 7,
+      "percent": 100.0
+    },
+    "whole_readable_label_accuracy": {
+      "correct": 6,
+      "total": 6,
+      "percent": 100.0
+    },
+    "unreadable_abstention": {
+      "correct": 4,
+      "total": 5,
+      "percent": 80.0
+    },
+    "verdict_accuracy": {
+      "correct": 8,
+      "total": 8,
+      "percent": 100.0
+    },
+    "initial_status_accuracy": {
+      "correct": null,
+      "total": null,
+      "percent": null
+    }
+  },
+  "per_field": {
+    "product_name": {
+      "correct": 7,
+      "total": 7,
+      "percent": 100.0
+    },
+    "brand": {
+      "correct": 7,
+      "total": 7,
+      "percent": 100.0
+    },
+    "manufacturer": {
+      "correct": 6,
+      "total": 6,
+      "percent": 100.0
+    },
+    "halal_mark_present": {
+      "correct": 7,
+      "total": 7,
+      "percent": 100.0
+    }
+  },
+  "cases": [
+    {
+      "case_id": "L01",
+      "schema_valid": true,
+      "error_present": false,
+      "issues": [],
+      "fields": {
+        "product_name": {
+          "literal": true,
+          "normalized": true
+        },
+        "brand": {
+          "literal": true,
+          "normalized": true
+        },
+        "manufacturer": {
+          "literal": true,
+          "normalized": true
+        },
+        "halal_mark_present": {
+          "literal": true,
+          "normalized": true
+        }
+      },
+      "verdict_correct": true,
+      "initial_status_correct": null
+    },
+    {
+      "case_id": "L02",
+      "schema_valid": true,
+      "error_present": false,
+      "issues": [],
+      "fields": {
+        "product_name": {
+          "literal": true,
+          "normalized": true
+        },
+        "brand": {
+          "literal": true,
+          "normalized": true
+        },
+        "manufacturer": {
+          "literal": true,
+          "normalized": true
+        },
+        "halal_mark_present": {
+          "literal": true,
+          "normalized": true
+        }
+      },
+      "verdict_correct": true,
+      "initial_status_correct": null
+    },
+    {
+      "case_id": "L03",
+      "schema_valid": true,
+      "error_present": false,
+      "issues": [],
+      "fields": {
+        "product_name": {
+          "literal": true,
+          "normalized": true
+        },
+        "brand": {
+          "literal": true,
+          "normalized": true
+        },
+        "manufacturer": {
+          "literal": true,
+          "normalized": true
+        },
+        "halal_mark_present": {
+          "literal": true,
+          "normalized": true
+        }
+      },
+      "verdict_correct": true,
+      "initial_status_correct": null
+    },
+    {
+      "case_id": "L04",
+      "schema_valid": true,
+      "error_present": false,
+      "issues": [],
+      "fields": {
+        "product_name": null,
+        "brand": null,
+        "manufacturer": null,
+        "halal_mark_present": null
+      },
+      "verdict_correct": true,
+      "initial_status_correct": null
+    },
+    {
+      "case_id": "L05",
+      "schema_valid": true,
+      "error_present": false,
+      "issues": [],
+      "fields": {
+        "product_name": {
+          "literal": true,
+          "normalized": true
+        },
+        "brand": {
+          "literal": true,
+          "normalized": true
+        },
+        "manufacturer": null,
+        "halal_mark_present": {
+          "literal": true,
+          "normalized": true
+        }
+      },
+      "verdict_correct": true,
+      "initial_status_correct": null
+    },
+    {
+      "case_id": "L06",
+      "schema_valid": true,
+      "error_present": false,
+      "issues": [],
+      "fields": {
+        "product_name": {
+          "literal": true,
+          "normalized": true
+        },
+        "brand": {
+          "literal": true,
+          "normalized": true
+        },
+        "manufacturer": {
+          "literal": true,
+          "normalized": true
+        },
+        "halal_mark_present": {
+          "literal": true,
+          "normalized": true
+        }
+      },
+      "verdict_correct": true,
+      "initial_status_correct": null
+    },
+    {
+      "case_id": "L07",
+      "schema_valid": true,
+      "error_present": false,
+      "issues": [],
+      "fields": {
+        "product_name": {
+          "literal": true,
+          "normalized": true
+        },
+        "brand": {
+          "literal": true,
+          "normalized": true
+        },
+        "manufacturer": {
+          "literal": true,
+          "normalized": true
+        },
+        "halal_mark_present": {
+          "literal": true,
+          "normalized": true
+        }
+      },
+      "verdict_correct": true,
+      "initial_status_correct": null
+    },
+    {
+      "case_id": "L08",
+      "schema_valid": true,
+      "error_present": false,
+      "issues": [],
+      "fields": {
+        "product_name": {
+          "literal": true,
+          "normalized": true
+        },
+        "brand": {
+          "literal": true,
+          "normalized": true
+        },
+        "manufacturer": {
+          "literal": true,
+          "normalized": true
+        },
+        "halal_mark_present": {
+          "literal": true,
+          "normalized": true
+        }
+      },
+      "verdict_correct": true,
+      "initial_status_correct": null
+    }
+  ],
+  "inputs": {
+    "expected_sha256": "8431264f7e19b70ed42bf91aeab5b00d6ff9d7ee45c7f46a07d4523a9cca235d",
+    "predictions_sha256": "419a259f84fc00fb3e812c49ec01a2ee50e5bb238ee2d5a96c95fb1aee5b7f79"
+  }
+}
