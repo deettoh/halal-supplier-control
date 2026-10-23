@@ -25,9 +25,9 @@ endpoint with these settings:
 | Verdicts matching the expected verdict | 8 | 8 | 100 |
 
 The miss was on L04, where the halal mark is covered: the model answered
-`false` instead of `null`. The verdict was still Needs human, because the
-other fields were blank and rule R1 failed. The full report is
-[`results/live-report.json`](results/live-report.json).
+`false` instead of `null`. The verdict was still `needs_human` (Reading
+incomplete), because the other fields were blank and rule R1 failed. The full
+report is [`results/live-report.json`](results/live-report.json).
 
 These numbers come from eight AI-generated photos and don't establish
 accuracy on camera photos of delivered goods.

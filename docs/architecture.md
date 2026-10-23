@@ -57,9 +57,9 @@ sequenceDiagram
 ```
 
 A Covered or Expiring delivery is accepted automatically. Substitution, Not
-covered and Needs human wait in the review queue, and the supervisor accepts
-or rejects with a reason. The rule table and the API routes are in [the API
-reference](api.md).
+covered and Reading incomplete wait in the review queue, and the supervisor
+accepts or rejects with a reason. The rule table and the API routes are in
+[the API reference](api.md).
 
 ## SMEs share one supplier registry
 
@@ -76,9 +76,9 @@ deliveries.
 Extraction is the only feature that depends on RunPod. After the endpoint
 idles, the first request waits while a worker loads the model, about three
 minutes in testing. A call that fails or passes the 180-second timeout saves
-the delivery as Needs human for the supervisor. For the prepared demo photos,
-the backend serves a stored reading from `src/backend/demo_cache.json` in that
-case. Before a demo, set one active worker as described in [the RunPod
+the delivery as Reading incomplete for the supervisor. For the prepared demo
+photos, the backend serves a stored reading from `src/backend/demo_cache.json`
+in that case. Before a demo, set one active worker as described in [the RunPod
 guide](../runpod/README.md).
 
 ## Two Orbyte services are simulated
