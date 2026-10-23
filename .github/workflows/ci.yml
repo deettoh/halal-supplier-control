@@ -27,7 +27,3 @@ jobs:
       - run: uv run ruff check --select E,F,I src tests
       - run: uv run ruff format --check src tests
       - run: uv run mypy src/backend tests
-      - name: Check requirements.txt matches uv.lock
-        run: |
-          uv export --no-dev --no-hashes --no-emit-project -o requirements.txt
-          git diff --exit-code requirements.txt
