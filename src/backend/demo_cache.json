@@ -1,1 +1,44 @@
-{}
+{
+  "9169ed19be54b03518de7945a0ff859f09be2ec5664cf6bc19ee91a0d5c26aff": {
+    "product_name": "Cocoa Powder",
+    "brand": "SilverCocoa",
+    "manufacturer": "Silver Valley Foods",
+    "halal_mark_present": true
+  },
+  "0eaef5fca0e797913f6b9f2febadb762339f2bf1788698ad786d19dd2ab4e2bc": {
+    "product_name": "Cocoa Powder",
+    "brand": "ALT SAMPLE BRAND",
+    "manufacturer": "Silver Valley Foods",
+    "halal_mark_present": true
+  },
+  "308f83d37335aec1131684a185bfc3c1e1d5c668aa896d1970ec599fc5f44dcc": {
+    "product_name": "Cocoa Powder",
+    "brand": "SilverCocoa",
+    "manufacturer": "ALT SAMPLE MAKER",
+    "halal_mark_present": true
+  },
+  "eeccb78e688424c59fc9e7811504ad1f43b35c7885006594f51830dea7b901ff": {
+    "product_name": "Cocoa Powder",
+    "brand": "SilverCocoa",
+    "manufacturer": null,
+    "halal_mark_present": true
+  },
+  "4f35d55d5f0231e552df883bceca540a0005018c6b6914f70675d7c61db88dea": {
+    "product_name": "Cocoa Powder",
+    "brand": "SilverCocoa",
+    "manufacturer": "Silver Valley Foods",
+    "halal_mark_present": true
+  },
+  "9083146c4c2bb1f3c01175c02c3aeef8a056dd0c5b6c5d3e7a893c8961b97065": {
+    "product_name": "Cocoa Powder",
+    "brand": "SilverCocoa",
+    "manufacturer": "Silver Valley Foods",
+    "halal_mark_present": true
+  },
+  "a98d34e3f5f35938d89afc1d75fe42c75e8745d1337e156ff2e69396f42605a1": {
+    "product_name": "Wheat Flour",
+    "brand": "GoldenMill",
+    "manufacturer": "Golden Grain Foods",
+    "halal_mark_present": true
+  }
+}
