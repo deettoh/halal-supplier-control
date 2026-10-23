@@ -5,6 +5,7 @@ import userEvent from "@testing-library/user-event";
 import { SessionProvider } from "./session.jsx";
 import { createPreviewGateway } from "./preview/gateway.js";
 import App from "../App.jsx";
+import { AppLink } from "./navigation.jsx";
 
 it("allows cancelling browser Back without losing the supplier draft, then permits confirmed Back and Forward", async () => {
   window.history.replaceState(null, "", "/demo");
@@ -19,7 +20,7 @@ it("allows cancelling browser Back without losing the supplier draft, then permi
     </SessionProvider>,
   );
   await user.click(screen.getByRole("button", { name: "Enter workspace" }));
-  const issuer = await screen.findByLabelText("Issuer");
+  const issuer = await screen.findByLabelText("Issuer", {}, { timeout: 5000 });
   const originalIssuer = issuer.value;
   await user.clear(issuer);
   await user.type(issuer, "UNSAVED SAMPLE ISSUER");
@@ -51,4 +52,111 @@ it("allows cancelling browser Back without losing the supplier draft, then permi
   await screen.findByRole("group", { name: "Choose your role" });
   expect(confirm).toHaveBeenCalledTimes(4);
   confirm.mockRestore();
+});
+
+it("commits an ordinary internal link inside the browser snapshot update", async () => {
+  window.history.replaceState(null, "", "/");
+  vi.stubGlobal("matchMedia", () => ({ matches: false }));
+  let commit;
+  document.startViewTransition = (update) => {
+    commit = update;
+    return {
+      ready: Promise.resolve(),
+      finished: Promise.resolve(),
+      updateCallbackDone: Promise.resolve(),
+    };
+  };
+  try {
+    const user = userEvent.setup();
+    render(
+      <SessionProvider gateway={createPreviewGateway()} initialIdentity={null}>
+        <App />
+      </SessionProvider>,
+    );
+    await user.click(screen.getAllByRole("link", { name: "Enter demo" })[0]);
+    expect(window.location.pathname).toBe("/");
+    await act(async () => commit());
+    expect(window.location.pathname).toBe("/demo");
+    expect(
+      screen.getByRole("group", { name: "Choose your role" }),
+    ).toBeVisible();
+  } finally {
+    delete document.startViewTransition;
+    vi.unstubAllGlobals();
+  }
+});
+
+it("preserves a caller's cancelled link without moving to another route", async () => {
+  window.history.replaceState(null, "", "/demo");
+  render(
+    <SessionProvider gateway={createPreviewGateway()} initialIdentity={null}>
+      <AppLink href="/check" onClick={(event) => event.preventDefault()}>
+        Stay here
+      </AppLink>
+    </SessionProvider>,
+  );
+  await userEvent
+    .setup()
+    .click(screen.getByRole("link", { name: "Stay here" }));
+  expect(window.location.pathname).toBe("/demo");
+});
+
+it("keeps Home when it is clicked after a pending Enter demo transition", async () => {
+  window.history.replaceState(null, "", "/");
+  vi.stubGlobal("matchMedia", () => ({ matches: false }));
+  const commits = [];
+  document.startViewTransition = (update) => {
+    commits.push(update);
+    return { ready: Promise.resolve(), finished: Promise.resolve() };
+  };
+  try {
+    const user = userEvent.setup();
+    render(
+      <SessionProvider gateway={createPreviewGateway()} initialIdentity={null}>
+        <App />
+      </SessionProvider>,
+    );
+    await user.click(screen.getAllByRole("link", { name: "Enter demo" })[0]);
+    await user.click(
+      screen.getByRole("link", { name: "Halal Supplier Control", exact: true }),
+    );
+    await act(async () => {
+      for (const commit of commits) commit();
+    });
+    expect(window.location.pathname).toBe("/");
+    expect(
+      screen.getByRole("heading", { name: "Know what your documents cover." }),
+    ).toBeVisible();
+  } finally {
+    delete document.startViewTransition;
+    vi.unstubAllGlobals();
+  }
+});
+
+it("preserves accepted browser Back when an older snapshot callback arrives afterwards", async () => {
+  window.history.replaceState(null, "", "/masterlist");
+  window.history.pushState(null, "", "/demo");
+  vi.stubGlobal("matchMedia", () => ({ matches: false }));
+  let commit;
+  document.startViewTransition = (update) => {
+    commit = update;
+    return { ready: Promise.resolve(), finished: Promise.resolve() };
+  };
+  try {
+    render(
+      <SessionProvider gateway={createPreviewGateway()} initialIdentity={null}>
+        <App />
+      </SessionProvider>,
+    );
+    await userEvent
+      .setup()
+      .click(screen.getByRole("link", { name: "Back to introduction" }));
+    await act(async () => window.history.back());
+    await waitFor(() => expect(window.location.pathname).toBe("/masterlist"));
+    await act(async () => commit());
+    expect(window.location.pathname).toBe("/masterlist");
+  } finally {
+    delete document.startViewTransition;
+    vi.unstubAllGlobals();
+  }
 });

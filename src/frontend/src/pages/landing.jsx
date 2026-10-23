@@ -1,8 +1,19 @@
 import React from "react";
-import { Link } from "wouter";
-import { ArrowRight, ArrowDown, FileText, Store } from "lucide-react";
-import { Status } from "../components/status.jsx";
+import { AppLink as Link } from "../lib/navigation.jsx";
+import { ArrowRight, FileText, Store } from "lucide-react";
+import { LandingEvidence } from "../components/landing-evidence.jsx";
+import { useIllustrationMotion } from "../lib/illustration-motion.js";
+import { OpeningIntro } from "../components/opening-intro.jsx";
 export default function Landing() {
+  return (
+    <OpeningIntro>
+      <LandingContent />
+    </OpeningIntro>
+  );
+}
+
+function LandingContent() {
+  const renewalRef = useIllustrationMotion();
   return (
     <div className="landing">
       <header className="landing-header">
@@ -16,66 +27,56 @@ export default function Landing() {
           </Link>
         </nav>
       </header>
-      <main>
+      <main className="route-arrival">
         <section className="landing-hero">
           <div className="landing-intro">
             <h1>Know what your documents cover.</h1>
             <p>
-              Compare delivery labels with your masterlist and supplier records.
-              Flagged deliveries go to your supervisor.
+              Check delivery labels against supplier records. Review exceptions
+              with evidence.
             </p>
             <Link href="/demo" className="button primary hero-cta">
               Enter demo
               <ArrowRight size={24} aria-hidden="true" />
             </Link>
           </div>
-          <figure className="landing-evidence">
-            <div className="landing-photo">
-              <h2>Label photo</h2>
-              <img
-                src="/media/label-alt-brand.jpg"
-                width="1246"
-                height="1262"
-                alt="Fictional cocoa package. ALT SAMPLE BRAND, Cocoa Powder, manufactured by Silver Valley Foods."
-              />
-            </div>
-            <div className="landing-reading">
-              <h2>Read from label</h2>
-              <dl>
-                <div>
-                  <dt>Product</dt>
-                  <dd>Cocoa Powder</dd>
-                </div>
-                <div>
-                  <dt>Brand</dt>
-                  <dd>ALT SAMPLE BRAND</dd>
-                </div>
-                <div>
-                  <dt>Manufacturer</dt>
-                  <dd>Silver Valley Foods</dd>
-                </div>
-              </dl>
-              <div className="landing-exception">
-                <Status value="substitution" />
-                <h3>Needs supervisor review</h3>
-                <p>Brand differs from approved SilverCocoa.</p>
-              </div>
-            </div>
-            <figcaption>
-              Illustrative workflow · SAMPLE data · Prepared example dated 22
-              Oct 2026.
-            </figcaption>
-          </figure>
+          <LandingEvidence />
         </section>
-        <section className="shared-renewal">
+        <section
+          className="how-it-works"
+          id="how-it-works"
+          aria-labelledby="workflow-heading"
+        >
+          <h2 id="workflow-heading">How it works</h2>
+          <ol>
+            <li>
+              <span aria-hidden="true">1</span>
+              <div>
+                <h3>Photograph</h3>
+                <p>Receiving staff</p>
+              </div>
+            </li>
+            <li>
+              <span aria-hidden="true">2</span>
+              <div>
+                <h3>Check records</h3>
+                <p>Model reads · rules check</p>
+              </div>
+            </li>
+            <li>
+              <span aria-hidden="true">3</span>
+              <div>
+                <h3>Review exceptions</h3>
+                <p>Supervisor decides</p>
+              </div>
+            </li>
+          </ol>
+        </section>
+        <section className="shared-renewal" aria-labelledby="renewal-heading">
           <div className="renewal-intro">
-            <h2>One renewal. Updated coverage for linked buyers.</h2>
-            <p>
-              Suppliers maintain one shared record. Each buyer's masterlist uses
-              its product and brand scope.
-            </p>
+            <h2 id="renewal-heading">Renew once. Update linked buyers.</h2>
           </div>
-          <div className="renewal-network">
+          <div className="renewal-network" ref={renewalRef}>
             <div className="registry-record">
               <FileText size={34} aria-hidden="true" />
               <div>
@@ -84,11 +85,37 @@ export default function Landing() {
                 <small>Shared supplier record</small>
               </div>
             </div>
-            <ArrowRight
-              className="network-arrow"
-              size={32}
+            <svg
+              className="renewal-connector"
+              viewBox="0 0 80 100"
+              fill="none"
               aria-hidden="true"
-            />
+            >
+              <path className="connector-base" d="M0 50H30V24H80M30 50V76H80" />
+              <path
+                className="connector-trace"
+                pathLength="1"
+                d="M0 50H30V24H80"
+              />
+              <path
+                className="connector-trace"
+                pathLength="1"
+                d="M30 50V76H80"
+              />
+            </svg>
+            <svg
+              className="renewal-connector renewal-connector-phone"
+              viewBox="0 0 32 32"
+              fill="none"
+              aria-hidden="true"
+            >
+              <path className="connector-base" d="M16 0V30M10 24L16 30L22 24" />
+              <path
+                className="connector-trace"
+                pathLength="1"
+                d="M16 0V30M10 24L16 30L22 24"
+              />
+            </svg>
             <ul>
               {["Sunrise Bakery SAMPLE", "Crescent Caterer SAMPLE"].map(
                 (name) => (
@@ -100,58 +127,6 @@ export default function Landing() {
               )}
             </ul>
           </div>
-        </section>
-        <section className="how-it-works" id="how-it-works">
-          <div>
-            <h2>
-              Evidence in.
-              <br />A decision on record.
-            </h2>
-            <p>
-              The model reads the label. Rules check the records. Your
-              supervisor decides exceptions.
-            </p>
-            <ArrowDown size={28} aria-hidden="true" />
-          </div>
-          <ol>
-            <li>
-              <span>1</span>
-              <div>
-                <h3>Record what arrived</h3>
-                <p>
-                  Receiving staff choose the approved material and photograph
-                  the delivered label.
-                </p>
-              </div>
-            </li>
-            <li>
-              <span>2</span>
-              <div>
-                <h3>Compare it with the documents</h3>
-                <p>
-                  Five deterministic checks examine readability, approved
-                  identity, certificate scope, expiry and the demo issuer list.
-                </p>
-              </div>
-            </li>
-            <li>
-              <span>3</span>
-              <div>
-                <h3>Keep the human decision</h3>
-                <p>
-                  Supervisors inspect flagged deliveries and record acceptance
-                  or rejection with a reason.
-                </p>
-              </div>
-            </li>
-          </ol>
-        </section>
-        <section className="landing-close">
-          <h2>Try your part of the process.</h2>
-          <Link href="/demo" className="button primary">
-            Enter demo
-            <ArrowRight size={22} aria-hidden="true" />
-          </Link>
         </section>
       </main>
       <footer>

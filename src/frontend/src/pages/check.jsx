@@ -87,7 +87,7 @@ export default function CheckDelivery() {
         <p>Choose the material, then photograph its label.</p>
       </div>
       {result ? (
-        <section className="delivery-result">
+        <section className="delivery-result confirmed-receipt">
           <h2 tabIndex={-1} ref={resultHeading}>
             {result.status === "pending_review"
               ? "Sent for supervisor review"
@@ -192,7 +192,10 @@ export default function CheckDelivery() {
                 </small>
               </div>
               {image && (
-                <>
+                <div
+                  className="selected-photo"
+                  key={image.name + image.lastModified}
+                >
                   <p className="file-name">{image.name}</p>
                   <PhotoViewer file={image} />
                   <button
@@ -207,7 +210,7 @@ export default function CheckDelivery() {
                     <RotateCcw size={17} aria-hidden="true" />
                     Remove photo
                   </button>
-                </>
+                </div>
               )}
               {session.gateway.mode === "preview" && (
                 <details className="prepared-photos">

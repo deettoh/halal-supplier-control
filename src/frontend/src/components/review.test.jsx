@@ -5,10 +5,39 @@ import userEvent from "@testing-library/user-event";
 import { SessionProvider } from "../lib/session.jsx";
 import { createPreviewGateway } from "../lib/preview/gateway.js";
 import { DecisionForm } from "./decision-form.jsx";
-import { RuleChecklist } from "./delivery-evidence.jsx";
+import { Comparison, RuleChecklist } from "./delivery-evidence.jsx";
 import Review from "../pages/review.jsx";
 import data from "../lib/preview/data.json";
 const identity = { role: "supervisor", tenant: "Sunrise Bakery SAMPLE" };
+it("links the selected comparison field using touch-equivalent clicks and keyboard activation", async () => {
+  const user = userEvent.setup();
+  const delivery = data.deliveries[identity.tenant][0];
+  render(
+    <Comparison
+      material={{
+        name: "Cocoa Powder",
+        approved_brand: "SilverCocoa",
+        approved_manufacturer: "Silver Valley Foods",
+      }}
+      delivery={delivery}
+    />,
+  );
+  const brand = screen.getByRole("button", { name: "Brand", exact: true });
+  await user.click(brand);
+  expect(brand).toHaveAttribute("aria-pressed", "true");
+  expect(screen.getByText("SilverCocoa")).toBeVisible();
+  expect(screen.getByText("ALT SAMPLE BRAND")).toBeVisible();
+  await user.tab();
+  await user.keyboard("{Enter}");
+  expect(
+    screen.getByRole("button", { name: "Manufacturer", exact: true }),
+  ).toHaveAttribute("aria-pressed", "true");
+  expect(brand).toHaveAttribute("aria-pressed", "false");
+  await user.keyboard("{Enter}");
+  expect(
+    screen.getByRole("button", { name: "Manufacturer", exact: true }),
+  ).toHaveAttribute("aria-pressed", "false");
+});
 it.each(["saved", "conflict"])(
   "keeps the current decision locked until its %s response arrives",
   async (outcome) => {

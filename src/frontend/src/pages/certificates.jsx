@@ -278,7 +278,9 @@ export default function Certificates() {
             aria-label="Current certificate"
           >
             {current ? (
-              <CertificateRecord record={current} />
+              <div className="certificate-current" key={current.id}>
+                <CertificateRecord record={current} />
+              </div>
             ) : (
               <div className="empty-state">
                 <h2>No certificate on record yet.</h2>
@@ -295,11 +297,30 @@ export default function Certificates() {
             )}
           </section>
           {saved ? (
-            <section className="renewal-receipt">
+            <section
+              className="renewal-receipt confirmed-receipt"
+              aria-label="Saved renewal"
+            >
               <h2 ref={success} tabIndex={-1}>
                 Renewal saved.
               </h2>
-              <p>{saved.cert_no}</p>
+              <dl className="renewal-change">
+                {saved.previous && (
+                  <div className="renewal-previous">
+                    <dt>
+                      Previous record{" "}
+                      <Status value="superseded">Superseded</Status>
+                    </dt>
+                    <dd>{saved.previous.cert_no}</dd>
+                  </div>
+                )}
+                <div className="renewal-current">
+                  <dt>
+                    Renewed record <Status value="active">Active</Status>
+                  </dt>
+                  <dd>{saved.cert_no}</dd>
+                </div>
+              </dl>
               <p>
                 The new record is active. Linked masterlists use it when they
                 refresh; coverage still depends on the delivered product and
@@ -313,7 +334,7 @@ export default function Certificates() {
             <RenewalForm
               key={current?.id || "new"}
               current={current}
-              onSaved={setSaved}
+              onSaved={(record) => setSaved({ ...record, previous: current })}
             />
           )}
         </div>

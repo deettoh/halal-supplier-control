@@ -1,7 +1,7 @@
 // Index this app's history entries so a cancelled traversal can return to the
 // existing entry without adding duplicates or dropping the forward history.
 const key = "hsc.navigation.index";
-export function installHistoryGuard(confirmDiscard) {
+export function installHistoryGuard(confirmDiscard, onNavigate = () => {}) {
   const history = window.history;
   const push = history.pushState;
   const replace = history.replaceState;
@@ -11,10 +11,14 @@ export function installHistoryGuard(confirmDiscard) {
   replace.call(history, indexed(history.state, current), "");
   function pushState(state, title, url) {
     current += 1;
-    return push.call(history, indexed(state, current), title, url);
+    const result = push.call(history, indexed(state, current), title, url);
+    onNavigate();
+    return result;
   }
   function replaceState(state, title, url) {
-    return replace.call(history, indexed(state, current), title, url);
+    const result = replace.call(history, indexed(state, current), title, url);
+    onNavigate();
+    return result;
   }
   function pop(event) {
     if (restoring) {
@@ -24,12 +28,18 @@ export function installHistoryGuard(confirmDiscard) {
     }
     const next = event.state?.[key];
     // Entries outside this document use the separate beforeunload protection.
-    if (!Number.isInteger(next) || next === current) return;
+    if (!Number.isInteger(next) || next === current) {
+      onNavigate();
+      return;
+    }
     if (!confirmDiscard()) {
       event.stopImmediatePropagation();
       restoring = true;
       history.go(current - next);
-    } else current = next;
+    } else {
+      current = next;
+      onNavigate();
+    }
   }
   history.pushState = pushState;
   history.replaceState = replaceState;
