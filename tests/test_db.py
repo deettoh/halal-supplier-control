@@ -25,6 +25,7 @@ from sqlalchemy.schema import CreateSchema, DropSchema
 
 from backend import db, images
 from backend.db import ActivityLog, Certificate, Delivery, Material, Supplier
+from backend.reset_demo import reset_demo_database
 from backend.rules import evaluate
 from backend.schemas import CertificateResponse
 from backend.seed import DEFAULT_SEED_PATH, SeedData
@@ -817,3 +818,110 @@ def test_merged_seed_matches_loader_api_and_rules(engine: Engine) -> None:
         )
         assert result["verdict"] == "expiring"
         assert all(check["passed"] for check in result["rule_results"])
+
+
+def test_demo_reset_restores_seed_photos_and_removes_workflows(
+    engine: Engine,
+) -> None:
+    bootstrap_database(engine, DEFAULT_SEED_PATH)
+    with Session(engine) as session:
+        old = session.get(Certificate, 1)
+        supplier = session.get(Supplier, 1)
+        assert old is not None and supplier is not None
+        supplier.name = "Edited during the demo"
+        old.status = "superseded"
+        old.image_bytes = b"old-demo-photo"
+        session.flush()
+        session.add(certificate(1, cert_no="SAMPLE-RENEWAL"))
+        item = delivery(1, tenant="Sunrise Bakery SAMPLE")
+        session.add(item)
+        session.flush()
+        session.add(
+            ActivityLog(
+                tenant=item.tenant,
+                actor="staff",
+                role="staff",
+                action="pending_review",
+                delivery_id=item.id,
+            )
+        )
+        session.add(Supplier(name="Extra demo supplier"))
+        session.commit()
+    for _ in range(2):
+        counts = reset_demo_database(engine)
+        assert counts == {
+            "suppliers": 2,
+            "certificates": 4,
+            "materials": 16,
+            "deliveries": 0,
+            "activity_log": 0,
+        }
+        with Session(engine) as session:
+            seed = SeedData.model_validate_json(DEFAULT_SEED_PATH.read_text())
+            for model in (
+                Supplier,
+                Certificate,
+                Material,
+                Delivery,
+                ActivityLog,
+            ):
+                assert (
+                    session.scalar(select(func.count()).select_from(model))
+                    == counts[model.__tablename__]
+                )
+            for source in seed.certificates:
+                restored = session.get(Certificate, source.id)
+                assert restored is not None and source.image_file is not None
+                assert restored.status == source.status
+                assert restored.image_bytes == images.as_jpeg(
+                    (DEFAULT_SEED_PATH.parent / source.image_file).read_bytes()
+                )
+            saved = session.get(Supplier, 1)
+            assert saved is not None and saved.name == seed.suppliers[0].name
+    with Session(engine) as session:
+        later = Supplier(name="New upload supplier")
+        session.add(later)
+        session.flush()
+        assert later.id > 2
+
+
+@pytest.mark.parametrize("failure", ["missing", "empty", "photo", "fk"])
+def test_failed_demo_reset_preserves_existing_records(
+    engine: Engine,
+    tmp_path: Path,
+    failure: str,
+) -> None:
+    with Session(engine) as session:
+        supplier, material = catalog(session)
+        session.add(certificate(supplier.id))
+        item = delivery(material.id)
+        session.add(item)
+        session.flush()
+        session.add(
+            ActivityLog(
+                tenant="bakery",
+                actor="staff",
+                role="staff",
+                action="pending_review",
+                delivery_id=item.id,
+            )
+        )
+        session.commit()
+    path = tmp_path / "reset.json"
+    payload = json.loads(DEFAULT_SEED_PATH.read_text())
+    if failure == "empty":
+        payload = {}
+    elif failure == "photo":
+        payload["certificates"][0]["image_file"] = "broken.png"
+        (tmp_path / "broken.png").write_bytes(b"not-png")
+    elif failure == "fk":
+        payload["materials"][0]["supplier_id"] = 999
+    if failure != "missing":
+        path.write_text(json.dumps(payload))
+    with pytest.raises(IntegrityError if failure == "fk" else ValueError):
+        reset_demo_database(engine, path)
+    with Session(engine) as session:
+        for model in (Supplier, Certificate, Material, Delivery, ActivityLog):
+            assert session.scalar(select(func.count()).select_from(model)) == 1
+        assert session.scalar(select(Supplier.name)) == "SAMPLE Supplier"
+        assert session.scalar(select(Delivery.status)) == "pending_review"
