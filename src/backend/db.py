@@ -10,6 +10,7 @@ from collections.abc import Generator
 from datetime import UTC, date, datetime
 from functools import lru_cache
 from typing import Any
+from zoneinfo import ZoneInfo
 
 from sqlalchemy import (
     JSON,
@@ -48,6 +49,11 @@ ACTIVITY_ACTION_CHECK = (
 
 def utc_now() -> datetime:
     return datetime.now(UTC)
+
+
+def business_today() -> date:
+    """Calendar date for certificate rules in Malaysia, independent of host."""
+    return utc_now().astimezone(ZoneInfo("Asia/Kuala_Lumpur")).date()
 
 
 class Base(DeclarativeBase):
