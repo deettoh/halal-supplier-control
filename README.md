@@ -10,13 +10,7 @@ uv sync           # create .venv and install runtime and dev dependencies
 uv run pytest -q  # run the test suite
 ```
 
-To add a dependency, run `uv add` and regenerate `requirements.txt` for
-the submission template:
-
-```bash
-uv add <package>
-uv export --no-dev --no-hashes --no-emit-project -o requirements.txt
-```
+To add a dependency, run `uv add <package>`.
 
 ## Shared API contract
 
