@@ -108,15 +108,7 @@
     max-width: 400px;
   }
   .renewal-network {
-    grid-template-columns: minmax(0, 1fr) 30px minmax(0, 1fr);
-    gap: 14px;
-  }
-  .renewal-intro {
-    display: block;
-  }
-  .renewal-intro > p {
-    max-width: 65ch;
-    margin-top: 16px;
+    grid-template-columns: minmax(0, 1fr) 60px minmax(0, 1fr);
   }
   .registry-record {
     padding: 18px;
@@ -128,12 +120,6 @@
   .renewal-network li {
     font-size: 18px;
     padding: 14px;
-  }
-  .how-it-works {
-    gap: 40px;
-  }
-  .how-it-works h2 {
-    font-size: 38px;
   }
 }
 @media (max-width: 900px) {
@@ -455,25 +441,11 @@
     font-size: 32px;
   }
   .how-it-works {
-    padding: 40px 24px;
-    gap: 32px;
-    grid-template-columns: 1fr;
+    width: calc(100% - 40px);
+    padding: 22px 24px;
   }
-  .how-it-works > div > p {
-    max-width: 55ch;
-  }
-  .how-it-works > div > svg {
-    display: none;
-  }
-  .landing-close {
-    padding: 30px 24px;
-  }
-  .landing-close h2 {
-    font-size: 32px;
-  }
-  .landing-close .button {
-    font-size: 19px;
-    gap: 18px;
+  .how-it-works h3 {
+    font-size: 21px;
   }
   .landing footer {
     padding: 24px;
@@ -644,9 +616,13 @@
     grid-template-columns: 1fr;
     gap: 14px;
   }
-  .network-arrow {
-    transform: rotate(90deg);
-    margin: 2px;
+  .renewal-connector {
+    display: none;
+  }
+  .renewal-connector-phone {
+    display: block;
+    height: 32px;
+    min-height: 0;
   }
   .registry-record {
     padding: 16px;
@@ -660,34 +636,9 @@
   .shared-renewal {
     padding: 22px 18px;
   }
-  .how-it-works h2 {
-    font-size: 37px;
-  }
-  .how-it-works > div > p {
-    font-size: 19px;
-    margin-top: 18px;
-  }
-  .how-it-works li {
-    gap: 22px;
-  }
-  .how-it-works h3 {
-    font-size: 24px;
-  }
-  .how-it-works li p {
-    font-size: 17px;
-  }
-  .landing-close {
-    display: block;
-    padding-block: 34px;
-  }
-  .landing-close h2 {
-    font-size: 33px;
-    max-width: 18ch;
-  }
-  .landing-close .button {
-    margin-top: 24px;
-    width: 100%;
-    justify-content: space-between;
+  .how-it-works ol {
+    grid-template-columns: 1fr;
+    gap: 20px;
   }
   .photo-modal {
     padding: 12px;

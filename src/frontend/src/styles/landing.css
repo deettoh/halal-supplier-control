@@ -78,6 +78,16 @@
   object-fit: contain;
   background: #e8e7e1;
 }
+.landing-photo-frame {
+  position: relative;
+}
+.landing-photo-frame::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border: 1px solid #9a4b10;
+  pointer-events: none;
+}
 .landing-reading dl {
   display: grid;
 }
@@ -95,6 +105,20 @@
   line-height: 1.2;
   margin-top: 7px;
   overflow-wrap: anywhere;
+}
+.landing-reading .label-brand {
+  position: relative;
+}
+.label-brand dd {
+  color: #84370d;
+}
+.label-brand::after {
+  content: "";
+  position: absolute;
+  inset: auto 0 -1px;
+  height: 1px;
+  background: #9a4b10;
+  transform-origin: left;
 }
 .landing-exception {
   margin-top: 27px;
@@ -123,25 +147,17 @@
   padding: 28px 30px 24px;
 }
 .renewal-intro {
-  display: flex;
-  justify-content: space-between;
-  gap: 40px;
-  align-items: start;
+  display: block;
 }
 .renewal-intro h2 {
   font-size: 35px;
   line-height: 1.1;
   max-width: 34ch;
 }
-.renewal-intro > p {
-  max-width: 38ch;
-  font-size: 16px;
-  color: var(--muted);
-}
 .renewal-network {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) 60px minmax(0, 1fr);
-  gap: 20px;
+  grid-template-columns: minmax(0, 1fr) 80px minmax(0, 1fr);
+  gap: 0;
   align-items: center;
   margin-top: 24px;
 }
@@ -164,8 +180,22 @@
   color: var(--muted);
   margin-top: 5px;
 }
-.network-arrow {
-  justify-self: center;
+.renewal-connector {
+  width: 100%;
+  height: 100%;
+  min-height: 110px;
+  stroke-width: 1.5;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.renewal-connector-phone {
+  display: none;
+}
+.connector-base {
+  stroke: var(--line);
+}
+.connector-trace {
+  stroke: #9a4b10;
 }
 .renewal-network ul {
   padding: 0;
@@ -184,66 +214,43 @@
 }
 .how-it-works {
   background: var(--ground);
-  display: grid;
-  grid-template-columns: 1fr 1.4fr;
-  gap: 80px;
-  padding: 64px max(40px, calc((100vw - 1456px) / 2));
+  max-width: 1456px;
+  width: calc(100% - 80px);
+  margin: 0 auto 24px;
+  padding: 22px 30px 24px;
+  border-radius: 4px;
   scroll-margin-top: 20px;
 }
 .how-it-works h2 {
-  font-size: 45px;
-  line-height: 1.03;
-}
-.how-it-works > div > p {
-  max-width: 34ch;
-  margin: 24px 0;
-  color: var(--muted);
-  font-size: 21px;
+  font-size: 19px;
+  margin-bottom: 18px;
 }
 .how-it-works ol {
   padding: 0;
   list-style: none;
-  border-top: 1px solid #9b9e9c;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 24px;
 }
 .how-it-works li {
   display: flex;
-  gap: 32px;
+  gap: 14px;
   align-items: start;
-  padding: 24px 0;
-  border-bottom: 1px solid #bfc2be;
 }
 .how-it-works li > span {
-  font-size: 34px;
+  font-size: 26px;
   font-variant-numeric: tabular-nums;
   line-height: 1.1;
   color: #784006;
 }
 .how-it-works h3 {
-  font-size: 25px;
+  font-size: 24px;
   line-height: 1.2;
 }
 .how-it-works li p {
-  font-size: 18px;
-  margin-top: 10px;
+  font-size: 16px;
+  margin-top: 5px;
   color: var(--muted);
-  max-width: 55ch;
-}
-.landing-close {
-  max-width: 1456px;
-  margin: auto;
-  display: flex;
-  gap: 32px;
-  justify-content: space-between;
-  align-items: center;
-  padding: 42px 40px;
-}
-.landing-close h2 {
-  font-size: 40px;
-}
-.landing-close .button {
-  font-size: 22px;
-  padding: 14px 24px;
-  gap: 28px;
 }
 .landing footer {
   background: #232320;
@@ -260,4 +267,94 @@
   font-size: 14px;
   max-width: 65ch;
   color: #d5d5ce;
+}
+
+/* The complete static example is the default. Only these finite sequences
+   opt into motion; no content or action waits for an animation to finish. */
+@media (prefers-reduced-motion: no-preference) {
+  .landing-evidence[data-motion="play"] .landing-photo-frame::after {
+    animation: evidence-frame 320ms cubic-bezier(0.16, 1, 0.3, 1) backwards;
+  }
+  .landing-evidence[data-motion="play"] .landing-reading dl > div {
+    animation: evidence-read 360ms cubic-bezier(0.16, 1, 0.3, 1) 180ms backwards;
+  }
+  .landing-evidence[data-motion="play"] .landing-reading dl > div:nth-child(2) {
+    animation-delay: 330ms;
+  }
+  .landing-evidence[data-motion="play"] .landing-reading dl > div:nth-child(3) {
+    animation-delay: 480ms;
+  }
+  .landing-evidence[data-motion="play"] .label-brand::after {
+    animation: evidence-underline 360ms cubic-bezier(0.16, 1, 0.3, 1) 660ms
+      backwards;
+  }
+  .landing-evidence[data-motion="play"] .landing-exception {
+    animation: evidence-verdict 420ms ease-out 780ms backwards;
+  }
+  .renewal-network[data-motion="play"] .connector-trace {
+    stroke-dasharray: 1;
+    animation: connect-buyers 700ms cubic-bezier(0.16, 1, 0.3, 1) backwards;
+  }
+  .renewal-network[data-motion="play"] li {
+    animation: buyer-acknowledgment 600ms ease-out 300ms backwards;
+  }
+  .renewal-network[data-motion="play"] li:nth-child(2) {
+    animation-delay: 450ms;
+  }
+  [data-motion-paused="true"] *,
+  [data-motion-paused="true"] *::after {
+    animation-play-state: paused !important;
+  }
+}
+@keyframes evidence-frame {
+  from {
+    clip-path: inset(0 100% 0 0);
+  }
+  to {
+    clip-path: inset(0);
+  }
+}
+@keyframes evidence-read {
+  from {
+    background-color: #ede5d8;
+    transform: translateX(6px);
+  }
+  to {
+    background-color: transparent;
+    transform: translateX(0);
+  }
+}
+@keyframes evidence-underline {
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: scaleX(1);
+  }
+}
+@keyframes evidence-verdict {
+  from {
+    background-color: #f1d3ac;
+  }
+  to {
+    background-color: transparent;
+  }
+}
+@keyframes connect-buyers {
+  from {
+    stroke-dashoffset: 1;
+  }
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+@keyframes buyer-acknowledgment {
+  from {
+    border-color: #9a4b10;
+    background-color: #f3e3cf;
+  }
+  to {
+    border-color: var(--line);
+    background-color: transparent;
+  }
 }
