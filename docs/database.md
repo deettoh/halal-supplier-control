@@ -157,6 +157,44 @@ and write one activity entry per linked SME, then commit together. This branch
 does not implement that workflow or concurrent-renewal handling.
 Material coverage is calculated from the active registry entry, never stored.
 
+## Manual demo reset
+
+Stop the application (including deployed workers) before resetting. From the
+repository root, using your local `.env`:
+
+```bash
+uv run --directory src --env-file ../.env python -m backend.reset_demo --confirm-reset-demo
+```
+
+For a Replit shell with `DATABASE_URL` already injected:
+
+```bash
+uv run --directory src python -m backend.reset_demo --confirm-reset-demo
+```
+
+This explicitly **replaces all data in the five application tables**, across
+both SMEs and every supplier, with `src/seed/seed.json`. Existing delivery
+photos, decisions, renewed certificates and activity history are removed;
+seed certificate PNGs are read and stored as JPEG again. Reset requires every
+referenced `image_file` to exist and be a readable PNG. A missing/broken PNG
+fails the reset and preserves existing records. Startup seeding still allows
+missing photos for later backfill. Table structure, constraints,
+and monotonically advancing PostgreSQL ID sequences are retained. A failed
+reset rolls back record replacement. There is no reset API endpoint.
+
+Without `--confirm-reset-demo`, the command exits without database access.
+`--seed PATH` selects an alternative seed file (relative to `src/` with the
+commands above). Missing/empty seed catalogs are rejected. A reset never
+runs as part of deployment or startup. Restart the app after the command.
+
+Seed/file errors identify the problem and affected path. Database errors
+report only their exception type, and invalid seed validation input is not
+printed, to avoid exposing connection details or private field contents.
+
+This restores the supplied fixtures and dates; it does not freeze the clock
+or shift expiry dates. L06/L07 evaluation overrides are not silently applied
+to the shared seed. Establish their separate demo setup before live testing.
+
 ## Later on Replit
 
 Activity actions are restricted by a database check constraint to
