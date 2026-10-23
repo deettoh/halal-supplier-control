@@ -1,0 +1,125 @@
+/* Motion confirms actions; it never controls when an action becomes available. */
+:root {
+  --motion-ease: cubic-bezier(0.16, 1, 0.3, 1);
+}
+main:focus {
+  outline: none;
+}
+@media (prefers-reduced-motion: no-preference) {
+  html {
+    scroll-behavior: smooth;
+  }
+  .button {
+    transition:
+      background-color 160ms ease-out,
+      color 160ms ease-out,
+      transform 160ms var(--motion-ease);
+  }
+  .button:active:not(:disabled) {
+    transform: translateY(1px);
+  }
+  .button > svg:last-child {
+    transition: translate 180ms var(--motion-ease);
+  }
+  .hero-cta:hover > svg:last-child {
+    translate: 3px 0;
+  }
+  .role-option {
+    transition:
+      background-color 180ms ease-out,
+      border-color 180ms ease-out;
+  }
+  .comparison tbody tr > * {
+    transition:
+      background-color 160ms ease-out,
+      box-shadow 160ms ease-out;
+  }
+  .selected-photo .evidence-photo > img {
+    animation: photo-dock 280ms var(--motion-ease);
+  }
+  .confirmed-receipt,
+  .decision-confirmation {
+    animation: receipt-arrive 320ms var(--motion-ease);
+  }
+  .certificate-current {
+    animation: record-arrive 280ms var(--motion-ease);
+  }
+  .renewal-current {
+    animation: record-arrive 380ms var(--motion-ease);
+  }
+  .modal-overlay[data-entering] {
+    animation: overlay-arrive 180ms ease-out;
+  }
+  .photo-modal[data-entering] {
+    animation: receipt-arrive 220ms var(--motion-ease);
+  }
+  ::view-transition-old(root) {
+    animation-duration: 160ms;
+    animation-timing-function: ease-out;
+  }
+  ::view-transition-new(root) {
+    animation-duration: 220ms;
+    animation-timing-function: var(--motion-ease);
+  }
+  @supports not (view-transition-name: none) {
+    .route-arrival {
+      animation: view-arrive 200ms var(--motion-ease);
+    }
+  }
+}
+@keyframes view-arrive {
+  from {
+    opacity: 0.85;
+    translate: 0 4px;
+  }
+  to {
+    opacity: 1;
+    translate: 0 0;
+  }
+}
+@keyframes photo-dock {
+  from {
+    opacity: 0.9;
+    transform: translateY(6px) rotate(-0.6deg);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+@keyframes receipt-arrive {
+  from {
+    opacity: 0.85;
+    clip-path: inset(0 0 8px);
+    translate: 0 6px;
+  }
+  to {
+    opacity: 1;
+    clip-path: inset(0);
+    translate: 0 0;
+  }
+}
+@keyframes record-arrive {
+  from {
+    opacity: 0.85;
+    translate: 0 5px;
+  }
+  to {
+    opacity: 1;
+    translate: 0 0;
+  }
+}
+@keyframes overlay-arrive {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  ::view-transition-old(root),
+  ::view-transition-new(root) {
+    animation: none !important;
+  }
+}

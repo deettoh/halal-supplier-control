@@ -18,6 +18,39 @@ const wrap = (gateway = createPreviewGateway(), who = identity) =>
       <Certificates />
     </SessionProvider>,
   );
+it("shows the actual previous and renewed record only after the service confirms", async () => {
+  const user = userEvent.setup();
+  const base = createPreviewGateway();
+  let release;
+  wrap(
+    {
+      ...base,
+      renewCertificate: (ctx, input) =>
+        new Promise((resolve) => {
+          release = async () =>
+            resolve(await base.renewCertificate(ctx, input));
+        }),
+    },
+    { role: "supplier", tenant: "1" },
+  );
+  await screen.findByRole("button", { name: "Use prepared renewal" });
+  await user.click(
+    screen.getByRole("button", { name: "Use prepared renewal" }),
+  );
+  await user.click(screen.getByRole("button", { name: "Publish renewal" }));
+  expect(
+    screen.queryByRole("region", { name: "Saved renewal" }),
+  ).not.toBeInTheDocument();
+  expect(
+    screen.getByRole("button", { name: "Publishing renewal…" }),
+  ).toBeDisabled();
+  await act(async () => release());
+  const receipt = await screen.findByRole("region", { name: "Saved renewal" });
+  expect(within(receipt).getByText("SAMPLE-GGS-2026-001")).toBeVisible();
+  expect(within(receipt).getByText("Superseded")).toBeVisible();
+  expect(within(receipt).getByText("SAMPLE-GGS-2027-PREVIEW")).toBeVisible();
+  expect(within(receipt).getByText("Active")).toBeVisible();
+});
 it("submits a JPEG certificate accepted by the current backend", async () => {
   const user = userEvent.setup({ applyAccept: false });
   const base = createPreviewGateway();

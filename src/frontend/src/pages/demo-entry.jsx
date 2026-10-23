@@ -1,5 +1,7 @@
 import React, { useState } from "react";
-import { Link, useLocation } from "wouter";
+import { useLocation } from "wouter";
+import { AppLink as Link } from "../lib/navigation.jsx";
+import { transitionUpdate } from "../lib/motion.js";
 import { ArrowRight } from "lucide-react";
 import { useQueryClient } from "@tanstack/react-query";
 import {
@@ -29,18 +31,20 @@ export default function DemoEntry({ requestedPath }) {
   function submit(event) {
     event.preventDefault();
     if (valid) {
-      session.selectIdentity(valid);
       const destinations =
         role === "supplier"
           ? ["/certificates"]
           : role === "staff"
             ? ["/check", "/masterlist"]
             : ["/review", "/masterlist", "/activity"];
-      navigate(
-        destinations.includes(requestedPath)
-          ? requestedPath
-          : homeForRole(role),
-      );
+      transitionUpdate(() => {
+        session.selectIdentity(valid);
+        navigate(
+          destinations.includes(requestedPath)
+            ? requestedPath
+            : homeForRole(role),
+        );
+      });
     }
   }
   return (
@@ -53,7 +57,7 @@ export default function DemoEntry({ requestedPath }) {
         </Link>
         <Link href="/">Back to introduction</Link>
       </header>
-      <main className="entry-page">
+      <main className="entry-page route-arrival">
         <div className="entry-intro">
           <h1>A workspace for your part of the process.</h1>
           <p>

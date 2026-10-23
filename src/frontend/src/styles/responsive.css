@@ -48,33 +48,8 @@
   }
 }
 @media (max-width: 1200px) {
-  .landing-hero {
-    grid-template-columns: minmax(0, 0.85fr) minmax(0, 1.5fr);
-    gap: 24px;
-    padding-inline: 30px;
-  }
-  .landing-intro h1 {
-    font-size: 62px;
-  }
-  .landing-intro > p {
-    font-size: 21px;
-  }
-  .landing-evidence {
-    grid-template-columns: minmax(0, 1.35fr) minmax(0, 1fr);
-    gap: 14px;
-  }
-  .landing-photo img {
-    height: 400px;
-  }
-  .landing-reading dd {
-    font-size: 21px;
-  }
   .registry-layout {
     gap: 26px;
-  }
-  .renewal-form-section,
-  .renewal-receipt {
-    padding-left: 26px;
   }
   .receiving-form {
     column-gap: 30px;
@@ -92,12 +67,6 @@
     grid-template-columns: 1fr;
     gap: 38px;
   }
-  .renewal-form-section,
-  .renewal-receipt {
-    border-left: 0;
-    border-top: 1px solid var(--line);
-    padding: 28px 0 0;
-  }
   .certificate-fields {
     max-width: 700px;
   }
@@ -106,20 +75,6 @@
   }
   .certificate-image-input .evidence-photo {
     max-width: 400px;
-  }
-  .renewal-network {
-    grid-template-columns: minmax(0, 1fr) 60px minmax(0, 1fr);
-  }
-  .registry-record {
-    padding: 18px;
-    gap: 15px;
-  }
-  .registry-record h3 {
-    font-size: 20px;
-  }
-  .renewal-network li {
-    font-size: 18px;
-    padding: 14px;
   }
 }
 @media (max-width: 900px) {
@@ -388,72 +343,6 @@
     font-size: 14px;
     max-width: 120px;
   }
-  .landing-header {
-    width: calc(100% - 40px);
-    gap: 16px;
-  }
-  .landing-brand {
-    font-size: 24px;
-    line-height: 1.1;
-    max-width: 14ch;
-  }
-  .landing-header nav {
-    gap: 16px;
-    font-size: 16px;
-  }
-  .landing-header .button {
-    min-width: 110px;
-    padding: 9px 12px;
-  }
-  .landing-hero {
-    padding: 24px 20px 28px;
-    grid-template-columns: 1fr;
-    gap: 28px;
-  }
-  .landing-intro {
-    padding: 0;
-  }
-  .landing-intro h1 {
-    max-width: 15ch;
-    font-size: 64px;
-  }
-  .landing-intro > p {
-    font-size: 22px;
-    max-width: 44ch;
-    margin-top: 20px;
-  }
-  .hero-cta {
-    margin-top: 24px;
-    min-height: 54px;
-    font-size: 22px;
-  }
-  .landing-photo img {
-    height: 440px;
-  }
-  .landing-reading dl > div {
-    padding: 18px 0;
-  }
-  .shared-renewal {
-    width: calc(100% - 40px);
-    padding: 24px;
-  }
-  .renewal-intro h2 {
-    font-size: 32px;
-  }
-  .how-it-works {
-    width: calc(100% - 40px);
-    padding: 22px 24px;
-  }
-  .how-it-works h3 {
-    font-size: 21px;
-  }
-  .landing footer {
-    padding: 24px;
-    display: block;
-  }
-  .landing footer p {
-    margin-top: 12px;
-  }
 }
 @media (max-width: 720px) {
   .materials-table {
@@ -567,78 +456,6 @@
   }
   .scope-remove svg {
     width: 14px;
-  }
-  .landing-header nav > a:first-child {
-    display: none;
-  }
-  .landing-brand {
-    font-size: 22px;
-    max-width: 13ch;
-  }
-  .landing-intro h1 {
-    font-size: 52px;
-    max-width: 12ch;
-  }
-  .landing-intro > p {
-    font-size: 20px;
-  }
-  .landing-evidence {
-    grid-template-columns: 1fr;
-    padding: 14px;
-  }
-  .landing-photo img {
-    height: 350px;
-  }
-  .landing-reading {
-    display: grid;
-    grid-template-columns: 1fr;
-  }
-  .landing-reading dl > div {
-    padding: 10px 0;
-  }
-  .landing-reading dd {
-    font-size: 21px;
-  }
-  .landing-reading h2 {
-    margin-top: 5px;
-  }
-  .landing-exception {
-    margin-top: 18px;
-  }
-  .landing-evidence figcaption {
-    margin-top: 8px;
-    font-size: 13px;
-  }
-  .renewal-intro h2 {
-    font-size: 30px;
-  }
-  .renewal-network {
-    grid-template-columns: 1fr;
-    gap: 14px;
-  }
-  .renewal-connector {
-    display: none;
-  }
-  .renewal-connector-phone {
-    display: block;
-    height: 32px;
-    min-height: 0;
-  }
-  .registry-record {
-    padding: 16px;
-  }
-  .registry-record h3 {
-    font-size: 20px;
-  }
-  .renewal-network ul {
-    gap: 10px;
-  }
-  .shared-renewal {
-    padding: 22px 18px;
-  }
-  .how-it-works ol {
-    grid-template-columns: 1fr;
-    gap: 20px;
   }
   .photo-modal {
     padding: 12px;

@@ -20,7 +20,7 @@ export default function App() {
   const session = useSession();
   const [path] = useLocation();
   useEffect(() => {
-    window.scrollTo(0, 0);
+    window.scrollTo({ top: 0, left: 0, behavior: "instant" });
     const main = document.querySelector("main");
     if (main) {
       main.setAttribute("tabindex", "-1");
@@ -54,15 +54,17 @@ export default function App() {
     );
   return (
     <Shell>
-      <Suspense
-        fallback={
-          <p className="request-loading" role="status">
-            Opening workspace…
-          </p>
-        }
-      >
-        {Page ? <Page /> : <NotFound />}
-      </Suspense>
+      <div className="route-arrival" key={path}>
+        <Suspense
+          fallback={
+            <p className="request-loading" role="status">
+              Opening workspace…
+            </p>
+          }
+        >
+          {Page ? <Page /> : <NotFound />}
+        </Suspense>
+      </div>
     </Shell>
   );
 }

@@ -197,6 +197,35 @@
 .renewal-receipt > .button {
   margin-top: 26px;
 }
+.renewal-change {
+  display: grid;
+  gap: 12px;
+  margin-top: 22px;
+}
+.renewal-change > div {
+  padding: 14px 16px;
+  background: #edf4e9;
+  border-radius: 3px;
+}
+.renewal-change > .renewal-previous {
+  background: #eeefec;
+}
+.renewal-change dt {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  font-size: 14px;
+}
+.renewal-change dd {
+  font-size: 19px;
+  font-weight: 700;
+  margin-top: 8px;
+  overflow-wrap: anywhere;
+}
+.renewal-change .status {
+  font-size: 13px;
+}
 .certificate-image-input input[type="file"] {
   min-width: 0;
 }

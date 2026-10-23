@@ -1,10 +1,9 @@
 import React from "react";
-import { Link } from "wouter";
+import { AppLink as Link } from "../lib/navigation.jsx";
 import { ArrowRight, FileText, Store } from "lucide-react";
-import { Status } from "../components/status.jsx";
+import { LandingEvidence } from "../components/landing-evidence.jsx";
 import { useIllustrationMotion } from "../lib/illustration-motion.js";
 export default function Landing() {
-  const evidenceRef = useIllustrationMotion();
   const renewalRef = useIllustrationMotion();
   return (
     <div className="landing">
@@ -19,7 +18,7 @@ export default function Landing() {
           </Link>
         </nav>
       </header>
-      <main>
+      <main className="route-arrival">
         <section className="landing-hero">
           <div className="landing-intro">
             <h1>Know what your documents cover.</h1>
@@ -32,45 +31,7 @@ export default function Landing() {
               <ArrowRight size={24} aria-hidden="true" />
             </Link>
           </div>
-          <figure className="landing-evidence" ref={evidenceRef}>
-            <div className="landing-photo">
-              <h2>Label photo</h2>
-              <div className="landing-photo-frame">
-                <img
-                  src="/media/label-alt-brand.jpg"
-                  width="1246"
-                  height="1262"
-                  alt="Fictional cocoa package. ALT SAMPLE BRAND, Cocoa Powder, manufactured by Silver Valley Foods."
-                />
-              </div>
-            </div>
-            <div className="landing-reading">
-              <h2>Read from label</h2>
-              <dl>
-                <div>
-                  <dt>Product</dt>
-                  <dd>Cocoa Powder</dd>
-                </div>
-                <div className="label-brand">
-                  <dt>Brand</dt>
-                  <dd>ALT SAMPLE BRAND</dd>
-                </div>
-                <div>
-                  <dt>Manufacturer</dt>
-                  <dd>Silver Valley Foods</dd>
-                </div>
-              </dl>
-              <div className="landing-exception">
-                <Status value="substitution" />
-                <h3>Needs supervisor review</h3>
-                <p>Brand differs from approved SilverCocoa.</p>
-              </div>
-            </div>
-            <figcaption>
-              Illustrative workflow · SAMPLE data · Prepared example dated 22
-              Oct 2026.
-            </figcaption>
-          </figure>
+          <LandingEvidence />
         </section>
         <section
           className="how-it-works"

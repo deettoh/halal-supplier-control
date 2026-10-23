@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { PhotoViewer } from "./photo-viewer.jsx";
 import { RuleStatus } from "./status.jsx";
 import { ChevronDown } from "lucide-react";
@@ -39,6 +39,7 @@ export function RuleChecklist({ rules = [] }) {
   );
 }
 export function Comparison({ material, delivery }) {
+  const [linked, setLinked] = useState(null);
   const extraction = delivery.extracted;
   const r2 = delivery.rule_results.find((r) => r.rule === "R2");
   const rows = [
@@ -49,6 +50,7 @@ export function Comparison({ material, delivery }) {
   return (
     <section className="comparison">
       <h2>Approved material vs read from label</h2>
+      <p className="comparison-hint">Hover, focus or tap a field to compare.</p>
       <table>
         <thead>
           <tr>
@@ -59,8 +61,17 @@ export function Comparison({ material, delivery }) {
         </thead>
         <tbody>
           {rows.map(([name, key, approved]) => (
-            <tr key={key}>
-              <th scope="row">{name}</th>
+            <tr key={key} data-linked={linked === key}>
+              <th scope="row">
+                <button
+                  type="button"
+                  className="comparison-field"
+                  aria-pressed={linked === key}
+                  onClick={() => setLinked(linked === key ? null : key)}
+                >
+                  {name}
+                </button>
+              </th>
               <td>{approved || "Approved record unavailable"}</td>
               <td
                 className={
@@ -100,7 +111,7 @@ export function DeliveryEvidence({ material, delivery, file }) {
     <div className="evidence-grid">
       <PhotoViewer reference={delivery.image} file={file} />
       <div className="evidence-reading">
-        <Comparison material={material} delivery={delivery} />
+        <Comparison key={delivery.id} material={material} delivery={delivery} />
         <RuleChecklist rules={delivery.rule_results} />
       </div>
     </div>
