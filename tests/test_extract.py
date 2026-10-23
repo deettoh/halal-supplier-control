@@ -21,6 +21,7 @@ from backend.extract import (
     TIMEOUT_SECONDS,
     ExtractionError,
     LabelExtraction,
+    _runpod_client,
     extract_label,
     load_demo_cache,
 )
@@ -304,6 +305,21 @@ def test_missing_api_key_names_variable(
     monkeypatch.delenv("RUNPOD_API_KEY", raising=False)
     with pytest.raises(ValidationError, match="RUNPOD_API_KEY"):
         extract_label(IMAGE)
+
+
+def test_client_trusts_root_cas_when_cert_dir_set(
+    monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+) -> None:
+    monkeypatch.setenv("RUNPOD_ENDPOINT_URL", "https://runpod.test/v1")
+    monkeypatch.setenv("RUNPOD_API_KEY", "test-key")
+    monkeypatch.delenv("SSL_CERT_FILE", raising=False)
+    # Replit's SSL_CERT_DIR lacks the root CA behind api.runpod.ai
+    monkeypatch.setenv("SSL_CERT_DIR", str(tmp_path))
+    transport = _runpod_client()._client._transport
+    assert isinstance(transport, httpx2.HTTPTransport)
+    context = transport._pool._ssl_context
+    assert context is not None
+    assert context.cert_store_stats()["x509_ca"] > 0
 
 
 def test_rejects_response_without_choices() -> None:
