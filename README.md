@@ -1,110 +1,179 @@
-# halal-supplier-control
+# Halal Supplier Control
 
-## Development setup
+Halal Supplier Control checks every ingredient delivered to a halal-certified
+micro food business against the business's Raw Material Masterlist and the
+supplier's halal certificate. Anything that doesn't match is queued for the
+Halal Supervisor's recorded decision. It is built for SDC Hackathon 2026,
+Domain 2 (Orbyte Smart SME Challenge), on the SDG 8 track.
 
-The project uses [uv](https://docs.astral.sh/uv/getting-started/installation/) for Python dependencies.
-Install uv, then run these from the repo root:
+## Submission links
+
+| Item | Link |
+|---|---|
+| Live prototype | https://halal-supplier-control--dedoh.replit.app |
+| Code repository | https://github.com/deettoh/halal-supplier-control |
+| Pitch video (YouTube) | Link to be added |
+| Pitch slides | Link to be added |
+| Proposal | `submission/SDC2026_TanAhChing_Preliminary.pdf` (to be added) |
+| Technical & Tools Declaration | `submission/SDC2026_TanAhChing_TechDeclaration.pdf` (to be added) |
+| Replit proof of use | [submission/Replit-proof-of-use.pdf](submission/Replit-proof-of-use.pdf) |
+| RunPod proof of use | [submission/Runpod-proof-of-use.pdf](submission/Runpod-proof-of-use.pdf) |
+
+## It checks each delivery at the receiving door
+
+At receiving, staff photograph the delivered item's label. A vision model
+reads the product name, brand, manufacturer and halal mark, and five rules
+check them against the masterlist and the supplier's certificate. A clean
+delivery is logged automatically. Anything else waits for the Halal
+Supervisor, who accepts or rejects it with a reason.
+
+| Step | In Halal Supplier Control |
+|---|---|
+| Trigger | A delivery arrives and staff photograph its label |
+| Data | The SME's masterlist and the shared supplier certificate registry |
+| Decision | The model reads the label, and rules R1 to R5 give the verdict |
+| Approval | Only the Halal Supervisor can accept or reject a flagged delivery with a required reason |
+| Outcome | Verdict with a rule checklist, delivery status, masterlist coverage and an activity log row |
+
+Certificates are stored in one registry shared by every SME. When a supplier
+renews a certificate once, every SME that buys from that supplier sees its own
+items change from Expiring to Covered. The app reports whether the documents
+on file cover an item. It doesn't rule on whether anything is halal.
+
+## Try the demo
+
+Open the live prototype, select Enter demo, and pick a role and an
+organisation. The demo script follows the project brief:
+
+1. As the Halal Supervisor of Sunrise Bakery SAMPLE, open Masterlist. Wheat
+   Flour shows Expiring.
+2. As Receiving staff, check a Cocoa Powder delivery with a clean label. The
+   verdict is Covered and the delivery is accepted automatically.
+3. Check another Cocoa Powder delivery from a different brand. The verdict is
+   Substitution, with rule R2 failed, and the delivery is queued for the
+   supervisor.
+4. As the supervisor, open Review deliveries and reject it with a reason.
+5. Open Activity to see each step with the role, action and time.
+6. Switch to Crescent Caterer SAMPLE. Its Wheat Flour from the same supplier
+   also shows Expiring.
+7. As the supplier Golden Grain Supplies SAMPLE, publish a renewed
+   certificate. Both SMEs now show Wheat Flour as Covered.
+
+On the live site, use a label photo from `tests/eval/images/`, for example
+`L01.png` (clean) or `L02.png` (different brand). The first check after the
+model has been idle can take about three minutes.
+
+## Screenshots from the live site
+
+| Covered delivery | Substitution flagged |
+|---|---|
+| ![Covered verdict with all five rules passed](docs/images/verdict-covered.jpg) | ![Substitution verdict with the brand mismatch](docs/images/verdict-substitution.jpg) |
+| Supervisor review | Activity log |
+| ![Supervisor comparing the approved brand with the label](docs/images/review-queue.jpg) | ![Activity log with the rejection and its reason](docs/images/activity-log.jpg) |
+
+## One web app on Replit and one model on RunPod
+
+FastAPI on Replit serves the React app and the API, and stores everything in
+Replit PostgreSQL. Label photos are sent to Qwen3-VL-8B-Instruct on a RunPod
+Serverless endpoint, which returns the fields as JSON, and Python rules
+decide the verdict. More detail is in these docs:
+
+- [Architecture](docs/architecture.md): diagram, stack and the delivery check
+- [API reference](docs/api.md): routes, rules and error codes
+- [Database](docs/database.md): tables, local PostgreSQL and the demo reset
+- [Deployment](docs/deployment.md): Replit build, Secrets and releases
+- [RunPod endpoint](runpod/README.md): model settings and warm-up
+- [Frontend](src/frontend/README.md): modes, routes and checks
+- [Seed data](src/seed/README.md): the fictional dataset format
+
+## The live test read every visible field correctly
+
+A live run on eight AI-generated label photos read 27 of 27 visible fields
+correctly and gave the expected verdict in 8 of 8 cases. On hidden fields the
+model left 4 of 5 blank and guessed the remaining one. The method, the cases
+and the limits of a synthetic set are in
+[the evaluation README](tests/eval/README.md).
+
+CI runs the backend and frontend checks on every pull request and on `main`.
+At this commit, `uv run pytest -q` reports 259 passed and 114 skipped, where
+the skipped tests need PostgreSQL (`--run-db`) or the live endpoint
+(`--run-live`). `pnpm --dir src/frontend test --run` reports 81 passed.
+
+## Run it locally
+
+You need Python 3.11 or later with [uv](https://docs.astral.sh/uv/), Node 24
+with pnpm 11, and Docker for the local PostgreSQL.
 
 ```bash
-uv sync           # create .venv and install runtime and dev dependencies
-uv run pytest -q  # run the test suite
-```
-
-To add a dependency, run `uv add <package>`.
-
-## Shared API contract
-
-`src/backend/schemas.py` is the shared request/response vocabulary.
-`src/backend/main.py` binds it to the eight business endpoints so FastAPI's
-generated **`/docs` and `/openapi.json` are the API contract**. Run locally:
-
-```bash
-uv run uvicorn backend.main:app --app-dir src --reload
-```
-
-Open http://127.0.0.1:8000/docs. Without DATABASE_URL the app runs in contract
-preview mode. With DATABASE_URL it initializes the database at startup.
-No RunPod endpoint is needed for startup or the contract preview.
-Certificate expiry/coverage use the Kuala Lumpur calendar date; audit
-timestamps and extraction timeouts use UTC.
-The core backend is implemented: tenant-scoped reads, protected JPEG retrieval,
-label uploads and rule checks, supervisor decisions, and supplier renewal with
-transactional activity records. Extraction uses the current RunPod client
-with a 180-second timeout and no retries. Main's demo-cache fallback is
-retained; unmatched failures become reviewable `needs_human` deliveries.
-Supervisors cannot decide while extraction runs.
-Only the stretch certificate-extraction endpoint remains **501**.
-`/api/health` works without a database. Business routes need DATABASE_URL;
-only delivery extraction needs the RunPod secrets.
-See [the backend service guide](docs/backend-services.md).
-
-See [the contract decisions and integration guide](docs/api-contract.md).
-Merge this contract branch before the team starts parallel implementations.
-Keep route signatures and shared response models coordinated with the
-frontend. Contract changes need a coordinated schema/route/test update.
-
-## Database setup
-
-The five SQLAlchemy models and connection/session helpers are in
-`src/backend/db.py`. For local PostgreSQL, start Docker Desktop and run:
-
-```bash
+uv sync
+cp -n .env.example .env   # add RUNPOD_ENDPOINT_URL and RUNPOD_API_KEY for label reading
 docker compose up -d --wait postgres
 uv run --env-file .env uvicorn backend.main:app --app-dir src --reload
 ```
 
-Use `.env.example` to create your ignored `.env` first. Startup creates missing
-tables, adds the binary-photo columns to the previous schema, and seeds empty
-tables if `src/seed/seed.json` exists. Photos can be stored as PostgreSQL BYTEA;
-certificate source assets remain PNG; both certificate and delivery photos
-are converted to JPEG (quality 85) in the database and served as image/jpeg.
-Startup converts legacy stored PNGs once, without rewriting the source files.
-See [the database guide](docs/database.md) and [seed format](docs/seed-format.md).
-To manually restore the demo, stop the app and run from the repository root:
+In a second terminal, start the frontend and open the URL it prints:
 
 ```bash
-uv run --directory src --env-file ../.env python -m backend.reset_demo --confirm-reset-demo
+pnpm --dir src/frontend install --frozen-lockfile
+pnpm --dir src/frontend dev
 ```
 
-This replaces all five tables' data from `src/seed/seed.json`, including stored
-seed photos, and removes demo uploads, renewals, decisions and activity logs.
-The command targets the configured `DATABASE_URL`; it never runs at startup.
-On Replit, omit `--env-file ../.env` to use the injected environment.
+Without the RunPod variables, uploads are saved as Reading incomplete
+(`needs_human`). The API docs are at http://127.0.0.1:8000/docs.
 
-The same models use Replit's DATABASE_URL later. Importing the models alone
-does not connect to a database. Read routes require a configured database;
-delivery uploads also need RunPod secrets for successful extraction.
-
-## Label extraction model
-
-`src/backend/extract.py` sends each label photo to a RunPod Serverless
-endpoint running Qwen3-VL-8B-Instruct on vLLM. Set `RUNPOD_ENDPOINT_URL`
-and `RUNPOD_API_KEY` in `.env`, then run the live test against the
-endpoint:
+To run the checks:
 
 ```bash
-uv run --env-file .env pytest -m live --run-live
+uv run pytest -q
+uv run ruff check --select E,F,I src tests
+uv run mypy src/backend tests
+pnpm --dir src/frontend test --run && pnpm --dir src/frontend lint
 ```
 
-Endpoint settings, setup and the warm-up before a demo are in
-[the RunPod endpoint guide](runpod/README.md).
+Python dependencies are declared in `pyproject.toml` and pinned in `uv.lock`,
+so the repo has no `requirements.txt`. To produce one, run
+`uv export --frozen --no-dev --no-hashes --no-emit-project -o requirements.txt`.
 
-## Deploy to Replit
+## AI use and sponsor resources
 
-The app runs as a Replit Autoscale deployment. The `.replit` build
-command compiles the React app in `src/frontend` with pnpm and then
-installs the Python dependencies with uv. FastAPI serves the React app
-at the site root and the API under `/api`. Node is installed from the
-`nodejs_24` Nix package. The deployment needs these Secrets:
+- Qwen3-VL-8B-Instruct, an open-weight vision model, reads the label photos.
+  It runs on our own RunPod Serverless endpoint, so photos aren't sent to a
+  third-party LLM vendor. Rules and the supervisor make every decision.
+- Replit hosts the app, its PostgreSQL database and its Secrets. RunPod runs
+  the model on sponsor credit. Both are declared in the Technical & Tools
+  Declaration.
+- The team used Claude Code, OpenAI Codex, OpenAI's image generation and the
+  Replit AI assistant while building.
 
-| Secret | Value |
-| --- | --- |
-| `DATABASE_URL` | Connection URL of the Replit PostgreSQL database |
-| `RUNPOD_ENDPOINT_URL` | Base URL of the endpoint's OpenAI-compatible API |
-| `RUNPOD_API_KEY` | RunPod API key |
+## All data is synthetic
 
-Replit doesn't deploy on a push to GitHub. To release a change merged
-into `main`:
+The demo uses two fictional SMEs, two suppliers and a fictional certification
+body marked SAMPLE, with no JAKIM logo and no personal data. The role and
+organisation picker simulates login. In a production deployment, Malaysia's
+PDPA principles would apply to staff accounts and supplier contacts through
+Orbyte's login, purpose notices and a retention period for label photos.
 
-1. In the Replit workspace, open the Git pane and pull `main`.
-2. Open Publishing and select Republish.
+## Project structure
+
+To list these folders, run
+`ls -d runpod src/backend src/frontend src/seed tests tests/eval submission docs`.
+
+```text
+runpod/        RunPod endpoint guide
+src/backend/   FastAPI app, rules, model client and database
+src/frontend/  React app
+src/seed/      Fictional seed data and certificate images
+tests/         Backend and frontend-contract tests
+tests/eval/    Synthetic label set, scorer and live results
+submission/    Submission PDFs
+docs/          Architecture, API, database and deployment guides
+```
+
+## Team
+
+Team Tan Ah Ching, Xiamen University Malaysia: Jay Hu, Nigel Cheong Tze
+Hock, Tan Ching Yang, Evelyn Chan Yee Syen and Lee Yi Hong.
+
+## License
+
+Apache License 2.0. See [LICENSE](LICENSE).
