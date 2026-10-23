@@ -128,20 +128,31 @@ def load_seed(path: Path) -> SeedData | None:
     return SeedData.model_validate_json(path.read_text(encoding="utf-8-sig"))
 
 
-def _read_seed_png(filename: str, base: Path) -> bytes | None:
+def _read_seed_png(
+    filename: str, base: Path, *, required: bool = False
+) -> bytes | None:
     root = base.resolve()
     image_path = (root / filename).resolve()
     if not image_path.is_relative_to(root):
-        raise ValueError("Seed images must be inside the seed directory")
+        raise ValueError(
+            f"Seed image '{filename}' must be inside the seed directory"
+        )
     if image_path.suffix.lower() != ".png":
-        raise ValueError("Seed images must use PNG files")
+        raise ValueError(f"Seed image '{filename}' must use a PNG file")
     try:
         payload = image_path.read_bytes()
     except FileNotFoundError:
+        if required:
+            raise ValueError(
+                f"Seed image file is missing: {image_path}"
+            ) from None
         return None
     if not payload.startswith(b"\x89PNG\r\n\x1a\n"):
-        raise ValueError("Seed image must have a PNG signature")
-    return images.as_jpeg(payload)
+        raise ValueError(f"Seed image '{filename}' must have a PNG signature")
+    try:
+        return images.as_jpeg(payload)
+    except ValueError as error:
+        raise ValueError(f"Seed image '{filename}': {error}") from None
 
 
 def upgrade_stored_photos(session: Session) -> None:
@@ -161,10 +172,12 @@ def upgrade_stored_photos(session: Session) -> None:
             row.image_bytes = images.as_jpeg(row.image_bytes)
 
 
-def _image_values(row: SeedImage, base: Path, table: str) -> dict[str, Any]:
+def _image_values(
+    row: SeedImage, base: Path, table: str, *, require_images: bool = False
+) -> dict[str, Any]:
     values = row.model_dump(exclude={"image_file"})
     if row.image_file is not None:
-        payload = _read_seed_png(row.image_file, base)
+        payload = _read_seed_png(row.image_file, base, required=require_images)
         values["image_bytes"] = payload
         if payload is not None or table == "deliveries":
             values["image"] = f"/api/{table}/{values['id']}/image"
@@ -174,7 +187,11 @@ def _image_values(row: SeedImage, base: Path, table: str) -> dict[str, Any]:
 
 
 def _fill_certificate_photos(
-    session: Session, seed: SeedData, base: Path
+    session: Session,
+    seed: SeedData,
+    base: Path,
+    *,
+    require_images: bool = False,
 ) -> None:
     for row in seed.certificates:
         if row.image_file is None:
@@ -189,7 +206,7 @@ def _fill_certificate_photos(
         )
         if saved is None:
             continue
-        payload = _read_seed_png(row.image_file, base)
+        payload = _read_seed_png(row.image_file, base, required=require_images)
         if payload is not None:
             saved.image_bytes = payload
             saved.image = f"/api/certificates/{saved.id}/image"
@@ -218,11 +235,16 @@ def _advance_sequence(session: Session, table: Table) -> None:
 
 
 def seed_empty_tables(
-    session: Session, seed: SeedData, base: Path
+    session: Session,
+    seed: SeedData,
+    base: Path,
+    *,
+    require_images: bool = False,
 ) -> dict[str, int]:
     """Insert empty tables, then fill missing certificate photos only.
 
     Caller owns the transaction and startup lock. Counts report new rows.
+    Startup tolerates missing files; a reset requires referenced images.
     """
     counts: dict[str, int] = {}
     models: list[type[db.Base]] = [
@@ -240,7 +262,7 @@ def seed_empty_tables(
             continue
         for row in rows:
             values = (
-                _image_values(row, base, name)
+                _image_values(row, base, name, require_images=require_images)
                 if isinstance(row, SeedImage)
                 else row.model_dump()
             )
@@ -249,5 +271,7 @@ def seed_empty_tables(
         table = db.Base.metadata.tables[name]
         _advance_sequence(session, table)
         counts[name] = len(rows)
-    _fill_certificate_photos(session, seed, base)
+    _fill_certificate_photos(
+        session, seed, base, require_images=require_images
+    )
     return counts

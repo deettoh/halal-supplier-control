@@ -3,8 +3,10 @@
 from pathlib import Path
 
 import pytest
+from sqlalchemy.exc import SQLAlchemyError
 
-from backend import reset_demo
+from backend import db, reset_demo
+from backend.seed import SeedData
 
 
 def test_reset_cli_requires_confirmation_before_database_access(
@@ -42,10 +44,59 @@ def test_reset_cli_does_not_print_private_error_details(
     capsys: pytest.CaptureFixture[str],
 ) -> None:
     def broken(**_: object) -> dict[str, int]:
-        raise ValueError("private-value")
+        raise SQLAlchemyError("private-value")
 
     monkeypatch.setattr(reset_demo, "reset_demo_database", broken)
     assert reset_demo.main(["--confirm-reset-demo"]) == 1
     output = capsys.readouterr()
     assert "no record replacement was committed" in output.err
+    assert "private-value" not in output.err
+
+
+@pytest.mark.parametrize(
+    "failure",
+    [ValueError("Broken PNG: bad.png"), OSError("Cannot read bad.png")],
+)
+def test_reset_cli_prints_seed_error_details(
+    monkeypatch: pytest.MonkeyPatch,
+    capsys: pytest.CaptureFixture[str],
+    failure: Exception,
+) -> None:
+    def broken(**_: object) -> dict[str, int]:
+        raise failure
+
+    monkeypatch.setattr(reset_demo, "reset_demo_database", broken)
+    assert reset_demo.main(["--confirm-reset-demo"]) == 1
+    output = capsys.readouterr()
+    assert str(failure) in output.err
+    assert "no record replacement was committed" in output.err
+
+
+def test_reset_cli_names_missing_seed_file(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    def forbidden() -> None:
+        pytest.fail("Missing seed must not open a database connection")
+
+    monkeypatch.setattr(db, "get_engine", forbidden)
+    monkeypatch.setattr(db, "dispose_db", lambda: None)
+    path = tmp_path / "missing.json"
+    assert reset_demo.main(["--confirm-reset-demo", "--seed", str(path)]) == 1
+    assert str(path) in capsys.readouterr().err
+
+
+def test_reset_cli_redacts_invalid_seed_input(
+    monkeypatch: pytest.MonkeyPatch,
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    def broken(**_: object) -> dict[str, int]:
+        SeedData.model_validate({"suppliers": "private-value"})
+        raise AssertionError("Validation should fail")
+
+    monkeypatch.setattr(reset_demo, "reset_demo_database", broken)
+    assert reset_demo.main(["--confirm-reset-demo"]) == 1
+    output = capsys.readouterr()
+    assert "Invalid seed JSON" in output.err
     assert "private-value" not in output.err

@@ -885,7 +885,10 @@ def test_demo_reset_restores_seed_photos_and_removes_workflows(
         assert later.id > 2
 
 
-@pytest.mark.parametrize("failure", ["missing", "empty", "photo", "fk"])
+@pytest.mark.parametrize(
+    "failure",
+    ["missing", "empty", "photo", "corrupt_photo", "missing_photo", "fk"],
+)
 def test_failed_demo_reset_preserves_existing_records(
     engine: Engine,
     tmp_path: Path,
@@ -909,17 +912,29 @@ def test_failed_demo_reset_preserves_existing_records(
         session.commit()
     path = tmp_path / "reset.json"
     payload = json.loads(DEFAULT_SEED_PATH.read_text())
+    for source in payload["certificates"]:
+        source["image_file"] = None
     if failure == "empty":
         payload = {}
-    elif failure == "photo":
+    elif failure in {"photo", "corrupt_photo", "missing_photo"}:
         payload["certificates"][0]["image_file"] = "broken.png"
-        (tmp_path / "broken.png").write_bytes(b"not-png")
+        if failure != "missing_photo":
+            content = (
+                b"not-png"
+                if failure == "photo"
+                else b"\x89PNG\r\n\x1a\ninvalid"
+            )
+            (tmp_path / "broken.png").write_bytes(content)
     elif failure == "fk":
         payload["materials"][0]["supplier_id"] = 999
     if failure != "missing":
         path.write_text(json.dumps(payload))
-    with pytest.raises(IntegrityError if failure == "fk" else ValueError):
+    with pytest.raises(
+        IntegrityError if failure == "fk" else ValueError
+    ) as error:
         reset_demo_database(engine, path)
+    if failure in {"photo", "corrupt_photo", "missing_photo"}:
+        assert "broken.png" in str(error.value)
     with Session(engine) as session:
         for model in (Supplier, Certificate, Material, Delivery, ActivityLog):
             assert session.scalar(select(func.count()).select_from(model)) == 1

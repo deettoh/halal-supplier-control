@@ -9,6 +9,7 @@ import argparse
 import sys
 from pathlib import Path
 
+from pydantic import ValidationError
 from sqlalchemy import Engine, delete, text
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import Session
@@ -27,7 +28,7 @@ def reset_demo_database(
     """
     seed = load_seed(seed_path)
     if seed is None:
-        raise ValueError("Demo reset requires an existing seed JSON file")
+        raise ValueError(f"Seed JSON file is missing: {seed_path}")
     if not seed.suppliers or not seed.certificates or not seed.materials:
         raise ValueError(
             "Demo reset requires suppliers, certificates and materials"
@@ -50,7 +51,9 @@ def reset_demo_database(
             db.Supplier,
         ):
             session.execute(delete(model))
-        return seed_empty_tables(session, seed, seed_path.parent)
+        return seed_empty_tables(
+            session, seed, seed_path.parent, require_images=True
+        )
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -73,8 +76,14 @@ def main(argv: list[str] | None = None) -> int:
     try:
         counts = reset_demo_database(seed_path=args.seed)
     except (OSError, ValueError, SQLAlchemyError) as error:
+        if isinstance(error, SQLAlchemyError):
+            detail = type(error).__name__
+        elif isinstance(error, ValidationError):
+            detail = f"Invalid seed JSON in {args.seed}; check its fields"
+        else:
+            detail = str(error)
         print(
-            f"Demo reset failed ({type(error).__name__}); "
+            f"Demo reset failed: {detail}; "
             "no record replacement was committed. "
             "Check seed files and database.",
             file=sys.stderr,

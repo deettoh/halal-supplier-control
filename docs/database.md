@@ -175,9 +175,10 @@ uv run --directory src python -m backend.reset_demo --confirm-reset-demo
 This explicitly **replaces all data in the five application tables**, across
 both SMEs and every supplier, with `src/seed/seed.json`. Existing delivery
 photos, decisions, renewed certificates and activity history are removed;
-seed certificate PNGs are read and stored as JPEG again. The usual seed
-loader's optional/missing-photo behavior still applies. Keep the committed
-seed PNGs available for a complete photo reset. Table structure, constraints,
+seed certificate PNGs are read and stored as JPEG again. Reset requires every
+referenced `image_file` to exist and be a readable PNG. A missing/broken PNG
+fails the reset and preserves existing records. Startup seeding still allows
+missing photos for later backfill. Table structure, constraints,
 and monotonically advancing PostgreSQL ID sequences are retained. A failed
 reset rolls back record replacement. There is no reset API endpoint.
 
@@ -185,6 +186,10 @@ Without `--confirm-reset-demo`, the command exits without database access.
 `--seed PATH` selects an alternative seed file (relative to `src/` with the
 commands above). Missing/empty seed catalogs are rejected. A reset never
 runs as part of deployment or startup. Restart the app after the command.
+
+Seed/file errors identify the problem and affected path. Database errors
+report only their exception type, and invalid seed validation input is not
+printed, to avoid exposing connection details or private field contents.
 
 This restores the supplied fixtures and dates; it does not freeze the clock
 or shift expiry dates. L06/L07 evaluation overrides are not silently applied
