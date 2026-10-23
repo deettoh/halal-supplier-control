@@ -1,0 +1,16 @@
+@import "tailwindcss";
+@import "@fontsource/rambla/latin-400.css";
+@import "@fontsource/rambla/latin-700.css";
+@import "./styles/shell.css";
+@import "./styles/review.css";
+@import "./styles/forms.css";
+@import "./styles/landing.css";
+@import "./styles/certificates.css";
+@import "./styles/responsive.css";
+html,
+body,
+#root {
+  margin: 0;
+  min-height: 100%;
+  background: #f7f7f7;
+}

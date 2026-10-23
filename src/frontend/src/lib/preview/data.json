@@ -1,0 +1,2457 @@
+{
+  "provenance": "Prepared synthetic UI simulation; not inference, persistence or evaluation measurements.",
+  "date": "2026-10-22",
+  "seed_sha256": "bb317d3e7dd7839c62ab4e8e2027d0054293136d59a17676414c70f50f53cdce",
+  "materials": {
+    "00": {
+      "Sunrise Bakery SAMPLE": [
+        {
+          "id": 1,
+          "name": "Wheat Flour",
+          "supplier_id": 1,
+          "supplier_name": "Golden Grain Supplies SAMPLE",
+          "approved_brand": "GoldenMill",
+          "approved_manufacturer": "Golden Grain Foods",
+          "coverage_status": "expiring",
+          "certificate_expiry_date": "2026-11-30"
+        },
+        {
+          "id": 2,
+          "name": "Bread Flour",
+          "supplier_id": 1,
+          "supplier_name": "Golden Grain Supplies SAMPLE",
+          "approved_brand": "GoldenMill",
+          "approved_manufacturer": "Golden Grain Foods",
+          "coverage_status": "expiring",
+          "certificate_expiry_date": "2026-11-30"
+        },
+        {
+          "id": 3,
+          "name": "Cake Flour",
+          "supplier_id": 1,
+          "supplier_name": "Golden Grain Supplies SAMPLE",
+          "approved_brand": "GoldenMill",
+          "approved_manufacturer": "Golden Grain Foods",
+          "coverage_status": "expiring",
+          "certificate_expiry_date": "2026-11-30"
+        },
+        {
+          "id": 4,
+          "name": "Fine Sugar",
+          "supplier_id": 1,
+          "supplier_name": "Golden Grain Supplies SAMPLE",
+          "approved_brand": "SweetGold",
+          "approved_manufacturer": "Golden Grain Foods",
+          "coverage_status": "expiring",
+          "certificate_expiry_date": "2026-11-30"
+        },
+        {
+          "id": 5,
+          "name": "Corn Starch",
+          "supplier_id": 1,
+          "supplier_name": "Golden Grain Supplies SAMPLE",
+          "approved_brand": "GoldenMill",
+          "approved_manufacturer": "Golden Grain Foods",
+          "coverage_status": "expiring",
+          "certificate_expiry_date": "2026-11-30"
+        },
+        {
+          "id": 6,
+          "name": "Cocoa Powder",
+          "supplier_id": 2,
+          "supplier_name": "Silver Valley Ingredients SAMPLE",
+          "approved_brand": "SilverCocoa",
+          "approved_manufacturer": "Silver Valley Foods",
+          "coverage_status": "covered",
+          "certificate_expiry_date": "2027-09-30"
+        },
+        {
+          "id": 7,
+          "name": "Vanilla Essence",
+          "supplier_id": 2,
+          "supplier_name": "Silver Valley Ingredients SAMPLE",
+          "approved_brand": "SilverVanilla",
+          "approved_manufacturer": "Silver Valley Foods",
+          "coverage_status": "covered",
+          "certificate_expiry_date": "2027-09-30"
+        },
+        {
+          "id": 8,
+          "name": "Cooking Chocolate",
+          "supplier_id": 2,
+          "supplier_name": "Silver Valley Ingredients SAMPLE",
+          "approved_brand": "SilverCocoa",
+          "approved_manufacturer": "Silver Valley Foods",
+          "coverage_status": "covered",
+          "certificate_expiry_date": "2027-09-30"
+        }
+      ],
+      "Crescent Caterer SAMPLE": [
+        {
+          "id": 9,
+          "name": "Wheat Flour",
+          "supplier_id": 1,
+          "supplier_name": "Golden Grain Supplies SAMPLE",
+          "approved_brand": "GoldenMill",
+          "approved_manufacturer": "Golden Grain Foods",
+          "coverage_status": "expiring",
+          "certificate_expiry_date": "2026-11-30"
+        },
+        {
+          "id": 10,
+          "name": "Rice Flour",
+          "supplier_id": 1,
+          "supplier_name": "Golden Grain Supplies SAMPLE",
+          "approved_brand": "GoldenMill",
+          "approved_manufacturer": "Golden Grain Foods",
+          "coverage_status": "expiring",
+          "certificate_expiry_date": "2026-11-30"
+        },
+        {
+          "id": 11,
+          "name": "Brown Sugar",
+          "supplier_id": 1,
+          "supplier_name": "Golden Grain Supplies SAMPLE",
+          "approved_brand": "SweetGold",
+          "approved_manufacturer": "Golden Grain Foods",
+          "coverage_status": "expiring",
+          "certificate_expiry_date": "2026-11-30"
+        },
+        {
+          "id": 12,
+          "name": "Semolina",
+          "supplier_id": 1,
+          "supplier_name": "Golden Grain Supplies SAMPLE",
+          "approved_brand": "GoldenMill",
+          "approved_manufacturer": "Golden Grain Foods",
+          "coverage_status": "expiring",
+          "certificate_expiry_date": "2026-11-30"
+        },
+        {
+          "id": 13,
+          "name": "Vegetable Oil",
+          "supplier_id": 2,
+          "supplier_name": "Silver Valley Ingredients SAMPLE",
+          "approved_brand": "SilverPure",
+          "approved_manufacturer": "Silver Valley Foods",
+          "coverage_status": "covered",
+          "certificate_expiry_date": "2027-09-30"
+        },
+        {
+          "id": 14,
+          "name": "Coconut Milk",
+          "supplier_id": 2,
+          "supplier_name": "Silver Valley Ingredients SAMPLE",
+          "approved_brand": "SilverCoco",
+          "approved_manufacturer": "Silver Valley Foods",
+          "coverage_status": "covered",
+          "certificate_expiry_date": "2027-09-30"
+        },
+        {
+          "id": 15,
+          "name": "Salt",
+          "supplier_id": 2,
+          "supplier_name": "Silver Valley Ingredients SAMPLE",
+          "approved_brand": "SilverSalt",
+          "approved_manufacturer": "Silver Valley Foods",
+          "coverage_status": "covered",
+          "certificate_expiry_date": "2027-09-30"
+        },
+        {
+          "id": 16,
+          "name": "Spice Mix",
+          "supplier_id": 2,
+          "supplier_name": "Silver Valley Ingredients SAMPLE",
+          "approved_brand": "SilverSpice",
+          "approved_manufacturer": "Silver Valley Foods",
+          "coverage_status": "covered",
+          "certificate_expiry_date": "2027-09-30"
+        }
+      ]
+    },
+    "10": {
+      "Sunrise Bakery SAMPLE": [
+        {
+          "id": 1,
+          "name": "Wheat Flour",
+          "supplier_id": 1,
+          "supplier_name": "Golden Grain Supplies SAMPLE",
+          "approved_brand": "GoldenMill",
+          "approved_manufacturer": "Golden Grain Foods",
+          "coverage_status": "covered",
+          "certificate_expiry_date": "2027-11-30"
+        },
+        {
+          "id": 2,
+          "name": "Bread Flour",
+          "supplier_id": 1,
+          "supplier_name": "Golden Grain Supplies SAMPLE",
+          "approved_brand": "GoldenMill",
+          "approved_manufacturer": "Golden Grain Foods",
+          "coverage_status": "covered",
+          "certificate_expiry_date": "2027-11-30"
+        },
+        {
+          "id": 3,
+          "name": "Cake Flour",
+          "supplier_id": 1,
+          "supplier_name": "Golden Grain Supplies SAMPLE",
+          "approved_brand": "GoldenMill",
+          "approved_manufacturer": "Golden Grain Foods",
+          "coverage_status": "covered",
+          "certificate_expiry_date": "2027-11-30"
+        },
+        {
+          "id": 4,
+          "name": "Fine Sugar",
+          "supplier_id": 1,
+          "supplier_name": "Golden Grain Supplies SAMPLE",
+          "approved_brand": "SweetGold",
+          "approved_manufacturer": "Golden Grain Foods",
+          "coverage_status": "covered",
+          "certificate_expiry_date": "2027-11-30"
+        },
+        {
+          "id": 5,
+          "name": "Corn Starch",
+          "supplier_id": 1,
+          "supplier_name": "Golden Grain Supplies SAMPLE",
+          "approved_brand": "GoldenMill",
+          "approved_manufacturer": "Golden Grain Foods",
+          "coverage_status": "covered",
+          "certificate_expiry_date": "2027-11-30"
+        },
+        {
+          "id": 6,
+          "name": "Cocoa Powder",
+          "supplier_id": 2,
+          "supplier_name": "Silver Valley Ingredients SAMPLE",
+          "approved_brand": "SilverCocoa",
+          "approved_manufacturer": "Silver Valley Foods",
+          "coverage_status": "covered",
+          "certificate_expiry_date": "2027-09-30"
+        },
+        {
+          "id": 7,
+          "name": "Vanilla Essence",
+          "supplier_id": 2,
+          "supplier_name": "Silver Valley Ingredients SAMPLE",
+          "approved_brand": "SilverVanilla",
+          "approved_manufacturer": "Silver Valley Foods",
+          "coverage_status": "covered",
+          "certificate_expiry_date": "2027-09-30"
+        },
+        {
+          "id": 8,
+          "name": "Cooking Chocolate",
+          "supplier_id": 2,
+          "supplier_name": "Silver Valley Ingredients SAMPLE",
+          "approved_brand": "SilverCocoa",
+          "approved_manufacturer": "Silver Valley Foods",
+          "coverage_status": "covered",
+          "certificate_expiry_date": "2027-09-30"
+        }
+      ],
+      "Crescent Caterer SAMPLE": [
+        {
+          "id": 9,
+          "name": "Wheat Flour",
+          "supplier_id": 1,
+          "supplier_name": "Golden Grain Supplies SAMPLE",
+          "approved_brand": "GoldenMill",
+          "approved_manufacturer": "Golden Grain Foods",
+          "coverage_status": "covered",
+          "certificate_expiry_date": "2027-11-30"
+        },
+        {
+          "id": 10,
+          "name": "Rice Flour",
+          "supplier_id": 1,
+          "supplier_name": "Golden Grain Supplies SAMPLE",
+          "approved_brand": "GoldenMill",
+          "approved_manufacturer": "Golden Grain Foods",
+          "coverage_status": "covered",
+          "certificate_expiry_date": "2027-11-30"
+        },
+        {
+          "id": 11,
+          "name": "Brown Sugar",
+          "supplier_id": 1,
+          "supplier_name": "Golden Grain Supplies SAMPLE",
+          "approved_brand": "SweetGold",
+          "approved_manufacturer": "Golden Grain Foods",
+          "coverage_status": "covered",
+          "certificate_expiry_date": "2027-11-30"
+        },
+        {
+          "id": 12,
+          "name": "Semolina",
+          "supplier_id": 1,
+          "supplier_name": "Golden Grain Supplies SAMPLE",
+          "approved_brand": "GoldenMill",
+          "approved_manufacturer": "Golden Grain Foods",
+          "coverage_status": "covered",
+          "certificate_expiry_date": "2027-11-30"
+        },
+        {
+          "id": 13,
+          "name": "Vegetable Oil",
+          "supplier_id": 2,
+          "supplier_name": "Silver Valley Ingredients SAMPLE",
+          "approved_brand": "SilverPure",
+          "approved_manufacturer": "Silver Valley Foods",
+          "coverage_status": "covered",
+          "certificate_expiry_date": "2027-09-30"
+        },
+        {
+          "id": 14,
+          "name": "Coconut Milk",
+          "supplier_id": 2,
+          "supplier_name": "Silver Valley Ingredients SAMPLE",
+          "approved_brand": "SilverCoco",
+          "approved_manufacturer": "Silver Valley Foods",
+          "coverage_status": "covered",
+          "certificate_expiry_date": "2027-09-30"
+        },
+        {
+          "id": 15,
+          "name": "Salt",
+          "supplier_id": 2,
+          "supplier_name": "Silver Valley Ingredients SAMPLE",
+          "approved_brand": "SilverSalt",
+          "approved_manufacturer": "Silver Valley Foods",
+          "coverage_status": "covered",
+          "certificate_expiry_date": "2027-09-30"
+        },
+        {
+          "id": 16,
+          "name": "Spice Mix",
+          "supplier_id": 2,
+          "supplier_name": "Silver Valley Ingredients SAMPLE",
+          "approved_brand": "SilverSpice",
+          "approved_manufacturer": "Silver Valley Foods",
+          "coverage_status": "covered",
+          "certificate_expiry_date": "2027-09-30"
+        }
+      ]
+    },
+    "01": {
+      "Sunrise Bakery SAMPLE": [
+        {
+          "id": 1,
+          "name": "Wheat Flour",
+          "supplier_id": 1,
+          "supplier_name": "Golden Grain Supplies SAMPLE",
+          "approved_brand": "GoldenMill",
+          "approved_manufacturer": "Golden Grain Foods",
+          "coverage_status": "expiring",
+          "certificate_expiry_date": "2026-11-30"
+        },
+        {
+          "id": 2,
+          "name": "Bread Flour",
+          "supplier_id": 1,
+          "supplier_name": "Golden Grain Supplies SAMPLE",
+          "approved_brand": "GoldenMill",
+          "approved_manufacturer": "Golden Grain Foods",
+          "coverage_status": "expiring",
+          "certificate_expiry_date": "2026-11-30"
+        },
+        {
+          "id": 3,
+          "name": "Cake Flour",
+          "supplier_id": 1,
+          "supplier_name": "Golden Grain Supplies SAMPLE",
+          "approved_brand": "GoldenMill",
+          "approved_manufacturer": "Golden Grain Foods",
+          "coverage_status": "expiring",
+          "certificate_expiry_date": "2026-11-30"
+        },
+        {
+          "id": 4,
+          "name": "Fine Sugar",
+          "supplier_id": 1,
+          "supplier_name": "Golden Grain Supplies SAMPLE",
+          "approved_brand": "SweetGold",
+          "approved_manufacturer": "Golden Grain Foods",
+          "coverage_status": "expiring",
+          "certificate_expiry_date": "2026-11-30"
+        },
+        {
+          "id": 5,
+          "name": "Corn Starch",
+          "supplier_id": 1,
+          "supplier_name": "Golden Grain Supplies SAMPLE",
+          "approved_brand": "GoldenMill",
+          "approved_manufacturer": "Golden Grain Foods",
+          "coverage_status": "expiring",
+          "certificate_expiry_date": "2026-11-30"
+        },
+        {
+          "id": 6,
+          "name": "Cocoa Powder",
+          "supplier_id": 2,
+          "supplier_name": "Silver Valley Ingredients SAMPLE",
+          "approved_brand": "SilverCocoa",
+          "approved_manufacturer": "Silver Valley Foods",
+          "coverage_status": "covered",
+          "certificate_expiry_date": "2028-09-30"
+        },
+        {
+          "id": 7,
+          "name": "Vanilla Essence",
+          "supplier_id": 2,
+          "supplier_name": "Silver Valley Ingredients SAMPLE",
+          "approved_brand": "SilverVanilla",
+          "approved_manufacturer": "Silver Valley Foods",
+          "coverage_status": "covered",
+          "certificate_expiry_date": "2028-09-30"
+        },
+        {
+          "id": 8,
+          "name": "Cooking Chocolate",
+          "supplier_id": 2,
+          "supplier_name": "Silver Valley Ingredients SAMPLE",
+          "approved_brand": "SilverCocoa",
+          "approved_manufacturer": "Silver Valley Foods",
+          "coverage_status": "covered",
+          "certificate_expiry_date": "2028-09-30"
+        }
+      ],
+      "Crescent Caterer SAMPLE": [
+        {
+          "id": 9,
+          "name": "Wheat Flour",
+          "supplier_id": 1,
+          "supplier_name": "Golden Grain Supplies SAMPLE",
+          "approved_brand": "GoldenMill",
+          "approved_manufacturer": "Golden Grain Foods",
+          "coverage_status": "expiring",
+          "certificate_expiry_date": "2026-11-30"
+        },
+        {
+          "id": 10,
+          "name": "Rice Flour",
+          "supplier_id": 1,
+          "supplier_name": "Golden Grain Supplies SAMPLE",
+          "approved_brand": "GoldenMill",
+          "approved_manufacturer": "Golden Grain Foods",
+          "coverage_status": "expiring",
+          "certificate_expiry_date": "2026-11-30"
+        },
+        {
+          "id": 11,
+          "name": "Brown Sugar",
+          "supplier_id": 1,
+          "supplier_name": "Golden Grain Supplies SAMPLE",
+          "approved_brand": "SweetGold",
+          "approved_manufacturer": "Golden Grain Foods",
+          "coverage_status": "expiring",
+          "certificate_expiry_date": "2026-11-30"
+        },
+        {
+          "id": 12,
+          "name": "Semolina",
+          "supplier_id": 1,
+          "supplier_name": "Golden Grain Supplies SAMPLE",
+          "approved_brand": "GoldenMill",
+          "approved_manufacturer": "Golden Grain Foods",
+          "coverage_status": "expiring",
+          "certificate_expiry_date": "2026-11-30"
+        },
+        {
+          "id": 13,
+          "name": "Vegetable Oil",
+          "supplier_id": 2,
+          "supplier_name": "Silver Valley Ingredients SAMPLE",
+          "approved_brand": "SilverPure",
+          "approved_manufacturer": "Silver Valley Foods",
+          "coverage_status": "covered",
+          "certificate_expiry_date": "2028-09-30"
+        },
+        {
+          "id": 14,
+          "name": "Coconut Milk",
+          "supplier_id": 2,
+          "supplier_name": "Silver Valley Ingredients SAMPLE",
+          "approved_brand": "SilverCoco",
+          "approved_manufacturer": "Silver Valley Foods",
+          "coverage_status": "covered",
+          "certificate_expiry_date": "2028-09-30"
+        },
+        {
+          "id": 15,
+          "name": "Salt",
+          "supplier_id": 2,
+          "supplier_name": "Silver Valley Ingredients SAMPLE",
+          "approved_brand": "SilverSalt",
+          "approved_manufacturer": "Silver Valley Foods",
+          "coverage_status": "covered",
+          "certificate_expiry_date": "2028-09-30"
+        },
+        {
+          "id": 16,
+          "name": "Spice Mix",
+          "supplier_id": 2,
+          "supplier_name": "Silver Valley Ingredients SAMPLE",
+          "approved_brand": "SilverSpice",
+          "approved_manufacturer": "Silver Valley Foods",
+          "coverage_status": "covered",
+          "certificate_expiry_date": "2028-09-30"
+        }
+      ]
+    },
+    "11": {
+      "Sunrise Bakery SAMPLE": [
+        {
+          "id": 1,
+          "name": "Wheat Flour",
+          "supplier_id": 1,
+          "supplier_name": "Golden Grain Supplies SAMPLE",
+          "approved_brand": "GoldenMill",
+          "approved_manufacturer": "Golden Grain Foods",
+          "coverage_status": "covered",
+          "certificate_expiry_date": "2027-11-30"
+        },
+        {
+          "id": 2,
+          "name": "Bread Flour",
+          "supplier_id": 1,
+          "supplier_name": "Golden Grain Supplies SAMPLE",
+          "approved_brand": "GoldenMill",
+          "approved_manufacturer": "Golden Grain Foods",
+          "coverage_status": "covered",
+          "certificate_expiry_date": "2027-11-30"
+        },
+        {
+          "id": 3,
+          "name": "Cake Flour",
+          "supplier_id": 1,
+          "supplier_name": "Golden Grain Supplies SAMPLE",
+          "approved_brand": "GoldenMill",
+          "approved_manufacturer": "Golden Grain Foods",
+          "coverage_status": "covered",
+          "certificate_expiry_date": "2027-11-30"
+        },
+        {
+          "id": 4,
+          "name": "Fine Sugar",
+          "supplier_id": 1,
+          "supplier_name": "Golden Grain Supplies SAMPLE",
+          "approved_brand": "SweetGold",
+          "approved_manufacturer": "Golden Grain Foods",
+          "coverage_status": "covered",
+          "certificate_expiry_date": "2027-11-30"
+        },
+        {
+          "id": 5,
+          "name": "Corn Starch",
+          "supplier_id": 1,
+          "supplier_name": "Golden Grain Supplies SAMPLE",
+          "approved_brand": "GoldenMill",
+          "approved_manufacturer": "Golden Grain Foods",
+          "coverage_status": "covered",
+          "certificate_expiry_date": "2027-11-30"
+        },
+        {
+          "id": 6,
+          "name": "Cocoa Powder",
+          "supplier_id": 2,
+          "supplier_name": "Silver Valley Ingredients SAMPLE",
+          "approved_brand": "SilverCocoa",
+          "approved_manufacturer": "Silver Valley Foods",
+          "coverage_status": "covered",
+          "certificate_expiry_date": "2028-09-30"
+        },
+        {
+          "id": 7,
+          "name": "Vanilla Essence",
+          "supplier_id": 2,
+          "supplier_name": "Silver Valley Ingredients SAMPLE",
+          "approved_brand": "SilverVanilla",
+          "approved_manufacturer": "Silver Valley Foods",
+          "coverage_status": "covered",
+          "certificate_expiry_date": "2028-09-30"
+        },
+        {
+          "id": 8,
+          "name": "Cooking Chocolate",
+          "supplier_id": 2,
+          "supplier_name": "Silver Valley Ingredients SAMPLE",
+          "approved_brand": "SilverCocoa",
+          "approved_manufacturer": "Silver Valley Foods",
+          "coverage_status": "covered",
+          "certificate_expiry_date": "2028-09-30"
+        }
+      ],
+      "Crescent Caterer SAMPLE": [
+        {
+          "id": 9,
+          "name": "Wheat Flour",
+          "supplier_id": 1,
+          "supplier_name": "Golden Grain Supplies SAMPLE",
+          "approved_brand": "GoldenMill",
+          "approved_manufacturer": "Golden Grain Foods",
+          "coverage_status": "covered",
+          "certificate_expiry_date": "2027-11-30"
+        },
+        {
+          "id": 10,
+          "name": "Rice Flour",
+          "supplier_id": 1,
+          "supplier_name": "Golden Grain Supplies SAMPLE",
+          "approved_brand": "GoldenMill",
+          "approved_manufacturer": "Golden Grain Foods",
+          "coverage_status": "covered",
+          "certificate_expiry_date": "2027-11-30"
+        },
+        {
+          "id": 11,
+          "name": "Brown Sugar",
+          "supplier_id": 1,
+          "supplier_name": "Golden Grain Supplies SAMPLE",
+          "approved_brand": "SweetGold",
+          "approved_manufacturer": "Golden Grain Foods",
+          "coverage_status": "covered",
+          "certificate_expiry_date": "2027-11-30"
+        },
+        {
+          "id": 12,
+          "name": "Semolina",
+          "supplier_id": 1,
+          "supplier_name": "Golden Grain Supplies SAMPLE",
+          "approved_brand": "GoldenMill",
+          "approved_manufacturer": "Golden Grain Foods",
+          "coverage_status": "covered",
+          "certificate_expiry_date": "2027-11-30"
+        },
+        {
+          "id": 13,
+          "name": "Vegetable Oil",
+          "supplier_id": 2,
+          "supplier_name": "Silver Valley Ingredients SAMPLE",
+          "approved_brand": "SilverPure",
+          "approved_manufacturer": "Silver Valley Foods",
+          "coverage_status": "covered",
+          "certificate_expiry_date": "2028-09-30"
+        },
+        {
+          "id": 14,
+          "name": "Coconut Milk",
+          "supplier_id": 2,
+          "supplier_name": "Silver Valley Ingredients SAMPLE",
+          "approved_brand": "SilverCoco",
+          "approved_manufacturer": "Silver Valley Foods",
+          "coverage_status": "covered",
+          "certificate_expiry_date": "2028-09-30"
+        },
+        {
+          "id": 15,
+          "name": "Salt",
+          "supplier_id": 2,
+          "supplier_name": "Silver Valley Ingredients SAMPLE",
+          "approved_brand": "SilverSalt",
+          "approved_manufacturer": "Silver Valley Foods",
+          "coverage_status": "covered",
+          "certificate_expiry_date": "2028-09-30"
+        },
+        {
+          "id": 16,
+          "name": "Spice Mix",
+          "supplier_id": 2,
+          "supplier_name": "Silver Valley Ingredients SAMPLE",
+          "approved_brand": "SilverSpice",
+          "approved_manufacturer": "Silver Valley Foods",
+          "coverage_status": "covered",
+          "certificate_expiry_date": "2028-09-30"
+        }
+      ]
+    }
+  },
+  "certificates": {
+    "1": [
+      {
+        "id": 1,
+        "supplier_id": 1,
+        "issuer": "SAMPLE Food Certification Council",
+        "cert_no": "SAMPLE-GGS-2026-001",
+        "holder_name": "Golden Grain Supplies SAMPLE",
+        "expiry_date": "2026-11-30",
+        "scope": [
+          {
+            "product_name": "Wheat Flour",
+            "brand": "GoldenMill"
+          },
+          {
+            "product_name": "Bread Flour",
+            "brand": "GoldenMill"
+          },
+          {
+            "product_name": "Cake Flour",
+            "brand": "GoldenMill"
+          },
+          {
+            "product_name": "Corn Starch",
+            "brand": "GoldenMill"
+          },
+          {
+            "product_name": "Rice Flour",
+            "brand": "GoldenMill"
+          },
+          {
+            "product_name": "Baking Powder",
+            "brand": "GoldenMill"
+          },
+          {
+            "product_name": "Fine Sugar",
+            "brand": "SweetGold"
+          },
+          {
+            "product_name": "Brown Sugar",
+            "brand": "SweetGold"
+          },
+          {
+            "product_name": "Semolina",
+            "brand": "GoldenMill"
+          },
+          {
+            "product_name": "Potato Starch",
+            "brand": "GoldenMill"
+          }
+        ],
+        "image": null,
+        "status": "active"
+      },
+      {
+        "id": 2,
+        "supplier_id": 1,
+        "issuer": "SAMPLE Food Certification Council",
+        "cert_no": "SAMPLE-GGS-2025-001",
+        "holder_name": "Golden Grain Supplies SAMPLE",
+        "expiry_date": "2025-11-30",
+        "scope": [
+          {
+            "product_name": "Wheat Flour",
+            "brand": "GoldenMill"
+          },
+          {
+            "product_name": "Bread Flour",
+            "brand": "GoldenMill"
+          },
+          {
+            "product_name": "Cake Flour",
+            "brand": "GoldenMill"
+          },
+          {
+            "product_name": "Corn Starch",
+            "brand": "GoldenMill"
+          }
+        ],
+        "image": null,
+        "status": "superseded"
+      }
+    ],
+    "2": [
+      {
+        "id": 3,
+        "supplier_id": 2,
+        "issuer": "SAMPLE Food Certification Council",
+        "cert_no": "SAMPLE-SVI-2026-001",
+        "holder_name": "Silver Valley Ingredients SAMPLE",
+        "expiry_date": "2027-09-30",
+        "scope": [
+          {
+            "product_name": "Cocoa Powder",
+            "brand": "SilverCocoa"
+          },
+          {
+            "product_name": "Vanilla Essence",
+            "brand": "SilverVanilla"
+          },
+          {
+            "product_name": "Cooking Chocolate",
+            "brand": "SilverCocoa"
+          },
+          {
+            "product_name": "Vegetable Oil",
+            "brand": "SilverPure"
+          },
+          {
+            "product_name": "Coconut Milk",
+            "brand": "SilverCoco"
+          },
+          {
+            "product_name": "Chocolate Chips",
+            "brand": "SilverCocoa"
+          },
+          {
+            "product_name": "Salt",
+            "brand": "SilverSalt"
+          },
+          {
+            "product_name": "Spice Mix",
+            "brand": "SilverSpice"
+          }
+        ],
+        "image": null,
+        "status": "active"
+      },
+      {
+        "id": 4,
+        "supplier_id": 2,
+        "issuer": "SAMPLE Food Certification Council",
+        "cert_no": "SAMPLE-SVI-2025-001",
+        "holder_name": "Silver Valley Ingredients SAMPLE",
+        "expiry_date": "2025-09-30",
+        "scope": [
+          {
+            "product_name": "Cocoa Powder",
+            "brand": "SilverCocoa"
+          },
+          {
+            "product_name": "Vanilla Essence",
+            "brand": "SilverVanilla"
+          },
+          {
+            "product_name": "Vegetable Oil",
+            "brand": "SilverPure"
+          }
+        ],
+        "image": null,
+        "status": "superseded"
+      }
+    ]
+  },
+  "renewals": {
+    "1": {
+      "issuer": "SAMPLE Food Certification Council",
+      "cert_no": "SAMPLE-GGS-2027-PREVIEW",
+      "holder_name": "Golden Grain Supplies SAMPLE",
+      "expiry_date": "2027-11-30",
+      "scope": [
+        {
+          "product_name": "Wheat Flour",
+          "brand": "GoldenMill"
+        },
+        {
+          "product_name": "Bread Flour",
+          "brand": "GoldenMill"
+        },
+        {
+          "product_name": "Cake Flour",
+          "brand": "GoldenMill"
+        },
+        {
+          "product_name": "Corn Starch",
+          "brand": "GoldenMill"
+        },
+        {
+          "product_name": "Rice Flour",
+          "brand": "GoldenMill"
+        },
+        {
+          "product_name": "Baking Powder",
+          "brand": "GoldenMill"
+        },
+        {
+          "product_name": "Fine Sugar",
+          "brand": "SweetGold"
+        },
+        {
+          "product_name": "Brown Sugar",
+          "brand": "SweetGold"
+        },
+        {
+          "product_name": "Semolina",
+          "brand": "GoldenMill"
+        },
+        {
+          "product_name": "Potato Starch",
+          "brand": "GoldenMill"
+        }
+      ]
+    },
+    "2": {
+      "issuer": "SAMPLE Food Certification Council",
+      "cert_no": "SAMPLE-SVI-2028-PREVIEW",
+      "holder_name": "Silver Valley Ingredients SAMPLE",
+      "expiry_date": "2028-09-30",
+      "scope": [
+        {
+          "product_name": "Cocoa Powder",
+          "brand": "SilverCocoa"
+        },
+        {
+          "product_name": "Vanilla Essence",
+          "brand": "SilverVanilla"
+        },
+        {
+          "product_name": "Cooking Chocolate",
+          "brand": "SilverCocoa"
+        },
+        {
+          "product_name": "Vegetable Oil",
+          "brand": "SilverPure"
+        },
+        {
+          "product_name": "Coconut Milk",
+          "brand": "SilverCoco"
+        },
+        {
+          "product_name": "Chocolate Chips",
+          "brand": "SilverCocoa"
+        },
+        {
+          "product_name": "Salt",
+          "brand": "SilverSalt"
+        },
+        {
+          "product_name": "Spice Mix",
+          "brand": "SilverSpice"
+        }
+      ]
+    }
+  },
+  "cases": [
+    {
+      "id": "alt-brand",
+      "title": "Changed brand",
+      "image": "/media/label-alt-brand.png",
+      "sha256": "23ffdac7e78a157188d0e297198603f22828736279077f112103a5ab239ed12e",
+      "extracted": {
+        "product_name": "Cocoa Powder",
+        "brand": "ALT SAMPLE BRAND",
+        "manufacturer": "Silver Valley Foods",
+        "halal_mark_present": false
+      },
+      "responses": {
+        "6": {
+          "id": 500,
+          "material_id": 6,
+          "image": "/media/label-alt-brand.png",
+          "extracted": {
+            "product_name": "Cocoa Powder",
+            "brand": "ALT SAMPLE BRAND",
+            "manufacturer": "Silver Valley Foods",
+            "halal_mark_present": false
+          },
+          "rule_results": [
+            {
+              "rule": "R1",
+              "passed": true,
+              "detail": "Required label fields are readable and valid."
+            },
+            {
+              "rule": "R2",
+              "passed": false,
+              "detail": "Brand score: 37.0; manufacturer score: 100.0. Both must be >= 90."
+            },
+            {
+              "rule": "R3",
+              "passed": false,
+              "detail": "Product or brand is not included in certificate scope."
+            },
+            {
+              "rule": "R4",
+              "passed": true,
+              "detail": "Certificate expiry: 2027-09-30."
+            },
+            {
+              "rule": "R5",
+              "passed": true,
+              "detail": "Issuer is on the demo recognised list."
+            }
+          ],
+          "verdict": "substitution",
+          "status": "pending_review",
+          "error": null,
+          "decided_by": null,
+          "reason": null,
+          "created_at": "2026-10-22T10:31:00+08:00"
+        }
+      },
+      "responses_by_renewal": {
+        "00": {
+          "6": {
+            "id": 500,
+            "material_id": 6,
+            "image": "/media/label-alt-brand.png",
+            "extracted": {
+              "product_name": "Cocoa Powder",
+              "brand": "ALT SAMPLE BRAND",
+              "manufacturer": "Silver Valley Foods",
+              "halal_mark_present": false
+            },
+            "rule_results": [
+              {
+                "rule": "R1",
+                "passed": true,
+                "detail": "Required label fields are readable and valid."
+              },
+              {
+                "rule": "R2",
+                "passed": false,
+                "detail": "Brand score: 37.0; manufacturer score: 100.0. Both must be >= 90."
+              },
+              {
+                "rule": "R3",
+                "passed": false,
+                "detail": "Product or brand is not included in certificate scope."
+              },
+              {
+                "rule": "R4",
+                "passed": true,
+                "detail": "Certificate expiry: 2027-09-30."
+              },
+              {
+                "rule": "R5",
+                "passed": true,
+                "detail": "Issuer is on the demo recognised list."
+              }
+            ],
+            "verdict": "substitution",
+            "status": "pending_review",
+            "error": null,
+            "decided_by": null,
+            "reason": null,
+            "created_at": "2026-10-22T10:31:00+08:00"
+          }
+        },
+        "10": {
+          "6": {
+            "id": 500,
+            "material_id": 6,
+            "image": "/media/label-alt-brand.png",
+            "extracted": {
+              "product_name": "Cocoa Powder",
+              "brand": "ALT SAMPLE BRAND",
+              "manufacturer": "Silver Valley Foods",
+              "halal_mark_present": false
+            },
+            "rule_results": [
+              {
+                "rule": "R1",
+                "passed": true,
+                "detail": "Required label fields are readable and valid."
+              },
+              {
+                "rule": "R2",
+                "passed": false,
+                "detail": "Brand score: 37.0; manufacturer score: 100.0. Both must be >= 90."
+              },
+              {
+                "rule": "R3",
+                "passed": false,
+                "detail": "Product or brand is not included in certificate scope."
+              },
+              {
+                "rule": "R4",
+                "passed": true,
+                "detail": "Certificate expiry: 2027-09-30."
+              },
+              {
+                "rule": "R5",
+                "passed": true,
+                "detail": "Issuer is on the demo recognised list."
+              }
+            ],
+            "verdict": "substitution",
+            "status": "pending_review",
+            "error": null,
+            "decided_by": null,
+            "reason": null,
+            "created_at": "2026-10-22T10:31:00+08:00"
+          }
+        },
+        "01": {
+          "6": {
+            "id": 500,
+            "material_id": 6,
+            "image": "/media/label-alt-brand.png",
+            "extracted": {
+              "product_name": "Cocoa Powder",
+              "brand": "ALT SAMPLE BRAND",
+              "manufacturer": "Silver Valley Foods",
+              "halal_mark_present": false
+            },
+            "rule_results": [
+              {
+                "rule": "R1",
+                "passed": true,
+                "detail": "Required label fields are readable and valid."
+              },
+              {
+                "rule": "R2",
+                "passed": false,
+                "detail": "Brand score: 37.0; manufacturer score: 100.0. Both must be >= 90."
+              },
+              {
+                "rule": "R3",
+                "passed": false,
+                "detail": "Product or brand is not included in certificate scope."
+              },
+              {
+                "rule": "R4",
+                "passed": true,
+                "detail": "Certificate expiry: 2028-09-30."
+              },
+              {
+                "rule": "R5",
+                "passed": true,
+                "detail": "Issuer is on the demo recognised list."
+              }
+            ],
+            "verdict": "substitution",
+            "status": "pending_review",
+            "error": null,
+            "decided_by": null,
+            "reason": null,
+            "created_at": "2026-10-22T10:31:00+08:00"
+          }
+        },
+        "11": {
+          "6": {
+            "id": 500,
+            "material_id": 6,
+            "image": "/media/label-alt-brand.png",
+            "extracted": {
+              "product_name": "Cocoa Powder",
+              "brand": "ALT SAMPLE BRAND",
+              "manufacturer": "Silver Valley Foods",
+              "halal_mark_present": false
+            },
+            "rule_results": [
+              {
+                "rule": "R1",
+                "passed": true,
+                "detail": "Required label fields are readable and valid."
+              },
+              {
+                "rule": "R2",
+                "passed": false,
+                "detail": "Brand score: 37.0; manufacturer score: 100.0. Both must be >= 90."
+              },
+              {
+                "rule": "R3",
+                "passed": false,
+                "detail": "Product or brand is not included in certificate scope."
+              },
+              {
+                "rule": "R4",
+                "passed": true,
+                "detail": "Certificate expiry: 2028-09-30."
+              },
+              {
+                "rule": "R5",
+                "passed": true,
+                "detail": "Issuer is on the demo recognised list."
+              }
+            ],
+            "verdict": "substitution",
+            "status": "pending_review",
+            "error": null,
+            "decided_by": null,
+            "reason": null,
+            "created_at": "2026-10-22T10:31:00+08:00"
+          }
+        }
+      }
+    },
+    {
+      "id": "covered",
+      "title": "Matching cocoa label",
+      "image": "/media/label-covered.png",
+      "sha256": "4c240cdcf7237f432d86317f65205fe2f2e03ec8f6b2c1c03858eb74d31e6054",
+      "extracted": {
+        "product_name": "Cocoa Powder",
+        "brand": "SilverCocoa",
+        "manufacturer": "Silver Valley Foods",
+        "halal_mark_present": false
+      },
+      "responses": {
+        "6": {
+          "id": 500,
+          "material_id": 6,
+          "image": "/media/label-covered.png",
+          "extracted": {
+            "product_name": "Cocoa Powder",
+            "brand": "SilverCocoa",
+            "manufacturer": "Silver Valley Foods",
+            "halal_mark_present": false
+          },
+          "rule_results": [
+            {
+              "rule": "R1",
+              "passed": true,
+              "detail": "Required label fields are readable and valid."
+            },
+            {
+              "rule": "R2",
+              "passed": true,
+              "detail": "Brand score: 100.0; manufacturer score: 100.0. Both must be >= 90."
+            },
+            {
+              "rule": "R3",
+              "passed": true,
+              "detail": "Product and any brand restriction match certificate scope."
+            },
+            {
+              "rule": "R4",
+              "passed": true,
+              "detail": "Certificate expiry: 2027-09-30."
+            },
+            {
+              "rule": "R5",
+              "passed": true,
+              "detail": "Issuer is on the demo recognised list."
+            }
+          ],
+          "verdict": "covered",
+          "status": "auto_accepted",
+          "error": null,
+          "decided_by": null,
+          "reason": null,
+          "created_at": "2026-10-22T10:31:00+08:00"
+        }
+      },
+      "responses_by_renewal": {
+        "00": {
+          "6": {
+            "id": 500,
+            "material_id": 6,
+            "image": "/media/label-covered.png",
+            "extracted": {
+              "product_name": "Cocoa Powder",
+              "brand": "SilverCocoa",
+              "manufacturer": "Silver Valley Foods",
+              "halal_mark_present": false
+            },
+            "rule_results": [
+              {
+                "rule": "R1",
+                "passed": true,
+                "detail": "Required label fields are readable and valid."
+              },
+              {
+                "rule": "R2",
+                "passed": true,
+                "detail": "Brand score: 100.0; manufacturer score: 100.0. Both must be >= 90."
+              },
+              {
+                "rule": "R3",
+                "passed": true,
+                "detail": "Product and any brand restriction match certificate scope."
+              },
+              {
+                "rule": "R4",
+                "passed": true,
+                "detail": "Certificate expiry: 2027-09-30."
+              },
+              {
+                "rule": "R5",
+                "passed": true,
+                "detail": "Issuer is on the demo recognised list."
+              }
+            ],
+            "verdict": "covered",
+            "status": "auto_accepted",
+            "error": null,
+            "decided_by": null,
+            "reason": null,
+            "created_at": "2026-10-22T10:31:00+08:00"
+          }
+        },
+        "10": {
+          "6": {
+            "id": 500,
+            "material_id": 6,
+            "image": "/media/label-covered.png",
+            "extracted": {
+              "product_name": "Cocoa Powder",
+              "brand": "SilverCocoa",
+              "manufacturer": "Silver Valley Foods",
+              "halal_mark_present": false
+            },
+            "rule_results": [
+              {
+                "rule": "R1",
+                "passed": true,
+                "detail": "Required label fields are readable and valid."
+              },
+              {
+                "rule": "R2",
+                "passed": true,
+                "detail": "Brand score: 100.0; manufacturer score: 100.0. Both must be >= 90."
+              },
+              {
+                "rule": "R3",
+                "passed": true,
+                "detail": "Product and any brand restriction match certificate scope."
+              },
+              {
+                "rule": "R4",
+                "passed": true,
+                "detail": "Certificate expiry: 2027-09-30."
+              },
+              {
+                "rule": "R5",
+                "passed": true,
+                "detail": "Issuer is on the demo recognised list."
+              }
+            ],
+            "verdict": "covered",
+            "status": "auto_accepted",
+            "error": null,
+            "decided_by": null,
+            "reason": null,
+            "created_at": "2026-10-22T10:31:00+08:00"
+          }
+        },
+        "01": {
+          "6": {
+            "id": 500,
+            "material_id": 6,
+            "image": "/media/label-covered.png",
+            "extracted": {
+              "product_name": "Cocoa Powder",
+              "brand": "SilverCocoa",
+              "manufacturer": "Silver Valley Foods",
+              "halal_mark_present": false
+            },
+            "rule_results": [
+              {
+                "rule": "R1",
+                "passed": true,
+                "detail": "Required label fields are readable and valid."
+              },
+              {
+                "rule": "R2",
+                "passed": true,
+                "detail": "Brand score: 100.0; manufacturer score: 100.0. Both must be >= 90."
+              },
+              {
+                "rule": "R3",
+                "passed": true,
+                "detail": "Product and any brand restriction match certificate scope."
+              },
+              {
+                "rule": "R4",
+                "passed": true,
+                "detail": "Certificate expiry: 2028-09-30."
+              },
+              {
+                "rule": "R5",
+                "passed": true,
+                "detail": "Issuer is on the demo recognised list."
+              }
+            ],
+            "verdict": "covered",
+            "status": "auto_accepted",
+            "error": null,
+            "decided_by": null,
+            "reason": null,
+            "created_at": "2026-10-22T10:31:00+08:00"
+          }
+        },
+        "11": {
+          "6": {
+            "id": 500,
+            "material_id": 6,
+            "image": "/media/label-covered.png",
+            "extracted": {
+              "product_name": "Cocoa Powder",
+              "brand": "SilverCocoa",
+              "manufacturer": "Silver Valley Foods",
+              "halal_mark_present": false
+            },
+            "rule_results": [
+              {
+                "rule": "R1",
+                "passed": true,
+                "detail": "Required label fields are readable and valid."
+              },
+              {
+                "rule": "R2",
+                "passed": true,
+                "detail": "Brand score: 100.0; manufacturer score: 100.0. Both must be >= 90."
+              },
+              {
+                "rule": "R3",
+                "passed": true,
+                "detail": "Product and any brand restriction match certificate scope."
+              },
+              {
+                "rule": "R4",
+                "passed": true,
+                "detail": "Certificate expiry: 2028-09-30."
+              },
+              {
+                "rule": "R5",
+                "passed": true,
+                "detail": "Issuer is on the demo recognised list."
+              }
+            ],
+            "verdict": "covered",
+            "status": "auto_accepted",
+            "error": null,
+            "decided_by": null,
+            "reason": null,
+            "created_at": "2026-10-22T10:31:00+08:00"
+          }
+        }
+      }
+    },
+    {
+      "id": "partial",
+      "title": "Manufacturer unreadable",
+      "image": "/media/label-partial.png",
+      "sha256": "7f84021e9c4b5760e727d58a37bdae7be67f0c94ce9ba0e511d317193256f2ff",
+      "extracted": {
+        "product_name": "Cocoa Powder",
+        "brand": "SilverCocoa",
+        "manufacturer": null,
+        "halal_mark_present": false
+      },
+      "responses": {
+        "6": {
+          "id": 500,
+          "material_id": 6,
+          "image": "/media/label-partial.png",
+          "extracted": {
+            "product_name": "Cocoa Powder",
+            "brand": "SilverCocoa",
+            "manufacturer": null,
+            "halal_mark_present": false
+          },
+          "rule_results": [
+            {
+              "rule": "R1",
+              "passed": false,
+              "detail": "Invalid or incomplete label extraction; human review required."
+            },
+            {
+              "rule": "R2",
+              "passed": null,
+              "detail": "Not evaluated: label information incomplete."
+            },
+            {
+              "rule": "R3",
+              "passed": null,
+              "detail": "Not evaluated: product name unavailable."
+            },
+            {
+              "rule": "R4",
+              "passed": true,
+              "detail": "Certificate expiry: 2027-09-30."
+            },
+            {
+              "rule": "R5",
+              "passed": true,
+              "detail": "Issuer is on the demo recognised list."
+            }
+          ],
+          "verdict": "needs_human",
+          "status": "pending_review",
+          "error": null,
+          "decided_by": null,
+          "reason": null,
+          "created_at": "2026-10-22T10:31:00+08:00"
+        }
+      },
+      "responses_by_renewal": {
+        "00": {
+          "6": {
+            "id": 500,
+            "material_id": 6,
+            "image": "/media/label-partial.png",
+            "extracted": {
+              "product_name": "Cocoa Powder",
+              "brand": "SilverCocoa",
+              "manufacturer": null,
+              "halal_mark_present": false
+            },
+            "rule_results": [
+              {
+                "rule": "R1",
+                "passed": false,
+                "detail": "Invalid or incomplete label extraction; human review required."
+              },
+              {
+                "rule": "R2",
+                "passed": null,
+                "detail": "Not evaluated: label information incomplete."
+              },
+              {
+                "rule": "R3",
+                "passed": null,
+                "detail": "Not evaluated: product name unavailable."
+              },
+              {
+                "rule": "R4",
+                "passed": true,
+                "detail": "Certificate expiry: 2027-09-30."
+              },
+              {
+                "rule": "R5",
+                "passed": true,
+                "detail": "Issuer is on the demo recognised list."
+              }
+            ],
+            "verdict": "needs_human",
+            "status": "pending_review",
+            "error": null,
+            "decided_by": null,
+            "reason": null,
+            "created_at": "2026-10-22T10:31:00+08:00"
+          }
+        },
+        "10": {
+          "6": {
+            "id": 500,
+            "material_id": 6,
+            "image": "/media/label-partial.png",
+            "extracted": {
+              "product_name": "Cocoa Powder",
+              "brand": "SilverCocoa",
+              "manufacturer": null,
+              "halal_mark_present": false
+            },
+            "rule_results": [
+              {
+                "rule": "R1",
+                "passed": false,
+                "detail": "Invalid or incomplete label extraction; human review required."
+              },
+              {
+                "rule": "R2",
+                "passed": null,
+                "detail": "Not evaluated: label information incomplete."
+              },
+              {
+                "rule": "R3",
+                "passed": null,
+                "detail": "Not evaluated: product name unavailable."
+              },
+              {
+                "rule": "R4",
+                "passed": true,
+                "detail": "Certificate expiry: 2027-09-30."
+              },
+              {
+                "rule": "R5",
+                "passed": true,
+                "detail": "Issuer is on the demo recognised list."
+              }
+            ],
+            "verdict": "needs_human",
+            "status": "pending_review",
+            "error": null,
+            "decided_by": null,
+            "reason": null,
+            "created_at": "2026-10-22T10:31:00+08:00"
+          }
+        },
+        "01": {
+          "6": {
+            "id": 500,
+            "material_id": 6,
+            "image": "/media/label-partial.png",
+            "extracted": {
+              "product_name": "Cocoa Powder",
+              "brand": "SilverCocoa",
+              "manufacturer": null,
+              "halal_mark_present": false
+            },
+            "rule_results": [
+              {
+                "rule": "R1",
+                "passed": false,
+                "detail": "Invalid or incomplete label extraction; human review required."
+              },
+              {
+                "rule": "R2",
+                "passed": null,
+                "detail": "Not evaluated: label information incomplete."
+              },
+              {
+                "rule": "R3",
+                "passed": null,
+                "detail": "Not evaluated: product name unavailable."
+              },
+              {
+                "rule": "R4",
+                "passed": true,
+                "detail": "Certificate expiry: 2028-09-30."
+              },
+              {
+                "rule": "R5",
+                "passed": true,
+                "detail": "Issuer is on the demo recognised list."
+              }
+            ],
+            "verdict": "needs_human",
+            "status": "pending_review",
+            "error": null,
+            "decided_by": null,
+            "reason": null,
+            "created_at": "2026-10-22T10:31:00+08:00"
+          }
+        },
+        "11": {
+          "6": {
+            "id": 500,
+            "material_id": 6,
+            "image": "/media/label-partial.png",
+            "extracted": {
+              "product_name": "Cocoa Powder",
+              "brand": "SilverCocoa",
+              "manufacturer": null,
+              "halal_mark_present": false
+            },
+            "rule_results": [
+              {
+                "rule": "R1",
+                "passed": false,
+                "detail": "Invalid or incomplete label extraction; human review required."
+              },
+              {
+                "rule": "R2",
+                "passed": null,
+                "detail": "Not evaluated: label information incomplete."
+              },
+              {
+                "rule": "R3",
+                "passed": null,
+                "detail": "Not evaluated: product name unavailable."
+              },
+              {
+                "rule": "R4",
+                "passed": true,
+                "detail": "Certificate expiry: 2028-09-30."
+              },
+              {
+                "rule": "R5",
+                "passed": true,
+                "detail": "Issuer is on the demo recognised list."
+              }
+            ],
+            "verdict": "needs_human",
+            "status": "pending_review",
+            "error": null,
+            "decided_by": null,
+            "reason": null,
+            "created_at": "2026-10-22T10:31:00+08:00"
+          }
+        }
+      }
+    },
+    {
+      "id": "expiring",
+      "title": "Expiring flour record",
+      "image": "/media/label-expiring.png",
+      "sha256": "400fd6af6cfff3cb6ec074431cf20f38b196723dd58a1245ef37f071c645d5c1",
+      "extracted": {
+        "product_name": "Wheat Flour",
+        "brand": "GoldenMill",
+        "manufacturer": "Golden Grain Foods",
+        "halal_mark_present": false
+      },
+      "responses": {
+        "1": {
+          "id": 500,
+          "material_id": 1,
+          "image": "/media/label-expiring.png",
+          "extracted": {
+            "product_name": "Wheat Flour",
+            "brand": "GoldenMill",
+            "manufacturer": "Golden Grain Foods",
+            "halal_mark_present": false
+          },
+          "rule_results": [
+            {
+              "rule": "R1",
+              "passed": true,
+              "detail": "Required label fields are readable and valid."
+            },
+            {
+              "rule": "R2",
+              "passed": true,
+              "detail": "Brand score: 100.0; manufacturer score: 100.0. Both must be >= 90."
+            },
+            {
+              "rule": "R3",
+              "passed": true,
+              "detail": "Product and any brand restriction match certificate scope."
+            },
+            {
+              "rule": "R4",
+              "passed": true,
+              "detail": "Certificate expiry: 2026-11-30."
+            },
+            {
+              "rule": "R5",
+              "passed": true,
+              "detail": "Issuer is on the demo recognised list."
+            }
+          ],
+          "verdict": "expiring",
+          "status": "auto_accepted",
+          "error": null,
+          "decided_by": null,
+          "reason": null,
+          "created_at": "2026-10-22T10:31:00+08:00"
+        },
+        "9": {
+          "id": 500,
+          "material_id": 9,
+          "image": "/media/label-expiring.png",
+          "extracted": {
+            "product_name": "Wheat Flour",
+            "brand": "GoldenMill",
+            "manufacturer": "Golden Grain Foods",
+            "halal_mark_present": false
+          },
+          "rule_results": [
+            {
+              "rule": "R1",
+              "passed": true,
+              "detail": "Required label fields are readable and valid."
+            },
+            {
+              "rule": "R2",
+              "passed": true,
+              "detail": "Brand score: 100.0; manufacturer score: 100.0. Both must be >= 90."
+            },
+            {
+              "rule": "R3",
+              "passed": true,
+              "detail": "Product and any brand restriction match certificate scope."
+            },
+            {
+              "rule": "R4",
+              "passed": true,
+              "detail": "Certificate expiry: 2026-11-30."
+            },
+            {
+              "rule": "R5",
+              "passed": true,
+              "detail": "Issuer is on the demo recognised list."
+            }
+          ],
+          "verdict": "expiring",
+          "status": "auto_accepted",
+          "error": null,
+          "decided_by": null,
+          "reason": null,
+          "created_at": "2026-10-22T10:31:00+08:00"
+        }
+      },
+      "responses_by_renewal": {
+        "00": {
+          "1": {
+            "id": 500,
+            "material_id": 1,
+            "image": "/media/label-expiring.png",
+            "extracted": {
+              "product_name": "Wheat Flour",
+              "brand": "GoldenMill",
+              "manufacturer": "Golden Grain Foods",
+              "halal_mark_present": false
+            },
+            "rule_results": [
+              {
+                "rule": "R1",
+                "passed": true,
+                "detail": "Required label fields are readable and valid."
+              },
+              {
+                "rule": "R2",
+                "passed": true,
+                "detail": "Brand score: 100.0; manufacturer score: 100.0. Both must be >= 90."
+              },
+              {
+                "rule": "R3",
+                "passed": true,
+                "detail": "Product and any brand restriction match certificate scope."
+              },
+              {
+                "rule": "R4",
+                "passed": true,
+                "detail": "Certificate expiry: 2026-11-30."
+              },
+              {
+                "rule": "R5",
+                "passed": true,
+                "detail": "Issuer is on the demo recognised list."
+              }
+            ],
+            "verdict": "expiring",
+            "status": "auto_accepted",
+            "error": null,
+            "decided_by": null,
+            "reason": null,
+            "created_at": "2026-10-22T10:31:00+08:00"
+          },
+          "9": {
+            "id": 500,
+            "material_id": 9,
+            "image": "/media/label-expiring.png",
+            "extracted": {
+              "product_name": "Wheat Flour",
+              "brand": "GoldenMill",
+              "manufacturer": "Golden Grain Foods",
+              "halal_mark_present": false
+            },
+            "rule_results": [
+              {
+                "rule": "R1",
+                "passed": true,
+                "detail": "Required label fields are readable and valid."
+              },
+              {
+                "rule": "R2",
+                "passed": true,
+                "detail": "Brand score: 100.0; manufacturer score: 100.0. Both must be >= 90."
+              },
+              {
+                "rule": "R3",
+                "passed": true,
+                "detail": "Product and any brand restriction match certificate scope."
+              },
+              {
+                "rule": "R4",
+                "passed": true,
+                "detail": "Certificate expiry: 2026-11-30."
+              },
+              {
+                "rule": "R5",
+                "passed": true,
+                "detail": "Issuer is on the demo recognised list."
+              }
+            ],
+            "verdict": "expiring",
+            "status": "auto_accepted",
+            "error": null,
+            "decided_by": null,
+            "reason": null,
+            "created_at": "2026-10-22T10:31:00+08:00"
+          }
+        },
+        "10": {
+          "1": {
+            "id": 500,
+            "material_id": 1,
+            "image": "/media/label-expiring.png",
+            "extracted": {
+              "product_name": "Wheat Flour",
+              "brand": "GoldenMill",
+              "manufacturer": "Golden Grain Foods",
+              "halal_mark_present": false
+            },
+            "rule_results": [
+              {
+                "rule": "R1",
+                "passed": true,
+                "detail": "Required label fields are readable and valid."
+              },
+              {
+                "rule": "R2",
+                "passed": true,
+                "detail": "Brand score: 100.0; manufacturer score: 100.0. Both must be >= 90."
+              },
+              {
+                "rule": "R3",
+                "passed": true,
+                "detail": "Product and any brand restriction match certificate scope."
+              },
+              {
+                "rule": "R4",
+                "passed": true,
+                "detail": "Certificate expiry: 2027-11-30."
+              },
+              {
+                "rule": "R5",
+                "passed": true,
+                "detail": "Issuer is on the demo recognised list."
+              }
+            ],
+            "verdict": "covered",
+            "status": "auto_accepted",
+            "error": null,
+            "decided_by": null,
+            "reason": null,
+            "created_at": "2026-10-22T10:31:00+08:00"
+          },
+          "9": {
+            "id": 500,
+            "material_id": 9,
+            "image": "/media/label-expiring.png",
+            "extracted": {
+              "product_name": "Wheat Flour",
+              "brand": "GoldenMill",
+              "manufacturer": "Golden Grain Foods",
+              "halal_mark_present": false
+            },
+            "rule_results": [
+              {
+                "rule": "R1",
+                "passed": true,
+                "detail": "Required label fields are readable and valid."
+              },
+              {
+                "rule": "R2",
+                "passed": true,
+                "detail": "Brand score: 100.0; manufacturer score: 100.0. Both must be >= 90."
+              },
+              {
+                "rule": "R3",
+                "passed": true,
+                "detail": "Product and any brand restriction match certificate scope."
+              },
+              {
+                "rule": "R4",
+                "passed": true,
+                "detail": "Certificate expiry: 2027-11-30."
+              },
+              {
+                "rule": "R5",
+                "passed": true,
+                "detail": "Issuer is on the demo recognised list."
+              }
+            ],
+            "verdict": "covered",
+            "status": "auto_accepted",
+            "error": null,
+            "decided_by": null,
+            "reason": null,
+            "created_at": "2026-10-22T10:31:00+08:00"
+          }
+        },
+        "01": {
+          "1": {
+            "id": 500,
+            "material_id": 1,
+            "image": "/media/label-expiring.png",
+            "extracted": {
+              "product_name": "Wheat Flour",
+              "brand": "GoldenMill",
+              "manufacturer": "Golden Grain Foods",
+              "halal_mark_present": false
+            },
+            "rule_results": [
+              {
+                "rule": "R1",
+                "passed": true,
+                "detail": "Required label fields are readable and valid."
+              },
+              {
+                "rule": "R2",
+                "passed": true,
+                "detail": "Brand score: 100.0; manufacturer score: 100.0. Both must be >= 90."
+              },
+              {
+                "rule": "R3",
+                "passed": true,
+                "detail": "Product and any brand restriction match certificate scope."
+              },
+              {
+                "rule": "R4",
+                "passed": true,
+                "detail": "Certificate expiry: 2026-11-30."
+              },
+              {
+                "rule": "R5",
+                "passed": true,
+                "detail": "Issuer is on the demo recognised list."
+              }
+            ],
+            "verdict": "expiring",
+            "status": "auto_accepted",
+            "error": null,
+            "decided_by": null,
+            "reason": null,
+            "created_at": "2026-10-22T10:31:00+08:00"
+          },
+          "9": {
+            "id": 500,
+            "material_id": 9,
+            "image": "/media/label-expiring.png",
+            "extracted": {
+              "product_name": "Wheat Flour",
+              "brand": "GoldenMill",
+              "manufacturer": "Golden Grain Foods",
+              "halal_mark_present": false
+            },
+            "rule_results": [
+              {
+                "rule": "R1",
+                "passed": true,
+                "detail": "Required label fields are readable and valid."
+              },
+              {
+                "rule": "R2",
+                "passed": true,
+                "detail": "Brand score: 100.0; manufacturer score: 100.0. Both must be >= 90."
+              },
+              {
+                "rule": "R3",
+                "passed": true,
+                "detail": "Product and any brand restriction match certificate scope."
+              },
+              {
+                "rule": "R4",
+                "passed": true,
+                "detail": "Certificate expiry: 2026-11-30."
+              },
+              {
+                "rule": "R5",
+                "passed": true,
+                "detail": "Issuer is on the demo recognised list."
+              }
+            ],
+            "verdict": "expiring",
+            "status": "auto_accepted",
+            "error": null,
+            "decided_by": null,
+            "reason": null,
+            "created_at": "2026-10-22T10:31:00+08:00"
+          }
+        },
+        "11": {
+          "1": {
+            "id": 500,
+            "material_id": 1,
+            "image": "/media/label-expiring.png",
+            "extracted": {
+              "product_name": "Wheat Flour",
+              "brand": "GoldenMill",
+              "manufacturer": "Golden Grain Foods",
+              "halal_mark_present": false
+            },
+            "rule_results": [
+              {
+                "rule": "R1",
+                "passed": true,
+                "detail": "Required label fields are readable and valid."
+              },
+              {
+                "rule": "R2",
+                "passed": true,
+                "detail": "Brand score: 100.0; manufacturer score: 100.0. Both must be >= 90."
+              },
+              {
+                "rule": "R3",
+                "passed": true,
+                "detail": "Product and any brand restriction match certificate scope."
+              },
+              {
+                "rule": "R4",
+                "passed": true,
+                "detail": "Certificate expiry: 2027-11-30."
+              },
+              {
+                "rule": "R5",
+                "passed": true,
+                "detail": "Issuer is on the demo recognised list."
+              }
+            ],
+            "verdict": "covered",
+            "status": "auto_accepted",
+            "error": null,
+            "decided_by": null,
+            "reason": null,
+            "created_at": "2026-10-22T10:31:00+08:00"
+          },
+          "9": {
+            "id": 500,
+            "material_id": 9,
+            "image": "/media/label-expiring.png",
+            "extracted": {
+              "product_name": "Wheat Flour",
+              "brand": "GoldenMill",
+              "manufacturer": "Golden Grain Foods",
+              "halal_mark_present": false
+            },
+            "rule_results": [
+              {
+                "rule": "R1",
+                "passed": true,
+                "detail": "Required label fields are readable and valid."
+              },
+              {
+                "rule": "R2",
+                "passed": true,
+                "detail": "Brand score: 100.0; manufacturer score: 100.0. Both must be >= 90."
+              },
+              {
+                "rule": "R3",
+                "passed": true,
+                "detail": "Product and any brand restriction match certificate scope."
+              },
+              {
+                "rule": "R4",
+                "passed": true,
+                "detail": "Certificate expiry: 2027-11-30."
+              },
+              {
+                "rule": "R5",
+                "passed": true,
+                "detail": "Issuer is on the demo recognised list."
+              }
+            ],
+            "verdict": "covered",
+            "status": "auto_accepted",
+            "error": null,
+            "decided_by": null,
+            "reason": null,
+            "created_at": "2026-10-22T10:31:00+08:00"
+          }
+        }
+      }
+    }
+  ],
+  "source_materials": {
+    "1": {
+      "id": 1,
+      "tenant": "Sunrise Bakery SAMPLE",
+      "name": "Wheat Flour",
+      "supplier_id": 1,
+      "approved_brand": "GoldenMill",
+      "approved_manufacturer": "Golden Grain Foods"
+    },
+    "2": {
+      "id": 2,
+      "tenant": "Sunrise Bakery SAMPLE",
+      "name": "Bread Flour",
+      "supplier_id": 1,
+      "approved_brand": "GoldenMill",
+      "approved_manufacturer": "Golden Grain Foods"
+    },
+    "3": {
+      "id": 3,
+      "tenant": "Sunrise Bakery SAMPLE",
+      "name": "Cake Flour",
+      "supplier_id": 1,
+      "approved_brand": "GoldenMill",
+      "approved_manufacturer": "Golden Grain Foods"
+    },
+    "4": {
+      "id": 4,
+      "tenant": "Sunrise Bakery SAMPLE",
+      "name": "Fine Sugar",
+      "supplier_id": 1,
+      "approved_brand": "SweetGold",
+      "approved_manufacturer": "Golden Grain Foods"
+    },
+    "5": {
+      "id": 5,
+      "tenant": "Sunrise Bakery SAMPLE",
+      "name": "Corn Starch",
+      "supplier_id": 1,
+      "approved_brand": "GoldenMill",
+      "approved_manufacturer": "Golden Grain Foods"
+    },
+    "6": {
+      "id": 6,
+      "tenant": "Sunrise Bakery SAMPLE",
+      "name": "Cocoa Powder",
+      "supplier_id": 2,
+      "approved_brand": "SilverCocoa",
+      "approved_manufacturer": "Silver Valley Foods"
+    },
+    "7": {
+      "id": 7,
+      "tenant": "Sunrise Bakery SAMPLE",
+      "name": "Vanilla Essence",
+      "supplier_id": 2,
+      "approved_brand": "SilverVanilla",
+      "approved_manufacturer": "Silver Valley Foods"
+    },
+    "8": {
+      "id": 8,
+      "tenant": "Sunrise Bakery SAMPLE",
+      "name": "Cooking Chocolate",
+      "supplier_id": 2,
+      "approved_brand": "SilverCocoa",
+      "approved_manufacturer": "Silver Valley Foods"
+    },
+    "9": {
+      "id": 9,
+      "tenant": "Crescent Caterer SAMPLE",
+      "name": "Wheat Flour",
+      "supplier_id": 1,
+      "approved_brand": "GoldenMill",
+      "approved_manufacturer": "Golden Grain Foods"
+    },
+    "10": {
+      "id": 10,
+      "tenant": "Crescent Caterer SAMPLE",
+      "name": "Rice Flour",
+      "supplier_id": 1,
+      "approved_brand": "GoldenMill",
+      "approved_manufacturer": "Golden Grain Foods"
+    },
+    "11": {
+      "id": 11,
+      "tenant": "Crescent Caterer SAMPLE",
+      "name": "Brown Sugar",
+      "supplier_id": 1,
+      "approved_brand": "SweetGold",
+      "approved_manufacturer": "Golden Grain Foods"
+    },
+    "12": {
+      "id": 12,
+      "tenant": "Crescent Caterer SAMPLE",
+      "name": "Semolina",
+      "supplier_id": 1,
+      "approved_brand": "GoldenMill",
+      "approved_manufacturer": "Golden Grain Foods"
+    },
+    "13": {
+      "id": 13,
+      "tenant": "Crescent Caterer SAMPLE",
+      "name": "Vegetable Oil",
+      "supplier_id": 2,
+      "approved_brand": "SilverPure",
+      "approved_manufacturer": "Silver Valley Foods"
+    },
+    "14": {
+      "id": 14,
+      "tenant": "Crescent Caterer SAMPLE",
+      "name": "Coconut Milk",
+      "supplier_id": 2,
+      "approved_brand": "SilverCoco",
+      "approved_manufacturer": "Silver Valley Foods"
+    },
+    "15": {
+      "id": 15,
+      "tenant": "Crescent Caterer SAMPLE",
+      "name": "Salt",
+      "supplier_id": 2,
+      "approved_brand": "SilverSalt",
+      "approved_manufacturer": "Silver Valley Foods"
+    },
+    "16": {
+      "id": 16,
+      "tenant": "Crescent Caterer SAMPLE",
+      "name": "Spice Mix",
+      "supplier_id": 2,
+      "approved_brand": "SilverSpice",
+      "approved_manufacturer": "Silver Valley Foods"
+    }
+  },
+  "source_certificates": {
+    "1": {
+      "id": 1,
+      "supplier_id": 1,
+      "issuer": "SAMPLE Food Certification Council",
+      "cert_no": "SAMPLE-GGS-2026-001",
+      "holder_name": "Golden Grain Supplies SAMPLE",
+      "expiry_date": "2026-11-30",
+      "scope": [
+        {
+          "product_name": "Wheat Flour",
+          "brand": "GoldenMill"
+        },
+        {
+          "product_name": "Bread Flour",
+          "brand": "GoldenMill"
+        },
+        {
+          "product_name": "Cake Flour",
+          "brand": "GoldenMill"
+        },
+        {
+          "product_name": "Corn Starch",
+          "brand": "GoldenMill"
+        },
+        {
+          "product_name": "Rice Flour",
+          "brand": "GoldenMill"
+        },
+        {
+          "product_name": "Baking Powder",
+          "brand": "GoldenMill"
+        },
+        {
+          "product_name": "Fine Sugar",
+          "brand": "SweetGold"
+        },
+        {
+          "product_name": "Brown Sugar",
+          "brand": "SweetGold"
+        },
+        {
+          "product_name": "Semolina",
+          "brand": "GoldenMill"
+        },
+        {
+          "product_name": "Potato Starch",
+          "brand": "GoldenMill"
+        }
+      ],
+      "status": "active",
+      "image_file": "certificates/cert_01_expiring.png"
+    },
+    "2": {
+      "id": 3,
+      "supplier_id": 2,
+      "issuer": "SAMPLE Food Certification Council",
+      "cert_no": "SAMPLE-SVI-2026-001",
+      "holder_name": "Silver Valley Ingredients SAMPLE",
+      "expiry_date": "2027-09-30",
+      "scope": [
+        {
+          "product_name": "Cocoa Powder",
+          "brand": "SilverCocoa"
+        },
+        {
+          "product_name": "Vanilla Essence",
+          "brand": "SilverVanilla"
+        },
+        {
+          "product_name": "Cooking Chocolate",
+          "brand": "SilverCocoa"
+        },
+        {
+          "product_name": "Vegetable Oil",
+          "brand": "SilverPure"
+        },
+        {
+          "product_name": "Coconut Milk",
+          "brand": "SilverCoco"
+        },
+        {
+          "product_name": "Chocolate Chips",
+          "brand": "SilverCocoa"
+        },
+        {
+          "product_name": "Salt",
+          "brand": "SilverSalt"
+        },
+        {
+          "product_name": "Spice Mix",
+          "brand": "SilverSpice"
+        }
+      ],
+      "status": "active",
+      "image_file": "certificates/cert_03_valid.png"
+    }
+  },
+  "deliveries": {
+    "Sunrise Bakery SAMPLE": [
+      {
+        "id": 102,
+        "material_id": 6,
+        "image": "/media/label-alt-brand.png",
+        "extracted": {
+          "product_name": "Cocoa Powder",
+          "brand": "ALT SAMPLE BRAND",
+          "manufacturer": "Silver Valley Foods",
+          "halal_mark_present": false
+        },
+        "rule_results": [
+          {
+            "rule": "R1",
+            "passed": true,
+            "detail": "Required label fields are readable and valid."
+          },
+          {
+            "rule": "R2",
+            "passed": false,
+            "detail": "Brand score: 37.0; manufacturer score: 100.0. Both must be >= 90."
+          },
+          {
+            "rule": "R3",
+            "passed": false,
+            "detail": "Product or brand is not included in certificate scope."
+          },
+          {
+            "rule": "R4",
+            "passed": true,
+            "detail": "Certificate expiry: 2027-09-30."
+          },
+          {
+            "rule": "R5",
+            "passed": true,
+            "detail": "Issuer is on the demo recognised list."
+          }
+        ],
+        "verdict": "substitution",
+        "status": "pending_review",
+        "error": null,
+        "decided_by": null,
+        "reason": null,
+        "created_at": "2026-10-22T10:31:00+08:00"
+      },
+      {
+        "id": 104,
+        "material_id": 6,
+        "image": "/media/label-partial.png",
+        "extracted": {
+          "product_name": "Cocoa Powder",
+          "brand": "SilverCocoa",
+          "manufacturer": null,
+          "halal_mark_present": false
+        },
+        "rule_results": [
+          {
+            "rule": "R1",
+            "passed": false,
+            "detail": "Invalid or incomplete label extraction; human review required."
+          },
+          {
+            "rule": "R2",
+            "passed": null,
+            "detail": "Not evaluated: label information incomplete."
+          },
+          {
+            "rule": "R3",
+            "passed": null,
+            "detail": "Not evaluated: product name unavailable."
+          },
+          {
+            "rule": "R4",
+            "passed": true,
+            "detail": "Certificate expiry: 2027-09-30."
+          },
+          {
+            "rule": "R5",
+            "passed": true,
+            "detail": "Issuer is on the demo recognised list."
+          }
+        ],
+        "verdict": "needs_human",
+        "status": "pending_review",
+        "error": null,
+        "decided_by": null,
+        "reason": null,
+        "created_at": "2026-10-22T10:34:00+08:00"
+      }
+    ],
+    "Crescent Caterer SAMPLE": []
+  },
+  "initial_activity": {
+    "Sunrise Bakery SAMPLE": [
+      {
+        "id": 102,
+        "actor": "Receiving staff SAMPLE",
+        "role": "staff",
+        "action": "pending_review",
+        "delivery_id": 102,
+        "reason": null,
+        "created_at": "2026-10-22T10:31:00+08:00"
+      },
+      {
+        "id": 104,
+        "actor": "Receiving staff SAMPLE",
+        "role": "staff",
+        "action": "pending_review",
+        "delivery_id": 104,
+        "reason": null,
+        "created_at": "2026-10-22T10:34:00+08:00"
+      }
+    ],
+    "Crescent Caterer SAMPLE": []
+  }
+}

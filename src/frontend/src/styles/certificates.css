@@ -1,0 +1,202 @@
+.registry-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.05fr);
+  gap: 42px;
+  align-items: start;
+}
+.certificate-record-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: start;
+  gap: 18px;
+}
+.certificate-record h2 {
+  font-size: 24px;
+  overflow-wrap: anywhere;
+}
+.certificate-record > p {
+  color: var(--muted);
+  margin-top: 10px;
+  font-size: 16px;
+}
+.certificate-details {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 28px;
+  margin: 24px 0;
+}
+.certificate-details dt {
+  font-size: 14px;
+  color: var(--muted);
+  margin-bottom: 4px;
+}
+.certificate-details dd {
+  font-size: 18px;
+  overflow-wrap: anywhere;
+}
+.certificate-record table {
+  font-size: 16px;
+}
+.certificate-record thead th {
+  padding: 10px 12px;
+  background: #eeefec;
+  font-size: 14px;
+  border-bottom: 1px solid var(--line);
+}
+.certificate-record tbody th,
+.certificate-record tbody td {
+  padding: 12px;
+  border-bottom: 1px solid var(--line);
+  overflow-wrap: anywhere;
+}
+.certificate-record tbody th {
+  font-weight: 700;
+}
+.certificate-record .evidence-photo {
+  margin-top: 24px;
+}
+.previous-certificates {
+  margin-top: 28px;
+  border-top: 1px solid var(--line);
+  padding-top: 14px;
+}
+.previous-certificates > summary {
+  min-height: 44px;
+  cursor: pointer;
+  font-weight: 700;
+  padding: 10px 0;
+}
+.previous-certificates .certificate-record {
+  margin-top: 20px;
+  padding: 20px 0;
+}
+.renewal-form-section,
+.renewal-receipt {
+  border-left: 1px solid var(--line);
+  padding-left: 38px;
+  min-width: 0;
+}
+.renewal-form-section > h2,
+.renewal-receipt > h2 {
+  font-size: 31px;
+  line-height: 1.1;
+  margin-bottom: 14px;
+}
+.renewal-form-section > .muted {
+  font-size: 17px;
+  max-width: 52ch;
+}
+.prepared-renewal {
+  padding: 18px 0;
+  border-block: 1px solid var(--line);
+  margin-top: 24px;
+}
+.prepared-renewal p {
+  font-size: 15px;
+  color: var(--muted);
+  margin-bottom: 12px;
+}
+.renewal-form {
+  display: grid;
+  gap: 24px;
+  margin-top: 24px;
+}
+.renewal-form > div:empty {
+  display: none;
+}
+.certificate-fields {
+  border: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 18px;
+}
+.certificate-fields .field:first-child,
+.certificate-fields .field:nth-child(3) {
+  grid-column: 1/-1;
+}
+.certificate-fields .field label {
+  font-size: 16px;
+}
+.certificate-fields .field:nth-child(4) {
+  grid-column: 2;
+  grid-row: 2;
+}
+.scope-editor {
+  border: 0;
+  padding: 0;
+  min-width: 0;
+}
+.scope-editor legend {
+  font-weight: 700;
+  font-size: 20px;
+}
+.scope-editor > p {
+  font-size: 14px;
+  color: var(--muted);
+  margin: 8px 0 18px;
+  max-width: 60ch;
+}
+.scope-headings {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) 82px;
+  gap: 8px;
+  font-size: 14px;
+  font-weight: 700;
+  margin-bottom: 8px;
+}
+.scope-editor ol {
+  list-style: none;
+  display: grid;
+  gap: 10px;
+  padding: 0;
+  margin-bottom: 16px;
+}
+.scope-editor li {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) 82px;
+  gap: 8px;
+  align-items: center;
+}
+.scope-editor input {
+  font-size: 15px;
+  padding: 10px 8px;
+  min-width: 0;
+}
+.scope-remove {
+  font-size: 13px;
+  gap: 4px;
+  padding: 10px 5px;
+  min-width: 0;
+}
+.scope-editor .field-error {
+  color: var(--danger);
+  font-weight: 700;
+}
+.certificate-image-input {
+  padding-top: 20px;
+  border-top: 1px solid var(--line);
+}
+.certificate-image-input .evidence-photo {
+  max-width: 450px;
+  margin-top: 14px;
+}
+.renewal-submit-note {
+  font-size: 15px;
+  color: var(--muted);
+}
+.renewal-form > .button {
+  width: 100%;
+  min-height: 50px;
+  font-size: 20px;
+}
+.renewal-receipt > p {
+  margin-top: 16px;
+  max-width: 55ch;
+}
+.renewal-receipt > .button {
+  margin-top: 26px;
+}
+.certificate-image-input input[type="file"] {
+  min-width: 0;
+}
