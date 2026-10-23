@@ -23,7 +23,7 @@ def client(tmp_path: Path) -> TestClient:
     return TestClient(app)
 
 
-@pytest.mark.parametrize("path", ["/", "/review"])
+@pytest.mark.parametrize("path", ["/", "/review", "/apiculture"])
 def test_page_path_serves_index(client: TestClient, path: str) -> None:
     response = client.get(path)
     assert response.status_code == 200
@@ -34,7 +34,12 @@ def test_built_asset_is_served_as_is(client: TestClient) -> None:
     assert client.get("/assets/app.js").text == SCRIPT
 
 
-def test_unknown_api_path_stays_json_404(client: TestClient) -> None:
-    response = client.get("/api/missing")
+@pytest.mark.parametrize(
+    "path", ["/api", "/api/missing", "/api/nested/missing"]
+)
+def test_unknown_api_path_stays_json_404(
+    client: TestClient, path: str
+) -> None:
+    response = client.get(path)
     assert response.status_code == 404
     assert response.json() == {"detail": "Not Found"}

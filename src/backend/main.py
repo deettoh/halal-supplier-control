@@ -354,7 +354,10 @@ class SinglePageApp(StaticFiles):
         try:
             return await super().get_response(path, scope)
         except StarletteHTTPException as exc:
-            is_api = path.split("/", 1)[0] == API_PREFIX
+            is_api = (
+                path.replace("\\", "/").lstrip("/").split("/", 1)[0]
+                == API_PREFIX
+            )
             if exc.status_code != status.HTTP_404_NOT_FOUND or is_api:
                 raise
             return await super().get_response(INDEX_FILE, scope)
