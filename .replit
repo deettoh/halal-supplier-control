@@ -7,6 +7,9 @@ channel = "stable-25_05"
 [agent]
 expertMode = true
 
+[packager]
+language = "python3-uv"
+
 [deployment]
 deploymentTarget = "autoscale"
 build = ["sh", "-c", "uv sync --frozen --no-dev"]

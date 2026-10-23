@@ -1,6 +1,6 @@
 # Saved-prediction evaluation runner
 
-Implemented 22 October 2026 against merged schema PR #56 at `bf22bce`. This first runner scores JSON files already saved by a caller. It **does not read images, load `env`, call RunPod, run coverage rules or measure time**. The final dataset/seed agreement with Member 5 remains pending.
+Implemented 22 October 2026 against merged schema PR #56 at `bf22bce`. This first runner scores JSON files already saved by a caller. It **does not read images, load `env`, call RunPod, run coverage rules or measure time**. Case/format/date agreement and seed mapping have arrived. Eight generated photos with Codex-checked expected answers are available in expected_results.json; human finished-asset review remains pending. See LABEL_REVIEW.md.
 
 ## Run it
 
@@ -44,7 +44,7 @@ Minimal expected-results example for exercising the CLI, not approved ground tru
 }
 ```
 
-Confirm the final expected-results format with Member 5 before collecting the final dataset. Adapt this input boundary explicitly if the agreed format changes.
+Member 5 has confirmed this expected-results layout, case list and fixed date. Finished-image/ground-truth approval remains pending. Packet revision 2 uses this same runner boundary with refreshed main 8cc3b9f fixture metadata; do not rename the proposed_expected_* keys. Adapt this boundary explicitly only if the team later changes the format.
 
 ## Saved-prediction input
 

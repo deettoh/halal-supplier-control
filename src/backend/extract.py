@@ -5,12 +5,14 @@ import functools
 import hashlib
 import logging
 import os
+import ssl
 from collections.abc import Mapping
 from pathlib import Path
 from types import MappingProxyType
 from typing import Annotated
 
-from openai import APIError, OpenAI
+import certifi
+from openai import APIError, DefaultHttpx2Client, OpenAI
 from openai.types.chat import ChatCompletionUserMessageParam
 from openai.types.shared_params import ResponseFormatJSONSchema
 from pydantic import (
@@ -106,6 +108,10 @@ def _runpod_client() -> OpenAI:
     return OpenAI(
         base_url=str(config.endpoint_url),
         api_key=config.api_key.get_secret_value(),
+        # fixed roots since Replit's SSL_CERT_DIR lacks RunPod's root CA
+        http_client=DefaultHttpx2Client(
+            verify=ssl.create_default_context(cafile=certifi.where())
+        ),
     )
 
 
