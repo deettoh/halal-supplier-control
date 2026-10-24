@@ -1,31 +1,59 @@
 # Halal Supplier Control
 
-Halal Supplier Control checks every ingredient delivered to a halal-certified
-micro food business against the business's Raw Material Masterlist and the
-supplier's halal certificate. Anything that doesn't match is queued for the
-Halal Supervisor's recorded decision. It is built for SDC Hackathon 2026,
-Domain 2 (Orbyte Smart SME Challenge), on the SDG 8 track.
+> Checks every ingredient delivered to a halal-certified micro food business
+> against its Raw Material Masterlist and the supplier's halal certificate,
+> for the business's receiving staff and its Halal Supervisor.
 
-## Submission links
+---
 
-| Item | Link |
+## Team information
+
+| Field | Details |
 |---|---|
-| Live prototype | https://halal-supplier-control--dedoh.replit.app |
-| Code repository | https://github.com/deettoh/halal-supplier-control |
-| Pitch video (YouTube) | Link to be added |
-| Pitch slides | Link to be added |
-| Proposal | `submission/SDC2026_TanAhChing_Preliminary.pdf` (to be added) |
-| Technical & Tools Declaration | `submission/SDC2026_TanAhChing_TechDeclaration.pdf` (to be added) |
+| **Team Name** | Tan Ah Ching |
+| **Team Domain** | Domain 2 (Orbyte Smart SME Challenge) |
+| **SDG Track (1-17)** | SDG 8, Decent Work and Economic Growth |
+| **Team Leader** | Jay Hu |
+| **University** | Xiamen University Malaysia |
+| **Number of Members** | 5 |
+
+## Links
+
+| Resource | Link |
+|---|---|
+| GitHub Repository | https://github.com/deettoh/halal-supplier-control |
+| Live Demo | https://halal-supplier-control--dedoh.replit.app |
+| RunPod Endpoint | https://api.runpod.ai/v2/l1ii8siifzdfan/openai/v1 (calls need a RunPod API key) |
+| Slide Deck | - |
+| Demo Video | - |
+| Proposal | - |
+| Technical & Tools Declaration | - |
 | Replit proof of use | [submission/SDC2026_TanAhChing_Replit_POU.pdf](submission/SDC2026_TanAhChing_Replit_POU.pdf) |
 | RunPod proof of use | [submission/SDC2026_TanAhChing_Runpod_POU.pdf](submission/SDC2026_TanAhChing_Runpod_POU.pdf) |
 
-## It checks each delivery at the receiving door
+---
+
+## Overview
+
+### Problem
+
+A halal-certified micro food business has to show at any audit that every
+ingredient comes from a supplier with a current, in-scope halal certificate,
+and today that proof is kept in folders, WhatsApp photos and spreadsheets. An
+expired supplier certificate counts the same as none. A supplier can also
+deliver a different brand of the same ingredient, and nobody notices until an
+auditor compares the labels with the masterlist. A failed audit can lead to
+suspension of the certificate and the loss of customers who depend on it.
+
+### Solution
 
 At receiving, staff photograph the delivered item's label. A vision model
 reads the product name, brand, manufacturer and halal mark, and five rules
 check them against the masterlist and the supplier's certificate. A clean
 delivery is logged automatically. Anything else waits for the Halal
-Supervisor, who accepts or rejects it with a reason.
+Supervisor, who accepts or rejects it with a reason. Substitutions and expired
+certificates are caught at the door instead of at the audit, and one supplier
+renewal in the shared registry updates every SME that buys from that supplier.
 
 | Step | In Halal Supplier Control |
 |---|---|
@@ -35,72 +63,124 @@ Supervisor, who accepts or rejects it with a reason.
 | Approval | Only the Halal Supervisor can accept or reject a flagged delivery with a required reason |
 | Outcome | Verdict with a rule checklist, delivery status, masterlist coverage and an activity log row |
 
-Certificates are stored in one registry shared by every SME. When a supplier
-renews a certificate once, every SME that buys from that supplier sees its own
-items change from Expiring to Covered. The app reports whether the documents
-on file cover an item. It doesn't rule on whether anything is halal.
+The app reports whether the documents on file cover an item. It doesn't rule
+on whether anything is halal.
 
-## Try the demo
+### Key features
 
-Open the live prototype, select Enter demo, and pick a role and an
-organisation. The demo script follows the project brief:
+- **Verdict with a rule checklist.** Rules R1 to R5 compare the label fields
+  with the masterlist and the supplier's active certificate, and the verdict
+  shows which rule failed.
+- **Supervisor review.** Only the Halal Supervisor can accept or reject a
+  flagged delivery, and each decision needs a reason.
+- **One certificate registry for every SME.** When a supplier renews a
+  certificate once, every SME that buys from that supplier sees its own items
+  change from Expiring to Covered.
+- **Activity log.** Every check, decision and renewal is logged with the role,
+  action and time.
+- **Review when the model fails.** A timeout or endpoint error on a photo
+  with no cached label saves the delivery for the supervisor with the error
+  recorded.
 
-1. As the Halal Supervisor of Sunrise Bakery SAMPLE, open Masterlist. Wheat
-   Flour shows Expiring.
-2. As Receiving staff, check a Cocoa Powder delivery with a clean label. The
-   verdict is Covered and the delivery is accepted automatically.
-3. Check another Cocoa Powder delivery from a different brand. The verdict is
-   Substitution, with rule R2 failed, and the delivery is queued for the
-   supervisor.
-4. As the supervisor, open Review deliveries and reject it with a reason.
-5. Open Activity to see each step with the role, action and time.
-6. Switch to Crescent Caterer SAMPLE. Its Wheat Flour from the same supplier
-   also shows Expiring.
-7. As the supplier Golden Grain Supplies SAMPLE, publish a renewed
-   certificate. Both SMEs now show Wheat Flour as Covered.
+### Tech stack
 
-On the live site, use a label photo from `tests/eval/images/`, for example
-`L01.png` (clean) or `L02.png` (different brand). The first check after the
-model has been idle can take about three minutes.
-
-## Screenshots from the live site
-
-| Covered delivery | Substitution flagged |
+| Layer | Technology |
 |---|---|
-| ![Covered verdict with all five rules passed](docs/images/verdict-covered.jpg) | ![Substitution verdict with the brand mismatch](docs/images/verdict-substitution.jpg) |
-| Supervisor review | Activity log |
-| ![Supervisor comparing the approved brand with the label](docs/images/review-queue.jpg) | ![Activity log with the rejection and its reason](docs/images/activity-log.jpg) |
+| Frontend | React 19, Vite and Tailwind CSS |
+| Backend | Python 3.11, FastAPI, Pydantic and SQLAlchemy |
+| Database | PostgreSQL (Replit PostgreSQL in production) |
+| AI / Compute | Qwen3-VL-8B-Instruct on a RunPod Serverless vLLM endpoint |
+| Hosting / Dev | Replit Autoscale and Replit Secrets |
 
-## One web app on Replit and one model on RunPod
+---
+
+## Project structure
+
+To list the top level, run `git ls-tree --name-only HEAD`.
+
+```text
+.
+├── .github/workflows/       # CI for the backend and frontend checks
+├── docs/                    # Architecture, API, database, deployment and demo guides
+│   └── images/              # Screenshots from the live site
+├── runpod/
+│   ├── README.md            # Endpoint setup, health check and warm-up
+│   └── endpoint.json        # RunPod Serverless endpoint settings
+├── src/
+│   ├── backend/             # FastAPI app, rules, model client and database
+│   ├── frontend/            # React app
+│   └── seed/                # Fictional seed data and certificate images
+├── submission/              # Required submission documents
+│   ├── SDC2026_TanAhChing_Replit_POU.pdf   # Replit proof of use
+│   └── SDC2026_TanAhChing_Runpod_POU.pdf   # RunPod proof of use
+├── tests/                   # Backend and frontend-contract tests
+│   └── eval/                # Synthetic label set, scorer and live results
+├── .env.example             # Example environment variables
+├── .gitattributes
+├── .gitignore
+├── .replit                  # Replit build and run configuration
+├── compose.yaml             # Local PostgreSQL for development
+├── LICENSE
+├── pyproject.toml           # Python dependencies
+├── uv.lock                  # Pinned Python dependency versions
+└── README.md
+```
+
+### Architecture
 
 FastAPI on Replit serves the React app and the API, and stores everything in
-Replit PostgreSQL. Label photos are sent to Qwen3-VL-8B-Instruct on a RunPod
-Serverless endpoint, which returns the fields as JSON, and Python rules
-decide the verdict. More detail is in these docs:
+Replit PostgreSQL. The backend sends each label photo to Qwen3-VL-8B-Instruct
+on a RunPod Serverless endpoint, which returns the fields as JSON, and Python
+rules decide the verdict.
+
+```mermaid
+flowchart LR
+    browser[Browser: staff, supervisor, supplier]
+    subgraph replit[Replit Autoscale]
+        api[FastAPI: React build and /api]
+        rules[Rules R1 to R5]
+        db[(Replit PostgreSQL)]
+    end
+    subgraph runpod[RunPod Serverless]
+        model[vLLM: Qwen3-VL-8B-Instruct]
+    end
+    browser -->|HTTPS| api
+    api --> rules
+    api <--> db
+    api -->|label photo| model
+    model -->|fields as JSON| api
+```
+
+More detail is in these docs:
 
 - [Architecture](docs/architecture.md): diagram, stack and the delivery check
 - [API reference](docs/api.md): routes, rules and error codes
 - [Database](docs/database.md): tables, local PostgreSQL and the demo reset
 - [Deployment](docs/deployment.md): Replit build, Secrets and releases
 - [RunPod endpoint](runpod/README.md): model settings and warm-up
+- [Demo walkthrough](docs/demo.md): demo script and screenshots
+- [Evaluation](tests/eval/README.md): label set, scorer and live results
 - [Frontend](src/frontend/README.md): modes, routes and checks
 - [Seed data](src/seed/README.md): the fictional dataset format
 
-## The live test read every visible field correctly
+---
 
-A live run on eight AI-generated label photos read 27 of 27 visible fields
-correctly and gave the expected verdict in 8 of 8 cases. On hidden fields the
-model left 4 of 5 blank and guessed the remaining one. Checked by hand, the
-same eight cases took a median of 82 seconds each. The method, the timings,
-the cases and the limits of a synthetic set are in
-[the evaluation README](tests/eval/README.md).
+## How to run
 
-CI runs the backend and frontend checks on every pull request and on `main`.
-At this commit, `uv run pytest -q` reports 259 passed and 114 skipped, where
-the skipped tests need PostgreSQL (`--run-db`) or the live endpoint
-(`--run-live`). `pnpm --dir src/frontend test --run` reports 81 passed.
+### Run on Replit
 
-## Run it locally
+1. Import this repository into Replit from GitHub.
+2. Create a PostgreSQL database in the Database tool, then set the Secrets
+   listed in [the deployment guide](docs/deployment.md):
+   `DATABASE_URL`, `RUNPOD_ENDPOINT_URL` and `RUNPOD_API_KEY`.
+3. Select Publish. The build in `.replit` builds the React app and installs
+   the Python packages from `uv.lock`, and the app creates its tables and
+   loads the seed data on first start.
+
+Run in the workspace serves the API only, because the React build is part of
+the publish step.
+
+### Run locally
 
 You need Python 3.11 or later with [uv](https://docs.astral.sh/uv/), Node 24
 with pnpm 11, and Docker for the local PostgreSQL.
@@ -122,7 +202,11 @@ pnpm --dir src/frontend dev
 Without the RunPod variables, uploads are saved as Reading incomplete
 (`needs_human`). The API docs are at http://127.0.0.1:8000/docs.
 
-To run the checks:
+Python dependencies are declared in `pyproject.toml` and pinned in `uv.lock`,
+so the repo has no `requirements.txt`. To produce one, run
+`uv export --frozen --no-dev --no-hashes --no-emit-project -o requirements.txt`.
+
+### Run tests
 
 ```bash
 uv run pytest -q
@@ -131,50 +215,113 @@ uv run mypy src/backend tests
 pnpm --dir src/frontend test --run && pnpm --dir src/frontend lint
 ```
 
-Python dependencies are declared in `pyproject.toml` and pinned in `uv.lock`,
-so the repo has no `requirements.txt`. To produce one, run
-`uv export --frozen --no-dev --no-hashes --no-emit-project -o requirements.txt`.
+CI runs the backend and frontend checks on every pull request and on `main`.
+At this commit, `uv run pytest -q` reports 259 passed and 114 skipped, where
+the skipped tests need PostgreSQL (`--run-db`) or the live endpoint
+(`--run-live`). `pnpm --dir src/frontend test --run` reports 81 passed.
 
-## AI use and sponsor resources
+---
 
-- Qwen3-VL-8B-Instruct, an open-weight vision model, reads the label photos.
-  It runs on our own RunPod Serverless endpoint, so photos aren't sent to a
-  third-party LLM vendor. Rules and the supervisor make every decision.
-- Replit hosts the app, its PostgreSQL database and its Secrets. RunPod runs
-  the model on sponsor credit. Both are declared in the Technical & Tools
-  Declaration.
-- The team used Claude Code, OpenAI Codex, OpenAI's image generation and the
-  Replit AI assistant while building.
+## How we use Replit
 
-## All data is synthetic
+- **Hosting.** A Replit Autoscale deployment serves the React build and the
+  API at the live demo link. The publish build installs Node 24 from Nix,
+  builds the frontend with pnpm and installs the Python packages with uv.
+- **Database.** Replit PostgreSQL stores the masterlists, certificates,
+  deliveries with their label photos, and the activity log. The published app
+  has its own production database, separate from the workspace's development
+  database.
+- **Secrets.** `DATABASE_URL`, `RUNPOD_ENDPOINT_URL` and `RUNPOD_API_KEY` are
+  Replit Secrets, and the repository holds no keys.
+- **Workspace.** The team pulls `main` into the Replit workspace to publish,
+  and uses its Shell for the live model test and the production database
+  reset.
 
-The demo uses two fictional SMEs, two suppliers and a fictional certification
-body marked SAMPLE, with no JAKIM logo and no personal data. The role and
-organisation picker simulates login. In a production deployment, Malaysia's
-PDPA principles would apply to staff accounts and supplier contacts through
-Orbyte's login, purpose notices and a retention period for label photos.
+Proof of use: [`submission/SDC2026_TanAhChing_Replit_POU.pdf`](submission/SDC2026_TanAhChing_Replit_POU.pdf)
 
-## Project structure
+## How we use RunPod
 
-To list these folders, run
-`ls -d runpod src/backend src/frontend src/seed tests tests/eval submission docs`.
+- **Workload.** Qwen3-VL-8B-Instruct reads the product name, brand,
+  manufacturer and halal mark from each delivery's label photo.
+- **Setup.** A RunPod Serverless endpoint runs the stock vLLM worker, so the
+  repo has no `handler.py`. The endpoint's settings are in
+  [`runpod/endpoint.json`](runpod/endpoint.json), and
+  [the RunPod guide](runpod/README.md) covers creating, checking and warming
+  the endpoint.
+- **Integration.** `src/backend/extract.py` sends each photo through the
+  OpenAI Python SDK to the endpoint's OpenAI-compatible URL, with a JSON
+  schema for the reply and the timeout set in `TIMEOUT_SECONDS`.
+- **Cost.** Between dry runs, the endpoint uses the `scaling` values in
+  `runpod/endpoint.json`. Before a dry run or judging, the team sets one
+  active worker so the first check doesn't wait for a cold start.
 
-```text
-runpod/        RunPod endpoint guide
-src/backend/   FastAPI app, rules, model client and database
-src/frontend/  React app
-src/seed/      Fictional seed data and certificate images
-tests/         Backend and frontend-contract tests
-tests/eval/    Synthetic label set, scorer and live results
-submission/    Submission PDFs
-docs/          Architecture, API, database and deployment guides
+The endpoint serves the OpenAI chat API, so a request looks like this:
+
+```bash
+curl -sS "$RUNPOD_ENDPOINT_URL/chat/completions" \
+  -H "Authorization: Bearer $RUNPOD_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{"model": "qwen/qwen3-vl-8b-instruct", "messages": [{"role": "user", "content": "Reply with the word OK."}], "max_tokens": 5}'
 ```
+
+Proof of use: [`submission/SDC2026_TanAhChing_Runpod_POU.pdf`](submission/SDC2026_TanAhChing_Runpod_POU.pdf)
+
+---
+
+## Challenges and learnings
+
+- **Cold starts.** With no worker running, the first request waits for a
+  worker to start, and in testing that wait took 2.5 minutes or more, close to
+  the request timeout set in `TIMEOUT_SECONDS`. The team warms one worker
+  before each dry run, and seven of the eight evaluation photos have a cached
+  label that is served if the endpoint call fails.
+- **TLS on Replit.** The certificate directory in Replit's environment lacked
+  the root certificate for RunPod's API, so the client verifies TLS against
+  the certifi bundle.
+- **Prompt changes.** Two rounds of prompt rewording made the live results
+  worse, because one left a visible halal mark unread and the other read a
+  SAMPLE sticker as the product. The first prompt stayed.
+- **Lesson.** Scoring every prompt change against the same eight cases caught
+  both regressions before deployment.
+
+## Future improvements
+
+- Pre-fill the renewal form from a certificate photo. The route
+  `POST /api/certificates/extract` is defined but returns 501.
+- Take certificates from suppliers and label photos from staff through
+  WhatsApp with the Meta Cloud API.
+- Check each certificate against Verify Halal or MYeHALAL.
+- Run a scheduled sweep that marks expiring certificates and sends renewal
+  reminders to suppliers.
+- Pilot the module with one certified premise and time the in-app check
+  against the [82-second manual baseline](tests/eval/README.md) on a larger
+  set of labels.
 
 ## Team
 
-Team Tan Ah Ching, Xiamen University Malaysia: Jay Hu, Nigel Cheong Tze
-Hock, Tan Ching Yang, Evelyn Chan Yee Syen and Lee Yi Hong.
+| Name | Role | GitHub |
+|---|---|---|
+| Jay Hu | Team Lead / AI Inference & Deployment | [@deettoh](https://github.com/deettoh) |
+| Nigel Cheong Tze Hock | Frontend & AI Evaluation | [@nigelcheong1](https://github.com/nigelcheong1) |
+| Lee Yi Hong | Frontend & Pitch | [@YiHong-12](https://github.com/YiHong-12) |
+| Tan Ching Yang | Backend & Database | [@fakedpotato1](https://github.com/fakedpotato1) |
+| Evelyn Chan Yee Syen | Rules Engine, Demo Data & Proposal | [@evelyn926](https://github.com/evelyn926) |
+
+---
+
+## Submission checklist
+
+- [x] Team name, domain (Domain 1 / Domain 2) and SDG track filled in
+- [ ] Slide deck link added
+- [ ] Demo video link added
+- [x] Replit used, with proof of use in `submission/`
+- [x] RunPod used, with proof of use in `submission/`
+- [ ] Preliminary submission completed (`SDC2026_TeamName_Preliminary.pdf`)
+- [ ] Technology declaration completed (`SDC2026_TeamName_TechDeclaration.pdf`)
+- [ ] Submission files renamed with your team name (replace `TeamName`)
+- [ ] "How to run" steps verified
+- [x] No API keys or secrets committed to the repository
 
 ## License
 
-Apache License 2.0. See [LICENSE](LICENSE).
+This project is licensed under the [Apache License 2.0](LICENSE).

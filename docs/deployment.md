@@ -68,7 +68,7 @@ from the seed state.
    described in [the RunPod guide](../runpod/README.md#warm-the-endpoint-before-a-dry-run-or-the-demo).
    A cold start can take about three minutes.
 2. Reset the production database.
-3. Open the live URL in a private window and run the demo script in the
-   [README](../README.md).
+3. Open the live URL in a private window and run the
+   [demo script](demo.md).
 4. Set active workers back to 0 afterwards, because RunPod bills an active
    worker for every second it is up.
