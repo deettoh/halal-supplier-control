@@ -49,7 +49,7 @@ curl -sS -H "Authorization: Bearer $RUNPOD_API_KEY" "${RUNPOD_ENDPOINT_URL%/open
 
 A nonzero `idle`, `ready` or `running` count under `workers` means a
 worker is up. With all three at 0, the first request waits for a worker
-to start, which took 2.5 minutes or more in testing.
+to start, and in testing that wait took 2.5 minutes or more.
 
 To send the synthetic test label and check the extracted fields, run the
 live test from the repo root:
@@ -63,7 +63,8 @@ It takes under 5s when a worker is up.
 ## Warm the endpoint before a dry run or the demo
 
 With 0 active workers, the first request after the idle timeout waits
-for a cold start. Before each dry run and before judging:
+for a cold start. Before each dry run and before judging, follow these
+steps:
 
 1. Edit the endpoint in the RunPod console, set Active workers to 1 and
    save.
