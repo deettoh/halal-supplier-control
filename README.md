@@ -171,16 +171,7 @@ More detail is in these docs:
 
 ### Run on Replit
 
-1. Import this repository into Replit from GitHub.
-2. Create a PostgreSQL database in the Database tool, then set the Secrets
-   listed in [the deployment guide](docs/deployment.md):
-   `DATABASE_URL`, `RUNPOD_ENDPOINT_URL` and `RUNPOD_API_KEY`.
-3. Select Publish. The build in `.replit` builds the React app and installs
-   the Python packages from `uv.lock`, and the app creates its tables and
-   loads the seed data on first start.
-
-Run in the workspace serves the API only, because the React build is part of
-the publish step.
+The app runs on Replit at https://halal-supplier-control--dedoh.replit.app.
 
 ### Run locally
 
