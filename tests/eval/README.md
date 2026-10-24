@@ -32,6 +32,20 @@ report is [`results/live-report.json`](results/live-report.json).
 These numbers come from eight AI-generated photos and don't establish
 accuracy on camera photos of delivered goods.
 
+## A check by hand took a median of 82 seconds
+
+On 24 October 2026 one team member checked each case once, in order,
+against the Sunrise Bakery SAMPLE masterlist and the supplier
+certificates, with the five rules written out. Each timing starts at
+opening the label photo and stops at writing the verdict.
+
+| Case | L01 | L02 | L03 | L04 | L05 | L06 | L07 | L08 |
+|---|---|---|---|---|---|---|---|---|
+| Seconds | 112 | 66 | 65 | 59 | 59 | 102 | 98 | 105 |
+
+The median was 82 seconds. Cases decided without the certificate (L02 to L05)
+took 59 to 66 seconds, and cases that needed the certificate took 98 to 112.
+
 ## Eight synthetic photos with checked answers
 
 `synthetic-labels-2026-10-22-v1` is eight 1254 x 1254 PNG photos in

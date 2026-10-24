@@ -90,8 +90,9 @@ decide the verdict. More detail is in these docs:
 
 A live run on eight AI-generated label photos read 27 of 27 visible fields
 correctly and gave the expected verdict in 8 of 8 cases. On hidden fields the
-model left 4 of 5 blank and guessed the remaining one. The method, the cases
-and the limits of a synthetic set are in
+model left 4 of 5 blank and guessed the remaining one. Checked by hand, the
+same eight cases took a median of 82 seconds each. The method, the timings,
+the cases and the limits of a synthetic set are in
 [the evaluation README](tests/eval/README.md).
 
 CI runs the backend and frontend checks on every pull request and on `main`.
