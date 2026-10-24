@@ -16,8 +16,8 @@ Domain 2 (Orbyte Smart SME Challenge), on the SDG 8 track.
 | Pitch slides | Link to be added |
 | Proposal | `submission/SDC2026_TanAhChing_Preliminary.pdf` (to be added) |
 | Technical & Tools Declaration | `submission/SDC2026_TanAhChing_TechDeclaration.pdf` (to be added) |
-| Replit proof of use | [submission/Replit-proof-of-use.pdf](submission/Replit-proof-of-use.pdf) |
-| RunPod proof of use | [submission/Runpod-proof-of-use.pdf](submission/Runpod-proof-of-use.pdf) |
+| Replit proof of use | [submission/SDC2026_TanAhChing_Replit_POU.pdf](submission/SDC2026_TanAhChing_Replit_POU.pdf) |
+| RunPod proof of use | [submission/SDC2026_TanAhChing_Runpod_POU.pdf](submission/SDC2026_TanAhChing_Runpod_POU.pdf) |
 
 ## It checks each delivery at the receiving door
 
