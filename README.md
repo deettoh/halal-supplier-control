@@ -28,8 +28,8 @@
 | Demo Video | - |
 | Proposal | - |
 | Technical & Tools Declaration | - |
-| Replit proof of use | [submission/SDC2026_READMELater_Replit_POU.pdf](submission/SDC2026_READMELater_Replit_POU.pdf) |
-| RunPod proof of use | [submission/SDC2026_READMELater_Runpod_POU.pdf](submission/SDC2026_READMELater_Runpod_POU.pdf) |
+| Replit proof of use | [submission/SDC2026_READMElater_Replit_POU.pdf](submission/SDC2026_READMElater_Replit_POU.pdf) |
+| RunPod proof of use | [submission/SDC2026_READMElater_Runpod_POU.pdf](submission/SDC2026_READMElater_Runpod_POU.pdf) |
 
 ---
 
@@ -111,8 +111,10 @@ To list the top level, run `git ls-tree --name-only HEAD`.
 │   ├── frontend/            # React app
 │   └── seed/                # Fictional seed data and certificate images
 ├── submission/              # Required submission documents
-│   ├── SDC2026_READMELater_Replit_POU.pdf   # Replit proof of use
-│   └── SDC2026_READMELater_Runpod_POU.pdf   # RunPod proof of use
+│   ├── SDC2026_READMElater_Preliminary.pdf      # Proposal
+│   ├── SDC2026_READMElater_TechDeclaration.pdf  # Technical & Tools Declaration
+│   ├── SDC2026_READMElater_Replit_POU.pdf       # Replit proof of use
+│   └── SDC2026_READMElater_Runpod_POU.pdf       # RunPod proof of use
 ├── tests/                   # Backend and frontend-contract tests
 │   └── eval/                # Synthetic label set, scorer and live results
 ├── .env.example             # Example environment variables
@@ -237,7 +239,7 @@ the skipped tests need PostgreSQL (`--run-db`) or the live endpoint
   and uses its Shell for the live model test and the production database
   reset.
 
-Proof of use: [`submission/SDC2026_READMELater_Replit_POU.pdf`](submission/SDC2026_READMELater_Replit_POU.pdf)
+Proof of use: [`submission/SDC2026_READMElater_Replit_POU.pdf`](submission/SDC2026_READMElater_Replit_POU.pdf)
 
 ## How we use RunPod
 
@@ -264,7 +266,7 @@ curl -sS "$RUNPOD_ENDPOINT_URL/chat/completions" \
   -d '{"model": "qwen/qwen3-vl-8b-instruct", "messages": [{"role": "user", "content": "Reply with the word OK."}], "max_tokens": 5}'
 ```
 
-Proof of use: [`submission/SDC2026_READMELater_Runpod_POU.pdf`](submission/SDC2026_READMELater_Runpod_POU.pdf)
+Proof of use: [`submission/SDC2026_READMElater_Runpod_POU.pdf`](submission/SDC2026_READMElater_Runpod_POU.pdf)
 
 ---
 
