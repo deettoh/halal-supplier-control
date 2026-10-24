@@ -26,8 +26,8 @@
 | RunPod Endpoint | https://api.runpod.ai/v2/l1ii8siifzdfan/openai/v1 (calls need a RunPod API key) |
 | Slide Deck | - |
 | Demo Video | - |
-| Proposal | - |
-| Technical & Tools Declaration | - |
+| Proposal | [submission/SDC2026_READMElater_Preliminary.pdf](submission/SDC2026_READMElater_Preliminary.pdf) |
+| Technical & Tools Declaration | [submission/SDC2026_READMElater_TechDeclaration.pdf](submission/SDC2026_READMElater_TechDeclaration.pdf) |
 | Replit proof of use | [submission/SDC2026_READMElater_Replit_POU.pdf](submission/SDC2026_READMElater_Replit_POU.pdf) |
 | RunPod proof of use | [submission/SDC2026_READMElater_Runpod_POU.pdf](submission/SDC2026_READMElater_Runpod_POU.pdf) |
 
@@ -318,8 +318,8 @@ Proof of use: [`submission/SDC2026_READMElater_Runpod_POU.pdf`](submission/SDC20
 - [ ] Demo video link added
 - [x] Replit used, with proof of use in `submission/`
 - [x] RunPod used, with proof of use in `submission/`
-- [ ] Preliminary submission completed (`SDC2026_TeamName_Preliminary.pdf`)
-- [ ] Technology declaration completed (`SDC2026_TeamName_TechDeclaration.pdf`)
+- [x] Preliminary submission completed (`SDC2026_TeamName_Preliminary.pdf`)
+- [x] Technology declaration completed (`SDC2026_TeamName_TechDeclaration.pdf`)
 - [ ] Submission files renamed with your team name (replace `TeamName`)
 - [ ] "How to run" steps verified
 - [x] No API keys or secrets committed to the repository
