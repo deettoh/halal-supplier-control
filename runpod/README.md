@@ -6,27 +6,27 @@ worker with Qwen3-VL-8B-Instruct.
 
 ## Endpoint settings
 
-| Setting | Value | Source |
-| --- | --- | --- |
-| Endpoint name | `halal-label-extract` | RunPod console |
-| Worker | vLLM from the Hub's Serverless repos (runpod-workers), worker 1.12.0 with vLLM 0.31.0 | Worker logs |
-| Model | `Qwen/Qwen3-VL-8B-Instruct`, bf16 | RunPod console |
-| Served model name | `qwen/qwen3-vl-8b-instruct` | `GET /models` |
-| Max model length | 8192 tokens | `GET /models` |
-| GPU | 24 GB tier | RunPod console |
-| Active workers | 0 | RunPod console |
-| Max workers | 1 | RunPod console |
-| Idle timeout | 60 s | RunPod console |
-| FlashBoot | On | RunPod console |
+The endpoint runs RunPod's stock vLLM worker image, so the repo has no
+`handler.py`. Settings for the endpoint are in
+[`endpoint.json`](endpoint.json):
+
+- `env` lists the two worker variables set on the Hub form. Every other
+  variable keeps the worker's default. `loaded_dtype` is the dtype the
+  worker loads under its default `DTYPE` of `auto`.
+- `worker` versions come from the worker logs.
+- `served_model_name` and `MAX_MODEL_LEN` match `GET /models`.
+- The endpoint name and type, the GPU and the `scaling` values come from
+  the RunPod console.
 
 ## Create the endpoint
 
 1. In the RunPod console, open the Hub, then Serverless repos, and pick
    vLLM by runpod-workers.
-2. Untick the 80 GB GPUs the form pre-selects and keep the 24 GB tier.
-3. Set the model to `Qwen/Qwen3-VL-8B-Instruct` and Max Model Length to
-   8192, then deploy.
-4. Edit the endpoint and set the worker values from the table above.
+2. Untick the 80 GB GPUs the form pre-selects and keep the `gpu` tier from
+   `endpoint.json`.
+3. Set the model and Max Model Length to the `env` values in
+   `endpoint.json`, then deploy.
+4. Edit the endpoint and set the `scaling` values from `endpoint.json`.
 5. Copy `.env.example` to `.env` at the repo root and fill in
    `RUNPOD_API_KEY` and `RUNPOD_ENDPOINT_URL`. The URL has the form
    `https://api.runpod.ai/v2/<ENDPOINT_ID>/openai/v1`.
