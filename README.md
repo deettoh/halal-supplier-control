@@ -25,7 +25,7 @@
 | Live Demo | https://halal-supplier-control--dedoh.replit.app |
 | RunPod Endpoint | https://api.runpod.ai/v2/l1ii8siifzdfan/openai/v1 (calls need a RunPod API key) |
 | Slide Deck | https://drive.google.com/file/d/1ZT91E4WRA4IQHOHlQ3GoJUBu_BrDJDtC/view?usp=drive_link |
-| Demo Video | - |
+| Demo Video | https://youtu.be/N1Fu5HE_wz8 |
 | Proposal | [submission/SDC2026_READMElater_Preliminary.pdf](submission/SDC2026_READMElater_Preliminary.pdf) |
 | Technical & Tools Declaration | [submission/SDC2026_READMElater_TechDeclaration.pdf](submission/SDC2026_READMElater_TechDeclaration.pdf) |
 | Replit proof of use | [submission/SDC2026_READMElater_Replit_POU.pdf](submission/SDC2026_READMElater_Replit_POU.pdf) |
