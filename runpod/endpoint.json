@@ -1,0 +1,22 @@
+{
+  "endpoint_name": "halal-label-extract",
+  "endpoint_type": "queue",
+  "worker": {
+    "hub_repo": "runpod-workers/worker-vllm",
+    "worker_version": "1.12.0",
+    "vllm_version": "0.31.0"
+  },
+  "env": {
+    "MODEL_NAME": "Qwen/Qwen3-VL-8B-Instruct",
+    "MAX_MODEL_LEN": "8192"
+  },
+  "loaded_dtype": "bfloat16",
+  "served_model_name": "qwen/qwen3-vl-8b-instruct",
+  "gpu": "24 GB tier",
+  "scaling": {
+    "active_workers": 0,
+    "max_workers": 1,
+    "idle_timeout_seconds": 60,
+    "flashboot": true
+  }
+}
