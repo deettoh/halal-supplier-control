@@ -1,8 +1,8 @@
 # Database
 
-The app stores everything in PostgreSQL through SQLAlchemy. The models and the
-session helpers are in `src/backend/db.py`, and the API models in
-`src/backend/schemas.py` are defined separately.
+The app stores its records and photos in PostgreSQL through SQLAlchemy. The
+models and the session helpers are in `src/backend/db.py`, and the API models
+in `src/backend/schemas.py` are defined separately.
 
 ## Five tables hold all the data
 
@@ -19,9 +19,9 @@ a supplier, and coverage is computed from that supplier's active certificate
 on every read.
 
 Constraints in the database enforce the allowed statuses and actions, at most
-one active certificate per supplier, matching tenants on linked rows, and a
-decision actor and nonblank reason on decided deliveries. Queries still filter
-by SME and check supplier ownership in `services.py`.
+one active certificate per supplier, matching tenants on linked rows, and both
+a decision actor and a nonblank reason on decided deliveries. Queries still
+filter by SME and check supplier ownership in `services.py`.
 
 Photos are stored as JPEG in the `image_bytes` column (PostgreSQL `BYTEA`) and
 load only when read. The `image` column holds the photo's API URL.
@@ -45,7 +45,7 @@ To create the tables without starting the server, run
 `uv run --env-file .env python src/backend/db.py`. It prints
 `Connected to PostgreSQL. All five tables are ready.`
 
-To inspect or stop the database:
+To inspect or stop the database, run:
 
 ```bash
 docker compose exec postgres psql -U halal -d halal_supplier_control -c '\dt'
@@ -56,19 +56,20 @@ docker compose stop postgres   # keeps the data volume
 
 With `DATABASE_URL` set, the app does this before serving requests:
 
-1. Creates any missing tables and adds missing columns from earlier schema
-   versions. It doesn't drop or alter existing columns.
+1. Creates any missing tables and adds the `image_bytes` column to older
+   tables that lack it. It doesn't drop or alter existing columns.
 2. Loads `src/seed/seed.json` into tables that are still empty. The format is
    in [the seed README](../src/seed/README.md).
 3. Fills missing certificate photos from the seed PNGs and converts any
    stored PNG photos to JPEG.
 
 Startup holds a PostgreSQL advisory lock, so parallel workers don't seed
-twice. Any error rolls the whole attempt back and stops startup with a
-message that leaves out credentials and seed contents.
+twice. On any error, startup rolls the whole attempt back and stops with a
+message that has no credentials or seed contents.
 
-Without `DATABASE_URL`, startup skips the database and only `/api/health`
-and `/docs` work. With a URL that can't be reached, startup fails.
+Without `DATABASE_URL`, startup skips the database and only `/api/health`,
+`/docs` and the static frontend respond. With a URL that can't be reached,
+startup fails.
 
 ## Reset the demo data
 
@@ -102,8 +103,8 @@ from backend.db import get_db
 DatabaseSession = Annotated[Session, Depends(get_db)]
 ```
 
-Each request gets its own session. Writes call `session.commit()`, and the
-dependency rolls back anything uncommitted when it closes.
+Each request gets its own session. Write routes call `session.commit()`, and
+the dependency rolls back anything uncommitted when the session closes.
 
 ## Tests run on SQLite, and also on PostgreSQL with `--run-db`
 
@@ -113,6 +114,6 @@ uv run --env-file .env pytest -q --run-db         # also on PostgreSQL
 ```
 
 `--run-db` needs `TEST_DATABASE_URL`, which is separate from
-`DATABASE_URL`. Each PostgreSQL test creates a random `halal_test_...`
-schema and drops only that schema afterwards. Point `TEST_DATABASE_URL` at
-the local database.
+`DATABASE_URL`. Each PostgreSQL test creates a schema named `halal_test_` or
+`halal_api_test_` plus a random suffix and drops only that schema afterwards.
+Point `TEST_DATABASE_URL` at the local database.

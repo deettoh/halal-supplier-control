@@ -4,15 +4,15 @@
 materials across Sunrise Bakery SAMPLE and Crescent Caterer SAMPLE. The
 certificate images in `certificates/` are AI-generated PNGs marked SAMPLE.
 
-To recount the rows:
+To recount the rows, run:
 
 ```bash
 python3 -c 'import json; print({k: len(v) for k, v in json.load(open("src/seed/seed.json")).items()})'
 ```
 
 Startup loads this file into empty tables, and the demo reset loads it into
-all tables (see [the database guide](../../docs/database.md)). A missing file
-skips seeding. A file that fails validation stops startup.
+all tables (see [the database guide](../../docs/database.md)). Startup skips
+seeding when the file is missing and stops when the file fails validation.
 
 ## The file has five arrays
 
@@ -50,10 +50,10 @@ are rejected. Dates use `YYYY-MM-DD`, and timestamps need a timezone.
   no brand restriction for that product. A plain product-name string is also
   accepted and becomes an object with a `null` brand.
 - `image_file` is optional, relative to this folder, and must be a `.png`
-  inside it. Startup stores it in PostgreSQL as JPEG and sets `image` to
-  `/api/certificates/{id}/image`. The PNG in the repo stays unchanged.
+  inside it. Startup stores that PNG in PostgreSQL as JPEG and sets `image`
+  to `/api/certificates/{id}/image`. The PNG in the repo stays unchanged.
 - Deliveries also need `tenant`, `material_id`, `extracted` (or `null`), the
-  five ordered `rule_results`, `verdict`, `status` and an image. A decided
+  six ordered `rule_results`, `verdict`, `status` and an image. A decided
   delivery needs `decided_by` and a `reason`.
 - Activity rows need `tenant`, `actor`, `role` and `action`. The action is
   one of `auto_accepted`, `pending_review`, `accepted`, `rejected` or
@@ -62,12 +62,12 @@ are rejected. Dates use `YYYY-MM-DD`, and timestamps need a timezone.
 
 ## Startup loads rows once and fills missing photos
 
-- Only empty tables receive rows, in dependency order and in one
-  transaction. IDs must match existing parent rows, and the loader doesn't
-  remap them.
+- Startup fills only empty tables and loads them in dependency order within
+  one transaction. IDs must match existing parent rows, and the loader
+  doesn't remap them.
 - On every startup, a certificate with no stored photo gets its PNG when the
   seed ID, supplier ID and certificate number all match.
-- PostgreSQL ID sequences move past the seeded IDs, so new uploads get fresh
-  IDs.
-- A missing parent, an unreadable PNG or a failed constraint rolls back the
-  whole load.
+- Startup advances the PostgreSQL ID sequences past the seeded IDs, so new
+  uploads get fresh IDs.
+- Startup rolls back the whole load on a missing parent, an unreadable PNG or
+  a failed constraint.
