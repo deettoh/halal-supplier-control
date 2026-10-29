@@ -4,10 +4,11 @@ The app stores everything in PostgreSQL through SQLAlchemy. The models and the
 session helpers are in `src/backend/db.py`, and the API models in
 `src/backend/schemas.py` are defined separately.
 
-## Five tables hold all the data
+## Six tables hold the data
 
 | Table | Contents | Scope |
 |---|---|---|
+| `people` | Fictional name, title, role and tenant | Demo identities |
 | `suppliers` | Supplier IDs and names | Shared by every SME |
 | `certificates` | Issuer, number, holder, expiry, scope, photo and version status | Shared, one active row per supplier |
 | `materials` | Approved product, supplier, brand and manufacturer | One SME (`tenant`) |
@@ -19,7 +20,7 @@ a supplier, and coverage is computed from that supplier's active certificate
 on every read.
 
 Constraints in the database enforce the allowed statuses and actions, at most
-one active certificate per supplier, matching tenants on linked rows, and a
+one active and one pending certificate per supplier, matching tenants on linked rows, and a
 decision actor and nonblank reason on decided deliveries. Queries still filter
 by SME and check supplier ownership in `services.py`.
 
@@ -43,7 +44,7 @@ doesn't load `.env` by itself, so local commands pass `--env-file .env`.
 
 To create the tables without starting the server, run
 `uv run --env-file .env python src/backend/db.py`. It prints
-`Connected to PostgreSQL. All five tables are ready.`
+`Connected to PostgreSQL. Application tables are ready.`
 
 To inspect or stop the database:
 
@@ -56,8 +57,14 @@ docker compose stop postgres   # keeps the data volume
 
 With `DATABASE_URL` set, the app does this before serving requests:
 
-1. Creates any missing tables and adds missing columns from earlier schema
-   versions. It doesn't drop or alter existing columns.
+1. Creates missing tables (including `people`) and applies the narrow image,
+   activity and renewal-review upgrades. For existing PostgreSQL certificates,
+   it adds nullable `review_note`/`reviewed_by` and an internal `created_at`
+   timestamp used to order pending renewals. Historical certificates receive
+   the upgrade time; new submissions receive their creation time. It expands
+   the certificate-status and audit-action/role checks and creates the unique
+   pending-certificate index. Certificate data and audit history are retained.
+   Other schema changes still require an explicit migration.
 2. Loads `src/seed/seed.json` into tables that are still empty. The format is
    in [the seed README](../src/seed/README.md).
 3. Fills missing certificate photos from the seed PNGs and converts any
@@ -72,7 +79,7 @@ and `/docs` work. With a URL that can't be reached, startup fails.
 
 ## Reset the demo data
 
-The reset replaces the data in all five tables with `src/seed/seed.json`,
+The reset replaces the data in all six tables with `src/seed/seed.json`,
 for both SMEs and every supplier. Uploads, decisions, renewals and the
 activity log are removed. Stop the app first, then run from the repo root:
 

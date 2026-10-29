@@ -1,7 +1,8 @@
 # Seed data
 
 `seed.json` holds the fictional demo data: 2 suppliers, 4 certificates and 16
-materials across Sunrise Bakery SAMPLE and Crescent Caterer SAMPLE. The
+materials across Sunrise Bakery SAMPLE and Crescent Caterer SAMPLE, plus
+7 fictional demo people. The
 certificate images in `certificates/` are AI-generated PNGs marked SAMPLE.
 
 To recount the rows:
@@ -14,10 +15,10 @@ Startup loads this file into empty tables, and the demo reset loads it into
 all tables (see [the database guide](../../docs/database.md)). A missing file
 skips seeding. A file that fails validation stops startup.
 
-## The file has five arrays
+## The file has six arrays
 
 The top-level object has `suppliers`, `certificates`, `materials`,
-`deliveries` and `activity_log`. An omitted array counts as empty. Every row
+`deliveries`, `activity_log` and `people`. An omitted array counts as empty. Every row
 needs a positive integer `id`, unique within its array, and unknown fields
 are rejected. Dates use `YYYY-MM-DD`, and timestamps need a timezone.
 
@@ -46,6 +47,10 @@ are rejected. Dates use `YYYY-MM-DD`, and timestamps need a timezone.
 }
 ```
 
+- People need `id`, `name`, `title`, `role` and `tenant`. Roles are `staff`,
+  `supervisor`, `supplier` and `reviewer`. The reviewer uses tenant `registry`;
+  supplier contacts use their supplier ID as a string. Certificate requests
+  bind X-Demo-Person to this seeded role and tenant.
 - `scope` is a list of `{product_name, brand}` objects. A `null` brand means
   no brand restriction for that product. A plain product-name string is also
   accepted and becomes an object with a `null` brand.
@@ -56,8 +61,8 @@ are rejected. Dates use `YYYY-MM-DD`, and timestamps need a timezone.
   five ordered `rule_results`, `verdict`, `status` and an image. A decided
   delivery needs `decided_by` and a `reason`.
 - Activity rows need `tenant`, `actor`, `role` and `action`. The action is
-  one of `auto_accepted`, `pending_review`, `accepted`, `rejected` or
-  `certificate_renewed`. A row without `created_at` gets the startup time in
+  one of `auto_accepted`, `pending_review`, `accepted`, `rejected`,
+  `certificate_submitted`, `certificate_renewed` or `certificate_rejected`. A row without `created_at` gets the startup time in
   UTC.
 
 ## Startup loads rows once and fills missing photos

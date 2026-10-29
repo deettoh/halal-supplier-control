@@ -60,6 +60,14 @@ class CertificateSeed(SeedImage):
         ]
 
 
+class PersonSeed(APIModel):
+    id: RecordId
+    name: NonEmptyText
+    title: NonEmptyText
+    role: DemoRole
+    tenant: NonEmptyText
+
+
 class MaterialSeed(APIModel):
     id: RecordId
     tenant: NonEmptyText
@@ -107,6 +115,7 @@ class ActivitySeed(APIModel):
 
 
 class SeedData(APIModel):
+    people: list[PersonSeed] = Field(default_factory=list)
     suppliers: list[SupplierSeed] = Field(default_factory=list)
     certificates: list[CertificateSeed] = Field(default_factory=list)
     materials: list[MaterialSeed] = Field(default_factory=list)
@@ -248,6 +257,7 @@ def seed_empty_tables(
     """
     counts: dict[str, int] = {}
     models: list[type[db.Base]] = [
+        db.Person,
         db.Supplier,
         db.Certificate,
         db.Material,

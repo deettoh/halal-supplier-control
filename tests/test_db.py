@@ -855,6 +855,7 @@ def test_demo_reset_restores_seed_photos_and_removes_workflows(
             "materials": 16,
             "deliveries": 0,
             "activity_log": 0,
+            "people": 7,
         }
         with Session(engine) as session:
             seed = SeedData.model_validate_json(DEFAULT_SEED_PATH.read_text())

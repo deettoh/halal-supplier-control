@@ -65,10 +65,12 @@ accepts or rejects with a reason. The rule table and the API routes are in
 
 Certificates belong to suppliers instead of SMEs. Each material in an SME's
 masterlist points to a supplier, and its coverage is computed from that
-supplier's active certificate on every read. When a supplier renews, the new
-certificate becomes active, the old one becomes superseded, and every linked
-SME sees the new coverage on its next request. Each SME's activity log gets a
-`certificate_renewed` row. SMEs don't see each other's materials or
+supplier's active certificate on every read. A supplier's renewal waits as
+pending with no coverage change. Only a registry reviewer can verify or
+reject it with a note. Verification activates the renewal, supersedes the
+old certificate, and updates every linked SME on its next read; rejection
+keeps the old certificate. Each linked SME gets a named submission and review
+event in its activity log. SMEs don't see each other's materials or
 deliveries.
 
 ## A failed model call leaves the delivery for review

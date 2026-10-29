@@ -10,6 +10,8 @@ from backend.schemas import (
     CertificateResponse,
     DeliveryResponse,
     MaterialResponse,
+    RenewalDecisionRequest,
+    RenewalResponse,
 )
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -91,3 +93,12 @@ def test_every_prepared_delivery_uses_its_registry_snapshot() -> None:
                 assert response["verdict"] == result["verdict"]
                 assert response["rule_results"] == result["rule_results"]
                 DeliveryResponse.model_validate(response)
+
+
+def test_registry_review_examples_follow_the_backend_contract() -> None:
+    examples = json.loads(DATA.with_name("renewal-review.json").read_text())
+    for entry in examples["pending_queue"]:
+        RenewalResponse.model_validate(entry)
+    RenewalDecisionRequest.model_validate(examples["verify_request"])
+    for name in ("verified_certificate", "rejected_certificate"):
+        CertificateResponse.model_validate(examples[name])
