@@ -236,6 +236,20 @@ def evaluate(
         else "Issuer is not on the demo recognised list.",
     )
 
+    # R6 - Halal mark visible on the label
+    if r1:
+        r6 = label_fields.get("halal_mark_present") is True
+        add(
+            "R6",
+            r6,
+            "Halal mark visible on label."
+            if r6
+            else "No halal mark visible, supervisor review required.",
+        )
+    else:
+        r6 = None
+        add("R6", None, "Not evaluated: label information incomplete.")
+
     # First failing rule determines the verdict.
     verdict: Verdict
     if not r1:
@@ -248,6 +262,8 @@ def evaluate(
         verdict = "not_covered"
     elif not r5:
         verdict = "not_covered"
+    elif not r6:
+        verdict = "needs_human"
     else:
         days_remaining = (expiry_date - evaluation_date).days
         verdict = (

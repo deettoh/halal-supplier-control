@@ -130,7 +130,7 @@ it("submits the original photo and treats saved extraction failure as a saved re
   expect(screen.getByText("Delivery #104")).toBeInTheDocument();
   expect(submitted.name).toBe("label.png");
   expect(screen.getAllByText("Not read").length).toBeGreaterThan(0);
-  expect(screen.getAllByText("Not evaluated")).toHaveLength(2);
+  expect(screen.getAllByText("Not evaluated")).toHaveLength(3);
 });
 it("shows a real 501 and retains the draft without a preview success", async () => {
   const user = userEvent.setup();

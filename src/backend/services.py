@@ -112,7 +112,8 @@ def materials(
                 "product_name": material.name,
                 "brand": material.approved_brand,
                 "manufacturer": material.approved_manufacturer,
-                "halal_mark_present": None,
+                # coverage ignores the halal mark
+                "halal_mark_present": True,
             },
             _material_values(material),
             _certificate_values(certificate),

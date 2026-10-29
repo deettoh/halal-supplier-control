@@ -960,6 +960,11 @@
               "rule": "R5",
               "passed": true,
               "detail": "Issuer is on the demo recognised list."
+            },
+            {
+              "rule": "R6",
+              "passed": false,
+              "detail": "No halal mark visible, supervisor review required."
             }
           ],
           "verdict": "substitution",
@@ -1007,6 +1012,11 @@
                 "rule": "R5",
                 "passed": true,
                 "detail": "Issuer is on the demo recognised list."
+              },
+              {
+                "rule": "R6",
+                "passed": false,
+                "detail": "No halal mark visible, supervisor review required."
               }
             ],
             "verdict": "substitution",
@@ -1053,6 +1063,11 @@
                 "rule": "R5",
                 "passed": true,
                 "detail": "Issuer is on the demo recognised list."
+              },
+              {
+                "rule": "R6",
+                "passed": false,
+                "detail": "No halal mark visible, supervisor review required."
               }
             ],
             "verdict": "substitution",
@@ -1099,6 +1114,11 @@
                 "rule": "R5",
                 "passed": true,
                 "detail": "Issuer is on the demo recognised list."
+              },
+              {
+                "rule": "R6",
+                "passed": false,
+                "detail": "No halal mark visible, supervisor review required."
               }
             ],
             "verdict": "substitution",
@@ -1145,6 +1165,11 @@
                 "rule": "R5",
                 "passed": true,
                 "detail": "Issuer is on the demo recognised list."
+              },
+              {
+                "rule": "R6",
+                "passed": false,
+                "detail": "No halal mark visible, supervisor review required."
               }
             ],
             "verdict": "substitution",
@@ -1161,12 +1186,12 @@
       "id": "covered",
       "title": "Matching cocoa label",
       "image": "/media/label-covered.jpg",
-      "sha256": "8cc968ecdb164abca32ca1fab8576c85fbdd1a50ac0cde45f6b6bf9124ebcdd7",
+      "sha256": "532d3d621a624019afa9a21dd1d625efeb9653908f317621efa542f9da11e9bc",
       "extracted": {
         "product_name": "Cocoa Powder",
         "brand": "SilverCocoa",
         "manufacturer": "Silver Valley Foods",
-        "halal_mark_present": false
+        "halal_mark_present": true
       },
       "responses": {
         "6": {
@@ -1177,7 +1202,7 @@
             "product_name": "Cocoa Powder",
             "brand": "SilverCocoa",
             "manufacturer": "Silver Valley Foods",
-            "halal_mark_present": false
+            "halal_mark_present": true
           },
           "rule_results": [
             {
@@ -1204,6 +1229,11 @@
               "rule": "R5",
               "passed": true,
               "detail": "Issuer is on the demo recognised list."
+            },
+            {
+              "rule": "R6",
+              "passed": true,
+              "detail": "Halal mark visible on label."
             }
           ],
           "verdict": "covered",
@@ -1224,7 +1254,7 @@
               "product_name": "Cocoa Powder",
               "brand": "SilverCocoa",
               "manufacturer": "Silver Valley Foods",
-              "halal_mark_present": false
+              "halal_mark_present": true
             },
             "rule_results": [
               {
@@ -1251,6 +1281,11 @@
                 "rule": "R5",
                 "passed": true,
                 "detail": "Issuer is on the demo recognised list."
+              },
+              {
+                "rule": "R6",
+                "passed": true,
+                "detail": "Halal mark visible on label."
               }
             ],
             "verdict": "covered",
@@ -1270,7 +1305,7 @@
               "product_name": "Cocoa Powder",
               "brand": "SilverCocoa",
               "manufacturer": "Silver Valley Foods",
-              "halal_mark_present": false
+              "halal_mark_present": true
             },
             "rule_results": [
               {
@@ -1297,6 +1332,11 @@
                 "rule": "R5",
                 "passed": true,
                 "detail": "Issuer is on the demo recognised list."
+              },
+              {
+                "rule": "R6",
+                "passed": true,
+                "detail": "Halal mark visible on label."
               }
             ],
             "verdict": "covered",
@@ -1316,7 +1356,7 @@
               "product_name": "Cocoa Powder",
               "brand": "SilverCocoa",
               "manufacturer": "Silver Valley Foods",
-              "halal_mark_present": false
+              "halal_mark_present": true
             },
             "rule_results": [
               {
@@ -1343,6 +1383,11 @@
                 "rule": "R5",
                 "passed": true,
                 "detail": "Issuer is on the demo recognised list."
+              },
+              {
+                "rule": "R6",
+                "passed": true,
+                "detail": "Halal mark visible on label."
               }
             ],
             "verdict": "covered",
@@ -1362,7 +1407,7 @@
               "product_name": "Cocoa Powder",
               "brand": "SilverCocoa",
               "manufacturer": "Silver Valley Foods",
-              "halal_mark_present": false
+              "halal_mark_present": true
             },
             "rule_results": [
               {
@@ -1389,6 +1434,11 @@
                 "rule": "R5",
                 "passed": true,
                 "detail": "Issuer is on the demo recognised list."
+              },
+              {
+                "rule": "R6",
+                "passed": true,
+                "detail": "Halal mark visible on label."
               }
             ],
             "verdict": "covered",
@@ -1448,6 +1498,11 @@
               "rule": "R5",
               "passed": true,
               "detail": "Issuer is on the demo recognised list."
+            },
+            {
+              "rule": "R6",
+              "passed": null,
+              "detail": "Not evaluated: label information incomplete."
             }
           ],
           "verdict": "needs_human",
@@ -1495,6 +1550,11 @@
                 "rule": "R5",
                 "passed": true,
                 "detail": "Issuer is on the demo recognised list."
+              },
+              {
+                "rule": "R6",
+                "passed": null,
+                "detail": "Not evaluated: label information incomplete."
               }
             ],
             "verdict": "needs_human",
@@ -1541,6 +1601,11 @@
                 "rule": "R5",
                 "passed": true,
                 "detail": "Issuer is on the demo recognised list."
+              },
+              {
+                "rule": "R6",
+                "passed": null,
+                "detail": "Not evaluated: label information incomplete."
               }
             ],
             "verdict": "needs_human",
@@ -1587,6 +1652,11 @@
                 "rule": "R5",
                 "passed": true,
                 "detail": "Issuer is on the demo recognised list."
+              },
+              {
+                "rule": "R6",
+                "passed": null,
+                "detail": "Not evaluated: label information incomplete."
               }
             ],
             "verdict": "needs_human",
@@ -1633,6 +1703,11 @@
                 "rule": "R5",
                 "passed": true,
                 "detail": "Issuer is on the demo recognised list."
+              },
+              {
+                "rule": "R6",
+                "passed": null,
+                "detail": "Not evaluated: label information incomplete."
               }
             ],
             "verdict": "needs_human",
@@ -1649,12 +1724,12 @@
       "id": "expiring",
       "title": "Expiring flour record",
       "image": "/media/label-expiring.jpg",
-      "sha256": "d73ff44e34912b471607febe73221a08d203fac59f972f97ff426038cd1f3bc5",
+      "sha256": "06de287e32b83c3afbc0bfedf207a0c73fe028e952e766a486bc09064011e4f7",
       "extracted": {
         "product_name": "Wheat Flour",
         "brand": "GoldenMill",
         "manufacturer": "Golden Grain Foods",
-        "halal_mark_present": false
+        "halal_mark_present": true
       },
       "responses": {
         "1": {
@@ -1665,7 +1740,7 @@
             "product_name": "Wheat Flour",
             "brand": "GoldenMill",
             "manufacturer": "Golden Grain Foods",
-            "halal_mark_present": false
+            "halal_mark_present": true
           },
           "rule_results": [
             {
@@ -1692,6 +1767,11 @@
               "rule": "R5",
               "passed": true,
               "detail": "Issuer is on the demo recognised list."
+            },
+            {
+              "rule": "R6",
+              "passed": true,
+              "detail": "Halal mark visible on label."
             }
           ],
           "verdict": "expiring",
@@ -1709,7 +1789,7 @@
             "product_name": "Wheat Flour",
             "brand": "GoldenMill",
             "manufacturer": "Golden Grain Foods",
-            "halal_mark_present": false
+            "halal_mark_present": true
           },
           "rule_results": [
             {
@@ -1736,6 +1816,11 @@
               "rule": "R5",
               "passed": true,
               "detail": "Issuer is on the demo recognised list."
+            },
+            {
+              "rule": "R6",
+              "passed": true,
+              "detail": "Halal mark visible on label."
             }
           ],
           "verdict": "expiring",
@@ -1756,7 +1841,7 @@
               "product_name": "Wheat Flour",
               "brand": "GoldenMill",
               "manufacturer": "Golden Grain Foods",
-              "halal_mark_present": false
+              "halal_mark_present": true
             },
             "rule_results": [
               {
@@ -1783,6 +1868,11 @@
                 "rule": "R5",
                 "passed": true,
                 "detail": "Issuer is on the demo recognised list."
+              },
+              {
+                "rule": "R6",
+                "passed": true,
+                "detail": "Halal mark visible on label."
               }
             ],
             "verdict": "expiring",
@@ -1800,7 +1890,7 @@
               "product_name": "Wheat Flour",
               "brand": "GoldenMill",
               "manufacturer": "Golden Grain Foods",
-              "halal_mark_present": false
+              "halal_mark_present": true
             },
             "rule_results": [
               {
@@ -1827,6 +1917,11 @@
                 "rule": "R5",
                 "passed": true,
                 "detail": "Issuer is on the demo recognised list."
+              },
+              {
+                "rule": "R6",
+                "passed": true,
+                "detail": "Halal mark visible on label."
               }
             ],
             "verdict": "expiring",
@@ -1846,7 +1941,7 @@
               "product_name": "Wheat Flour",
               "brand": "GoldenMill",
               "manufacturer": "Golden Grain Foods",
-              "halal_mark_present": false
+              "halal_mark_present": true
             },
             "rule_results": [
               {
@@ -1873,6 +1968,11 @@
                 "rule": "R5",
                 "passed": true,
                 "detail": "Issuer is on the demo recognised list."
+              },
+              {
+                "rule": "R6",
+                "passed": true,
+                "detail": "Halal mark visible on label."
               }
             ],
             "verdict": "covered",
@@ -1890,7 +1990,7 @@
               "product_name": "Wheat Flour",
               "brand": "GoldenMill",
               "manufacturer": "Golden Grain Foods",
-              "halal_mark_present": false
+              "halal_mark_present": true
             },
             "rule_results": [
               {
@@ -1917,6 +2017,11 @@
                 "rule": "R5",
                 "passed": true,
                 "detail": "Issuer is on the demo recognised list."
+              },
+              {
+                "rule": "R6",
+                "passed": true,
+                "detail": "Halal mark visible on label."
               }
             ],
             "verdict": "covered",
@@ -1936,7 +2041,7 @@
               "product_name": "Wheat Flour",
               "brand": "GoldenMill",
               "manufacturer": "Golden Grain Foods",
-              "halal_mark_present": false
+              "halal_mark_present": true
             },
             "rule_results": [
               {
@@ -1963,6 +2068,11 @@
                 "rule": "R5",
                 "passed": true,
                 "detail": "Issuer is on the demo recognised list."
+              },
+              {
+                "rule": "R6",
+                "passed": true,
+                "detail": "Halal mark visible on label."
               }
             ],
             "verdict": "expiring",
@@ -1980,7 +2090,7 @@
               "product_name": "Wheat Flour",
               "brand": "GoldenMill",
               "manufacturer": "Golden Grain Foods",
-              "halal_mark_present": false
+              "halal_mark_present": true
             },
             "rule_results": [
               {
@@ -2007,6 +2117,11 @@
                 "rule": "R5",
                 "passed": true,
                 "detail": "Issuer is on the demo recognised list."
+              },
+              {
+                "rule": "R6",
+                "passed": true,
+                "detail": "Halal mark visible on label."
               }
             ],
             "verdict": "expiring",
@@ -2026,7 +2141,7 @@
               "product_name": "Wheat Flour",
               "brand": "GoldenMill",
               "manufacturer": "Golden Grain Foods",
-              "halal_mark_present": false
+              "halal_mark_present": true
             },
             "rule_results": [
               {
@@ -2053,6 +2168,11 @@
                 "rule": "R5",
                 "passed": true,
                 "detail": "Issuer is on the demo recognised list."
+              },
+              {
+                "rule": "R6",
+                "passed": true,
+                "detail": "Halal mark visible on label."
               }
             ],
             "verdict": "covered",
@@ -2070,7 +2190,7 @@
               "product_name": "Wheat Flour",
               "brand": "GoldenMill",
               "manufacturer": "Golden Grain Foods",
-              "halal_mark_present": false
+              "halal_mark_present": true
             },
             "rule_results": [
               {
@@ -2097,6 +2217,11 @@
                 "rule": "R5",
                 "passed": true,
                 "detail": "Issuer is on the demo recognised list."
+              },
+              {
+                "rule": "R6",
+                "passed": true,
+                "detail": "Halal mark visible on label."
               }
             ],
             "verdict": "covered",
@@ -2375,6 +2500,11 @@
             "rule": "R5",
             "passed": true,
             "detail": "Issuer is on the demo recognised list."
+          },
+          {
+            "rule": "R6",
+            "passed": false,
+            "detail": "No halal mark visible, supervisor review required."
           }
         ],
         "verdict": "substitution",
@@ -2419,6 +2549,11 @@
             "rule": "R5",
             "passed": true,
             "detail": "Issuer is on the demo recognised list."
+          },
+          {
+            "rule": "R6",
+            "passed": null,
+            "detail": "Not evaluated: label information incomplete."
           }
         ],
         "verdict": "needs_human",

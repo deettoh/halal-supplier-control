@@ -39,7 +39,7 @@ ActivityAction = Literal[
     "rejected",
     "certificate_renewed",
 ]
-RuleName = Literal["R1", "R2", "R3", "R4", "R5"]
+RuleName = Literal["R1", "R2", "R3", "R4", "R5", "R6"]
 RULE_ORDER: tuple[RuleName, ...] = get_args(RuleName)
 RULE_ORDER_ERROR = (
     f"rule_results must contain {RULE_ORDER[0]} to {RULE_ORDER[-1]} in order"

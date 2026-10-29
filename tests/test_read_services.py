@@ -46,7 +46,7 @@ def add_delivery(
                 "passed": False if n == 1 else None,
                 "detail": "Extraction failed" if n == 1 else "Not evaluated",
             }
-            for n in range(1, 6)
+            for n in range(1, 7)
         ],
         verdict="needs_human",
         status=status,
@@ -187,6 +187,7 @@ def test_review_queue_is_scoped_filtered_and_newest_first(
         "R3",
         "R4",
         "R5",
+        "R6",
     ]
 
 
