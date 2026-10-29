@@ -1,7 +1,8 @@
 # Label evaluation
 
-Eight synthetic label photos with expected answers, the scripts that collect
-live model predictions and score them, and the results of the live run.
+This folder holds eight synthetic label photos with expected answers, the
+scripts that collect live model predictions and score them, and the results
+of the live run.
 
 ## The live run got every verdict right
 
@@ -24,8 +25,8 @@ endpoint with these settings:
 | Hidden fields left blank (null) | 4 | 5 | 80 |
 | Verdicts matching the expected verdict | 8 | 8 | 100 |
 
-The miss was on L04, where the halal mark is covered: the model answered
-`false` instead of `null`. The verdict was still `needs_human` (Reading
+The miss was on L04, where the model answered `false` instead of `null` for
+the hidden halal mark. The verdict was still `needs_human` (Reading
 incomplete), because the other fields were blank and rule R1 failed. The full
 report is [`results/live-report.json`](results/live-report.json).
 
@@ -55,9 +56,10 @@ took 59 to 66 seconds, and cases that needed the certificate took 98 to 112.
 - Each photo is the unedited output of one call to OpenAI's built-in
   image_gen tool. The prompts are in
   [`generation_prompts.json`](generation_prompts.json).
-- The products, brands, suppliers and certificates are fictional records
-  from the demo seed. Every package says SAMPLE - FICTIONAL DEMO, and the
-  generic HALAL / SAMPLE stamp isn't an official certification logo.
+- The products, brands, manufacturers, suppliers and certificates are
+  fictional records from the demo seed, apart from ALT SAMPLE BRAND in L02
+  and ALT SAMPLE MAKER in L03. Every package says SAMPLE - FICTIONAL DEMO,
+  and the generic HALAL / SAMPLE stamp isn't an official certification logo.
 - Codex checked the expected answers against each photo, and a team member
   reported the review complete on 23 October 2026. The approval fields in
   `expected_results.json` still read `pending`, since nobody recorded a
@@ -66,8 +68,8 @@ took 59 to 66 seconds, and cases that needed the certificate took 98 to 112.
   answers byte-identical on every checkout, since the collector records each
   photo's hash and the scorer records the hash of the expected answers.
 
-The set is small, mostly clear and English only. It has two occluded cases
-and no case with a clearly absent halal mark.
+The set is small, mostly clear and English only. It has two cases with hidden
+fields and no case with a clearly absent halal mark.
 
 ## What each case tests
 
@@ -81,12 +83,12 @@ unchanged.
 |---|---|---|---|
 | L01 | Clear label: Cocoa Powder, SilverCocoa, Silver Valley Foods | covered | auto_accepted |
 | L02 | Brand ALT SAMPLE BRAND, approved brand SilverCocoa | substitution | pending_review |
-| L03 | Manufacturer ALT SAMPLE MAKER, approved maker Silver Valley Foods | substitution | pending_review |
-| L04 | Product, brand, manufacturer and mark all covered | needs_human | pending_review |
-| L05 | Manufacturer covered, everything else readable | needs_human | pending_review |
+| L03 | Manufacturer ALT SAMPLE MAKER, approved manufacturer Silver Valley Foods | substitution | pending_review |
+| L04 | Product, brand, manufacturer and mark all hidden | needs_human | pending_review |
+| L05 | Manufacturer hidden, everything else readable | needs_human | pending_review |
 | L06 | Clear label, certificate copy expired on 2026-10-20 | not_covered | pending_review |
-| L07 | Clear label, certificate copy excludes Cocoa Powder | not_covered | pending_review |
-| L08 | Clear Wheat Flour label, certificate 1 expires on 2026-11-30 | expiring | auto_accepted |
+| L07 | Clear label, certificate copy without Cocoa Powder in scope | not_covered | pending_review |
+| L08 | Clear Wheat Flour label, certificate 1 expiring on 2026-11-30 | expiring | auto_accepted |
 
 ## Collect and score predictions
 
@@ -105,7 +107,7 @@ certificate copy and date. It records the model, the temperature, the prompt
 hash and each photo's hash. A failed request is saved with an error and no
 verdict, so it scores as a failure.
 
-To score saved predictions:
+To score saved predictions, run:
 
 ```bash
 uv run python tests/eval/run_eval.py \
@@ -115,7 +117,8 @@ uv run python tests/eval/run_eval.py \
 ```
 
 Exit code 0 means the report was written, even with wrong predictions, and 2
-means an input was invalid or unreadable or the output couldn't be written.
+means either an input was invalid or unreadable, or the output couldn't be
+written.
 
 ## How the scorer counts
 

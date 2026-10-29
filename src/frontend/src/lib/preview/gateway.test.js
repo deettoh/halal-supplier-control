@@ -76,6 +76,7 @@ describe("isolated prepared-example gateway", () => {
       null,
       true,
       true,
+      null,
     ]);
   });
   it("rejects arbitrary bytes instead of pretending to read them", async () => {

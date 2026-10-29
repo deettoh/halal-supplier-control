@@ -4,7 +4,7 @@
 OpenAI-compatible API to a RunPod Serverless endpoint that runs the vLLM
 worker with Qwen3-VL-8B-Instruct.
 
-## Endpoint settings
+## The endpoint runs the stock vLLM worker
 
 The endpoint runs RunPod's stock vLLM worker image, so the repo has no
 `handler.py`. Settings for the endpoint are in
@@ -58,7 +58,7 @@ live test from the repo root:
 uv run --env-file .env pytest -m live --run-live
 ```
 
-It takes under 5s when a worker is up.
+It took under 5 s in testing when a worker was up.
 
 ## Warm the endpoint before a dry run or the demo
 

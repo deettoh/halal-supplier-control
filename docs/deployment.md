@@ -62,13 +62,13 @@ reset the demo data on the live site:
 After every rehearsal and before judging, reset the data so visitors start
 from the seed state.
 
-## Warm the model and reset the data before a demo
+## Warm the endpoint and reset the data before a demo
 
-1. Warm the RunPod endpoint with one active worker and run its test call, as
+1. Warm the RunPod endpoint with one active worker and run the live test, as
    described in [the RunPod guide](../runpod/README.md#warm-the-endpoint-before-a-dry-run-or-the-demo).
-   A cold start can take about three minutes.
+   A cold start can take 2.5 minutes or more.
 2. Reset the production database.
 3. Open the live URL in a private window and run the
    [demo script](demo.md).
-4. Set active workers back to 0 afterwards, because RunPod bills an active
+4. Afterwards, set active workers back to 0, because RunPod bills an active
    worker for every second it is up.

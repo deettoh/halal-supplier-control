@@ -10,6 +10,7 @@ from sqlalchemy.orm import Session
 
 from backend import db, extract, images, rules
 from backend.schemas import (
+    RULE_ORDER,
     ActivityResponse,
     CertificateCreateRequest,
     CertificateResponse,
@@ -86,6 +87,7 @@ def _certificate_values(row: db.Certificate | None) -> dict[str, object]:
 
 def _material_values(row: db.Material) -> dict[str, object]:
     return {
+        "name": row.name,
         "approved_brand": row.approved_brand,
         "approved_manufacturer": row.approved_manufacturer,
     }
@@ -113,7 +115,8 @@ def materials(
                 "product_name": material.name,
                 "brand": material.approved_brand,
                 "manufacturer": material.approved_manufacturer,
-                "halal_mark_present": None,
+                # coverage ignores the halal mark
+                "halal_mark_present": True,
             },
             _material_values(material),
             _certificate_values(certificate),
@@ -224,14 +227,14 @@ def _failed_checks(message: str) -> list[dict[str, object]]:
     return [
         RuleResult.model_validate(
             {
-                "rule": f"R{number}",
-                "passed": False if number == 1 else None,
+                "rule": rule,
+                "passed": False if rule == "R1" else None,
                 "detail": message
-                if number == 1
+                if rule == "R1"
                 else "Not evaluated: label extraction failed.",
             }
         ).model_dump()
-        for number in range(1, 6)
+        for rule in RULE_ORDER
     ]
 
 

@@ -20,13 +20,13 @@ follows the project brief:
 
 On the live site, use a label photo from
 [`tests/eval/images/`](../tests/eval/images/), for example `L01.png` (clean)
-or `L02.png` (different brand). The first check after the model has been
-idle can take about three minutes.
+or `L02.png` (different brand). The first check after the endpoint has been
+idle can take 2.5 minutes or more.
 
 ## Screenshots from the live site
 
 | Covered delivery | Substitution flagged |
 |---|---|
-| ![Covered verdict with all five rules passed](images/verdict-covered.jpg) | ![Substitution verdict with the brand mismatch](images/verdict-substitution.jpg) |
+| ![Covered verdict with every rule passed](images/verdict-covered.jpg) | ![Substitution verdict with the brand mismatch](images/verdict-substitution.jpg) |
 | Supervisor review | Activity log |
 | ![Supervisor comparing the approved brand with the label](images/review-queue.jpg) | ![Activity log with the rejection and its reason](images/activity-log.jpg) |

@@ -5,7 +5,7 @@ Nullable extraction fields are still required keys in the model output.
 """
 
 from datetime import date
-from typing import Annotated, Literal
+from typing import Annotated, Literal, get_args
 
 from fastapi import UploadFile
 from pydantic import (
@@ -41,7 +41,11 @@ ActivityAction = Literal[
     "certificate_submitted",
     "certificate_rejected",
 ]
-RuleName = Literal["R1", "R2", "R3", "R4", "R5"]
+RuleName = Literal["R1", "R2", "R3", "R4", "R5", "R6"]
+RULE_ORDER: tuple[RuleName, ...] = get_args(RuleName)
+RULE_ORDER_ERROR = (
+    f"rule_results must contain {RULE_ORDER[0]} to {RULE_ORDER[-1]} in order"
+)
 
 
 class APIModel(BaseModel):
@@ -139,7 +143,8 @@ class DeliveryResponse(APIModel):
     )
     extracted: LabelExtraction | None
     rule_results: Annotated[
-        list[RuleResult], Field(min_length=5, max_length=5)
+        list[RuleResult],
+        Field(min_length=len(RULE_ORDER), max_length=len(RULE_ORDER)),
     ]
     verdict: Verdict
     status: DeliveryStatus
@@ -152,14 +157,8 @@ class DeliveryResponse(APIModel):
 
     @model_validator(mode="after")
     def check_rule_order(self) -> "DeliveryResponse":
-        if [item.rule for item in self.rule_results] != [
-            "R1",
-            "R2",
-            "R3",
-            "R4",
-            "R5",
-        ]:
-            raise ValueError("rule_results must contain R1 to R5 in order")
+        if tuple(item.rule for item in self.rule_results) != RULE_ORDER:
+            raise ValueError(RULE_ORDER_ERROR)
         return self
 
 
