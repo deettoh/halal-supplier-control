@@ -43,7 +43,10 @@ from backend.schemas import (
     ErrorResponse,
     HealthResponse,
     MaterialResponse,
+    NamedDemoContext,
     NonEmptyText,
+    RenewalDecisionRequest,
+    RenewalResponse,
     ValidationErrorResponse,
 )
 from backend.startup import bootstrap_database
@@ -128,11 +131,46 @@ def require_roles(*roles: DemoRole) -> Callable[..., DemoContext]:
 
 Staff = Annotated[DemoContext, Depends(require_roles("staff"))]
 Supervisor = Annotated[DemoContext, Depends(require_roles("supervisor"))]
-Supplier = Annotated[DemoContext, Depends(require_roles("supplier"))]
-Reader = Annotated[DemoContext, Depends(require_roles("staff", "supervisor"))]
-PhotoReader = Annotated[
-    DemoContext, Depends(require_roles("staff", "supervisor", "supplier"))
+
+
+def require_named_roles(*roles: DemoRole) -> Callable[..., NamedDemoContext]:
+    role_check = require_roles(*roles)
+
+    def check_person(
+        context: Annotated[DemoContext, Depends(role_check)],
+        person: Annotated[int, Header(alias="X-Demo-Person")],
+        session: Database,
+    ) -> NamedDemoContext:
+        return services.named_context(session, context, person)
+
+    return check_person
+
+
+Supplier = Annotated[
+    NamedDemoContext, Depends(require_named_roles("supplier"))
 ]
+Reviewer = Annotated[
+    NamedDemoContext, Depends(require_named_roles("reviewer"))
+]
+Reader = Annotated[DemoContext, Depends(require_roles("staff", "supervisor"))]
+
+
+def certificate_reader(
+    context: Annotated[
+        DemoContext,
+        Depends(require_roles("staff", "supervisor", "supplier", "reviewer")),
+    ],
+    session: Database,
+    person: Annotated[int | None, Header(alias="X-Demo-Person")] = None,
+) -> DemoContext:
+    if context.role in {"supplier", "reviewer"}:
+        if person is None:
+            raise HTTPException(422, "X-Demo-Person is required")
+        return services.named_context(session, context, person)
+    return context
+
+
+PhotoReader = Annotated[DemoContext, Depends(certificate_reader)]
 DeliveryId = Annotated[int, Path(gt=0)]
 CertificateId = Annotated[int, Path(gt=0)]
 
@@ -243,7 +281,7 @@ def list_activity(
 def list_certificates(
     context: Supplier, session: Database
 ) -> list[CertificateResponse]:
-    """Supplier's own active and superseded certificates."""
+    """Supplier's own certificates, including pending and rejected renewals."""
     return services.certificates(session, context)
 
 
@@ -253,6 +291,7 @@ def list_certificates(
     status_code=201,
     responses={
         **ERRORS,
+        409: {"model": ErrorResponse, "description": "Pending renewal exists"},
         404: {"model": ErrorResponse},
         413: {"model": ErrorResponse, "description": "Photo exceeds 10 MiB"},
     },
@@ -265,12 +304,45 @@ def renew_certificate(
     ],
     session: Database,
 ) -> CertificateResponse:
-    """Renew using form fields, JSON-encoded scope, and an optional image.
+    """Submit a pending renewal using form fields and an optional image.
 
     Supplier ID comes from X-Demo-Tenant, never from this form.
     """
     payload = services.read_photo(request.image) if request.image else None
     return services.renew_certificate(session, context, request, payload)
+
+
+@app.get(
+    "/api/registry/renewals",
+    response_model=list[RenewalResponse],
+    responses=ERRORS,
+    tags=["Registry"],
+)
+def list_renewals(
+    context: Reviewer, session: Database
+) -> list[RenewalResponse]:
+    """Pending renewals, oldest first, next to the active certificate."""
+    return services.pending_renewals(session)
+
+
+@app.post(
+    "/api/registry/renewals/{id}/decision",
+    response_model=CertificateResponse,
+    responses={
+        **ERRORS,
+        404: {"model": ErrorResponse},
+        409: {"model": ErrorResponse},
+    },
+    tags=["Registry"],
+)
+def decide_renewal(
+    id: CertificateId,
+    request: RenewalDecisionRequest,
+    context: Reviewer,
+    session: Database,
+) -> CertificateResponse:
+    """Verify or reject a pending renewal with a required reviewer note."""
+    return services.decide_renewal(session, context, id, request)
 
 
 @app.post(

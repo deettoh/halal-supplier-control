@@ -24,7 +24,10 @@ JPEG = images.as_jpeg(PNG)
 
 
 def headers(role: str = "staff", tenant: str = BAKERY) -> dict[str, str]:
-    return {"X-Demo-Role": role, "X-Demo-Tenant": tenant}
+    result = {"X-Demo-Role": role, "X-Demo-Tenant": tenant}
+    if role == "supplier":
+        result["X-Demo-Person"] = "6" if tenant == "2" else "5"
+    return result
 
 
 def label(brand: str = "GoldenMill") -> LabelExtraction:
@@ -406,7 +409,18 @@ def test_renewal_supersedes_and_updates_both_smes(
     )
     assert response.status_code == 201
     renewed = response.json()
-    assert renewed["supplier_id"] == 1 and renewed["status"] == "active"
+    assert renewed["supplier_id"] == 1 and renewed["status"] == "pending"
+    reviewed = api_client.post(
+        f"/api/registry/renewals/{renewed['id']}/decision",
+        headers={
+            "X-Demo-Role": "reviewer",
+            "X-Demo-Tenant": "registry",
+            "X-Demo-Person": "7",
+        },
+        json={"decision": "verify", "note": "Matches certificate"},
+    )
+    assert reviewed.status_code == 200
+    assert reviewed.json()["status"] == "active"
     if image_format is not None:
         assert api_client.get(
             renewed["image"], headers=headers("supplier", "1")
@@ -427,9 +441,11 @@ def test_renewal_supersedes_and_updates_both_smes(
         assert [row.id for row in active] == [renewed["id"]]
         logs = list(session.scalars(select(db.ActivityLog)))
         assert {row.tenant for row in logs} == {BAKERY, CATERER}
-        assert len(logs) == 2
-        assert all(row.action == "certificate_renewed" for row in logs)
-        assert all(row.actor == "supplier:1" for row in logs)
+        assert len(logs) == 4
+        assert {(row.action, row.actor) for row in logs} == {
+            ("certificate_submitted", "Hakim"),
+            ("certificate_renewed", "Nadia"),
+        }
     for tenant in (BAKERY, CATERER):
         material = api_client.get(
             "/api/materials", headers=headers(tenant=tenant)
@@ -566,7 +582,7 @@ def test_concurrent_renewals_keep_one_active_certificate(
         ).status_code
 
     with ThreadPoolExecutor(max_workers=2) as pool:
-        assert list(pool.map(renew, ["SAMPLE-A", "SAMPLE-B"])) == [201, 201]
+        assert sorted(pool.map(renew, ["SAMPLE-A", "SAMPLE-B"])) == [201, 409]
     with Session(api_engine) as session:
         active = list(
             session.scalars(
@@ -579,5 +595,5 @@ def test_concurrent_renewals_keep_one_active_certificate(
         assert len(active) == 1
         assert (
             session.scalar(select(func.count()).select_from(db.ActivityLog))
-            == 4
+            == 2
         )

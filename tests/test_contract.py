@@ -36,6 +36,8 @@ PNG = (Path(__file__).parent / "fixtures/synthetic_label.png").read_bytes()
         "accepted",
         "rejected",
         "certificate_renewed",
+        "certificate_submitted",
+        "certificate_rejected",
         "cert_renewed",
         "delivery_checked",
         "invented",
@@ -57,6 +59,8 @@ def test_activity_action_contract_and_seed(action: str) -> None:
         "accepted",
         "rejected",
         "certificate_renewed",
+        "certificate_submitted",
+        "certificate_rejected",
     }
     for model, values in (
         (ActivityResponse, payload),
@@ -69,7 +73,7 @@ def test_activity_action_contract_and_seed(action: str) -> None:
                 model.model_validate(values)
 
 
-def test_openapi_lists_only_five_activity_actions() -> None:
+def test_openapi_lists_supported_activity_actions() -> None:
     spec = client.get("/openapi.json").json()
     action = spec["components"]["schemas"]["ActivityResponse"]["properties"][
         "action"
@@ -80,6 +84,8 @@ def test_openapi_lists_only_five_activity_actions() -> None:
         "accepted",
         "rejected",
         "certificate_renewed",
+        "certificate_submitted",
+        "certificate_rejected",
     }
 
 
@@ -92,6 +98,17 @@ def contract_database() -> Generator[None, None, None]:
         poolclass=StaticPool,
     )
     db.init_db(engine)
+    with Session(engine) as seeded:
+        seeded.add(
+            db.Person(
+                id=5,
+                name="Hakim",
+                title="Supplier contact",
+                role="supplier",
+                tenant="1",
+            )
+        )
+        seeded.commit()
 
     def session() -> Generator[Session, None, None]:
         with Session(engine) as current:
@@ -108,6 +125,7 @@ def contract_database() -> Generator[None, None, None]:
 def headers(role: str = "supervisor") -> dict[str, str]:
     return {
         "X-Demo-Role": role,
+        "X-Demo-Person": "5",
         "X-Demo-Tenant": "1" if role == "supplier" else "bakery",
     }
 
@@ -328,7 +346,7 @@ def test_response_scope_is_json_array_not_encoded_string() -> None:
     assert isinstance(certificate.model_dump(mode="json")["scope"], list)
 
 
-def test_openapi_documents_all_eight_business_routes() -> None:
+def test_openapi_documents_business_and_registry_routes() -> None:
     response = client.get("/openapi.json")
     assert response.status_code == 200
     spec = response.json()
@@ -341,6 +359,8 @@ def test_openapi_documents_all_eight_business_routes() -> None:
         ("/api/certificates", "get"),
         ("/api/certificates", "post"),
         ("/api/certificates/extract", "post"),
+        ("/api/registry/renewals", "get"),
+        ("/api/registry/renewals/{id}/decision", "post"),
     }
     actual = {
         (path, method)
@@ -354,7 +374,10 @@ def test_openapi_documents_all_eight_business_routes() -> None:
         header_names = {
             p["name"] for p in operation["parameters"] if p["in"] == "header"
         }
-        assert header_names == {"X-Demo-Role", "X-Demo-Tenant"}
+        expected_headers = {"X-Demo-Role", "X-Demo-Tenant"}
+        if path.startswith(("/api/certificates", "/api/registry")):
+            expected_headers.add("X-Demo-Person")
+        assert header_names == expected_headers
         assert ("501" in operation["responses"]) == (
             path == "/api/certificates/extract"
         )
