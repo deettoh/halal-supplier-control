@@ -806,6 +806,7 @@ def test_merged_seed_matches_loader_api_and_rules(engine: Engine) -> None:
                 "halal_mark_present": True,
             },
             {
+                "name": material.name,
                 "approved_brand": material.approved_brand,
                 "approved_manufacturer": material.approved_manufacturer,
             },

@@ -83,6 +83,7 @@ def _certificate_values(row: db.Certificate | None) -> dict[str, object]:
 
 def _material_values(row: db.Material) -> dict[str, object]:
     return {
+        "name": row.name,
         "approved_brand": row.approved_brand,
         "approved_manufacturer": row.approved_manufacturer,
     }

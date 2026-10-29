@@ -1,7 +1,7 @@
 {
   "provenance": "Prepared synthetic UI simulation; not inference, persistence or evaluation measurements.",
   "date": "2026-10-22",
-  "seed_sha256": "bb317d3e7dd7839c62ab4e8e2027d0054293136d59a17676414c70f50f53cdce",
+  "seed_sha256": "48119a2147ed8fa5df8d93bac38927abff8c8666bbc012a49580ebdb3977b236",
   "materials": {
     "00": {
       "Sunrise Bakery SAMPLE": [
@@ -944,7 +944,7 @@
             {
               "rule": "R2",
               "passed": false,
-              "detail": "Brand score: 37.0; manufacturer score: 100.0. Both must be >= 90."
+              "detail": "Brand score 37.0 is below 90."
             },
             {
               "rule": "R3",
@@ -991,7 +991,7 @@
               {
                 "rule": "R2",
                 "passed": false,
-                "detail": "Brand score: 37.0; manufacturer score: 100.0. Both must be >= 90."
+                "detail": "Brand score 37.0 is below 90."
               },
               {
                 "rule": "R3",
@@ -1037,7 +1037,7 @@
               {
                 "rule": "R2",
                 "passed": false,
-                "detail": "Brand score: 37.0; manufacturer score: 100.0. Both must be >= 90."
+                "detail": "Brand score 37.0 is below 90."
               },
               {
                 "rule": "R3",
@@ -1083,7 +1083,7 @@
               {
                 "rule": "R2",
                 "passed": false,
-                "detail": "Brand score: 37.0; manufacturer score: 100.0. Both must be >= 90."
+                "detail": "Brand score 37.0 is below 90."
               },
               {
                 "rule": "R3",
@@ -1129,7 +1129,7 @@
               {
                 "rule": "R2",
                 "passed": false,
-                "detail": "Brand score: 37.0; manufacturer score: 100.0. Both must be >= 90."
+                "detail": "Brand score 37.0 is below 90."
               },
               {
                 "rule": "R3",
@@ -1188,7 +1188,7 @@
             {
               "rule": "R2",
               "passed": true,
-              "detail": "Brand score: 100.0; manufacturer score: 100.0. Both must be >= 90."
+              "detail": "Product matches. Brand score: 100.0; manufacturer score: 100.0. Both must be >= 90."
             },
             {
               "rule": "R3",
@@ -1235,7 +1235,7 @@
               {
                 "rule": "R2",
                 "passed": true,
-                "detail": "Brand score: 100.0; manufacturer score: 100.0. Both must be >= 90."
+                "detail": "Product matches. Brand score: 100.0; manufacturer score: 100.0. Both must be >= 90."
               },
               {
                 "rule": "R3",
@@ -1281,7 +1281,7 @@
               {
                 "rule": "R2",
                 "passed": true,
-                "detail": "Brand score: 100.0; manufacturer score: 100.0. Both must be >= 90."
+                "detail": "Product matches. Brand score: 100.0; manufacturer score: 100.0. Both must be >= 90."
               },
               {
                 "rule": "R3",
@@ -1327,7 +1327,7 @@
               {
                 "rule": "R2",
                 "passed": true,
-                "detail": "Brand score: 100.0; manufacturer score: 100.0. Both must be >= 90."
+                "detail": "Product matches. Brand score: 100.0; manufacturer score: 100.0. Both must be >= 90."
               },
               {
                 "rule": "R3",
@@ -1373,7 +1373,7 @@
               {
                 "rule": "R2",
                 "passed": true,
-                "detail": "Brand score: 100.0; manufacturer score: 100.0. Both must be >= 90."
+                "detail": "Product matches. Brand score: 100.0; manufacturer score: 100.0. Both must be >= 90."
               },
               {
                 "rule": "R3",
@@ -1676,7 +1676,7 @@
             {
               "rule": "R2",
               "passed": true,
-              "detail": "Brand score: 100.0; manufacturer score: 100.0. Both must be >= 90."
+              "detail": "Product matches. Brand score: 100.0; manufacturer score: 100.0. Both must be >= 90."
             },
             {
               "rule": "R3",
@@ -1720,7 +1720,7 @@
             {
               "rule": "R2",
               "passed": true,
-              "detail": "Brand score: 100.0; manufacturer score: 100.0. Both must be >= 90."
+              "detail": "Product matches. Brand score: 100.0; manufacturer score: 100.0. Both must be >= 90."
             },
             {
               "rule": "R3",
@@ -1767,7 +1767,7 @@
               {
                 "rule": "R2",
                 "passed": true,
-                "detail": "Brand score: 100.0; manufacturer score: 100.0. Both must be >= 90."
+                "detail": "Product matches. Brand score: 100.0; manufacturer score: 100.0. Both must be >= 90."
               },
               {
                 "rule": "R3",
@@ -1811,7 +1811,7 @@
               {
                 "rule": "R2",
                 "passed": true,
-                "detail": "Brand score: 100.0; manufacturer score: 100.0. Both must be >= 90."
+                "detail": "Product matches. Brand score: 100.0; manufacturer score: 100.0. Both must be >= 90."
               },
               {
                 "rule": "R3",
@@ -1857,7 +1857,7 @@
               {
                 "rule": "R2",
                 "passed": true,
-                "detail": "Brand score: 100.0; manufacturer score: 100.0. Both must be >= 90."
+                "detail": "Product matches. Brand score: 100.0; manufacturer score: 100.0. Both must be >= 90."
               },
               {
                 "rule": "R3",
@@ -1901,7 +1901,7 @@
               {
                 "rule": "R2",
                 "passed": true,
-                "detail": "Brand score: 100.0; manufacturer score: 100.0. Both must be >= 90."
+                "detail": "Product matches. Brand score: 100.0; manufacturer score: 100.0. Both must be >= 90."
               },
               {
                 "rule": "R3",
@@ -1947,7 +1947,7 @@
               {
                 "rule": "R2",
                 "passed": true,
-                "detail": "Brand score: 100.0; manufacturer score: 100.0. Both must be >= 90."
+                "detail": "Product matches. Brand score: 100.0; manufacturer score: 100.0. Both must be >= 90."
               },
               {
                 "rule": "R3",
@@ -1991,7 +1991,7 @@
               {
                 "rule": "R2",
                 "passed": true,
-                "detail": "Brand score: 100.0; manufacturer score: 100.0. Both must be >= 90."
+                "detail": "Product matches. Brand score: 100.0; manufacturer score: 100.0. Both must be >= 90."
               },
               {
                 "rule": "R3",
@@ -2037,7 +2037,7 @@
               {
                 "rule": "R2",
                 "passed": true,
-                "detail": "Brand score: 100.0; manufacturer score: 100.0. Both must be >= 90."
+                "detail": "Product matches. Brand score: 100.0; manufacturer score: 100.0. Both must be >= 90."
               },
               {
                 "rule": "R3",
@@ -2081,7 +2081,7 @@
               {
                 "rule": "R2",
                 "passed": true,
-                "detail": "Brand score: 100.0; manufacturer score: 100.0. Both must be >= 90."
+                "detail": "Product matches. Brand score: 100.0; manufacturer score: 100.0. Both must be >= 90."
               },
               {
                 "rule": "R3",
@@ -2359,7 +2359,7 @@
           {
             "rule": "R2",
             "passed": false,
-            "detail": "Brand score: 37.0; manufacturer score: 100.0. Both must be >= 90."
+            "detail": "Brand score 37.0 is below 90."
           },
           {
             "rule": "R3",

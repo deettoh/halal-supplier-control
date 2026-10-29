@@ -76,6 +76,44 @@ def parse_scope(value: object) -> list[CertificateScopeItem]:
         return []
 
 
+def _approved_item_check(
+    label: Mapping[str, object], material: Mapping[str, object]
+) -> tuple[bool, str]:
+    """Return R2's result and detail for the label vs the material."""
+    product = label["product_name"]
+    approved_name = material.get("name")
+    brand_score = fuzz.ratio(
+        normalize(label["brand"]), normalize(material.get("approved_brand"))
+    )
+    manufacturer_score = fuzz.ratio(
+        normalize(label["manufacturer"]),
+        normalize(material.get("approved_manufacturer")),
+    )
+
+    failures: list[str] = []
+    if normalize(product) != normalize(approved_name):
+        failures.append(
+            f'Product mismatch: label says "{product}", '
+            f'approved material is "{approved_name}".'
+        )
+    for part, score in (
+        ("Brand", brand_score),
+        ("Manufacturer", manufacturer_score),
+    ):
+        if score < MATCH_THRESHOLD:
+            failures.append(
+                f"{part} score {score:.1f} is below {MATCH_THRESHOLD}."
+            )
+
+    if failures:
+        return False, " ".join(failures)
+    return True, (
+        f"Product matches. Brand score: {brand_score:.1f}; "
+        f"manufacturer score: {manufacturer_score:.1f}. "
+        f"Both must be >= {MATCH_THRESHOLD}."
+    )
+
+
 def evaluate(
     label: object,
     material: Mapping[str, object] | None,
@@ -143,29 +181,10 @@ def evaluate(
         else "Invalid or incomplete label extraction; human review required.",
     )
 
-    # R2 - Brand and manufacturer matching
+    # R2 - Product, brand and manufacturer match the chosen material
     if r1:
-        brand_score = fuzz.ratio(
-            normalize(label_fields["brand"]),
-            normalize(material.get("approved_brand")),
-        )
-        manufacturer_score = fuzz.ratio(
-            normalize(label_fields["manufacturer"]),
-            normalize(material.get("approved_manufacturer")),
-        )
-
-        r2 = (
-            brand_score >= MATCH_THRESHOLD
-            and manufacturer_score >= MATCH_THRESHOLD
-        )
-
-        add(
-            "R2",
-            r2,
-            f"Brand score: {brand_score:.1f}; "
-            f"manufacturer score: {manufacturer_score:.1f}. "
-            f"Both must be >= {MATCH_THRESHOLD}.",
-        )
+        r2, r2_detail = _approved_item_check(label_fields, material)
+        add("R2", r2, r2_detail)
     else:
         r2 = None
         add("R2", None, "Not evaluated: label information incomplete.")

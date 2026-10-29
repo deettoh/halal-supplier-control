@@ -1,5 +1,6 @@
 """Regression checks for rule evaluation and recognized demo issuers."""
 
+import re
 from datetime import date, timedelta
 
 import pytest
@@ -14,6 +15,7 @@ LABEL = {
     "halal_mark_present": True,
 }
 MATERIAL = {
+    "name": "Wheat Flour",
     "approved_brand": "GoldenMill",
     "approved_manufacturer": "Golden Grain Foods",
 }
@@ -98,3 +100,51 @@ def test_scope_formats_share_product_matching(scope: object) -> None:
     )
     assert result["verdict"] == "covered"
     assert result["rule_results"][2]["passed"] is True
+
+
+def test_other_product_from_approved_supplier_is_substitution() -> None:
+    result = evaluate(
+        {**LABEL, "product_name": "Semolina"},
+        MATERIAL,
+        {
+            "scope": ["Wheat Flour", "Semolina"],
+            "expiry_date": "2027-12-31",
+            "issuer": "SAMPLE Food Certification Council",
+        },
+        TODAY,
+    )
+    assert result["verdict"] == "substitution"
+    assert result["rule_results"][1] == {
+        "rule": "R2",
+        "passed": False,
+        "detail": 'Product mismatch: label says "Semolina", '
+        'approved material is "Wheat Flour".',
+    }
+
+
+def test_brand_failure_reports_its_score() -> None:
+    result = evaluate(
+        {**LABEL, "brand": "ALT SAMPLE BRAND"},
+        MATERIAL,
+        None,
+        TODAY,
+    )
+    assert result["verdict"] == "substitution"
+    assert re.fullmatch(
+        r"Brand score \d+\.\d is below 90\.",
+        result["rule_results"][1]["detail"],
+    )
+
+
+def test_r2_detail_lists_every_failing_part() -> None:
+    result = evaluate(
+        {**LABEL, "product_name": "Semolina", "brand": "ALT SAMPLE BRAND"},
+        MATERIAL,
+        None,
+        TODAY,
+    )
+    assert re.fullmatch(
+        r'Product mismatch: label says "Semolina", approved material is '
+        r'"Wheat Flour"\. Brand score \d+\.\d is below 90\.',
+        result["rule_results"][1]["detail"],
+    )
