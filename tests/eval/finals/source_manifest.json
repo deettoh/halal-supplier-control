@@ -1,0 +1,81 @@
+{
+  "sources": [
+    {
+      "source_id": "green",
+      "source_filename": "my-11134103-820la-mmxag42yxtz5ed.webp",
+      "packaging_family_id": "green-cocoa-pouch",
+      "sha256": "53006a36708ce20eb63a03d05d282c11eeddfbb84c61b3eb2f9a5be77f886f92",
+      "provenance": "User-supplied online source; original URL/creator/license not supplied; source not committed."
+    },
+    {
+      "source_id": "prima",
+      "source_filename": "my-11134103-820la-mujafiv93pc8ba.webp",
+      "packaging_family_id": "prima-flour-sack",
+      "sha256": "5926c40ea29246883c3583a27295841a628b4171d1e957ac5396653c91655d4b",
+      "provenance": "User-supplied online source; original URL/creator/license not supplied; source not committed."
+    },
+    {
+      "source_id": "white",
+      "source_filename": "my-11134103-7rasb-m9398z5vfobpe7.webp",
+      "packaging_family_id": "white-label-cocoa-pouch",
+      "sha256": "a9f6c9ba1940961924cc52188aada56ec57e72c4e9ae48bf72827c14b9839727",
+      "provenance": "User-supplied online source; original URL/creator/license not supplied; source not committed."
+    },
+    {
+      "source_id": "bear",
+      "source_filename": "my-11134103-820l6-mk2ey6ro3u9sb2.webp",
+      "packaging_family_id": "bear-flour-sack",
+      "sha256": "510a95bb8fb6110c6376741cf7574865b67329aa6d717a9c2d953f77b1d202ec",
+      "provenance": "User-supplied online source; original URL/creator/license not supplied; source not committed."
+    },
+    {
+      "source_id": "kris",
+      "source_filename": "double-kris-bread-flour-25kg.jpg",
+      "packaging_family_id": "kris-flour-sack",
+      "sha256": "11c4e1cb1dc1e1a257eb5c992d0d385b65e485c907dc0b59e9ecbf93dd24159f",
+      "provenance": "User-supplied online source; original URL/creator/license not supplied; source not committed."
+    },
+    {
+      "source_id": "caputo",
+      "source_filename": "my-11134103-7r992-ly7wnv67xt9l12.webp",
+      "packaging_family_id": "blue-flour-sack",
+      "sha256": "9e70d01291c866dfb735925d9fdef0ce9762156538d42acb48f9800727a0533e",
+      "provenance": "User-supplied online source; original URL/creator/license not supplied; source not committed."
+    },
+    {
+      "source_id": "pipe",
+      "source_filename": "my-11134103-820li-mezets8rgpho21.webp",
+      "packaging_family_id": "prima-flour-sack",
+      "sha256": "a0d8ea994cde105e7f3569e53607c0cdb9edba0bf4eec83e0244c382664dedc9",
+      "provenance": "User-supplied online source; original URL/creator/license not supplied; source not committed."
+    },
+    {
+      "source_id": "bear-tilt",
+      "source_filename": "my-11134103-820l4-mqstn56tcfsx36.webp",
+      "packaging_family_id": "bear-flour-sack",
+      "sha256": "0a698796d12eecfd6bbcf4079e4f034d2b7ff098a0cb44517c2eec27373821bf",
+      "provenance": "User-supplied online source; original URL/creator/license not supplied; source not committed."
+    },
+    {
+      "source_id": "box",
+      "source_filename": "Guan-Chong-3.gif",
+      "packaging_family_id": "cocoa-carton",
+      "sha256": "ffc07c811dd18ebdbc057ab725dd6098f80d8c794ede7a136e4a934e8a19d764",
+      "provenance": "User-supplied online source; original URL/creator/license not supplied; source not committed."
+    },
+    {
+      "source_id": "pink",
+      "source_filename": "my-11134103-820lh-mqgv3dh4jr4110.webp",
+      "packaging_family_id": "white-label-cocoa-pouch",
+      "sha256": "484596c8f9085eb53ddb5ee8f9b28cc9210991933211d9eff2696aaf04353057",
+      "provenance": "User-supplied online source; original URL/creator/license not supplied; source not committed."
+    },
+    {
+      "source_id": "grass",
+      "source_filename": "7a98ca89e5e3abb35057e1ea820c1ac2.webp",
+      "packaging_family_id": "brown-cocoa-pouch",
+      "sha256": "9d248f57167d419ff483fbe567fab9d0956813624f1d617a2f76c1056926e4f0",
+      "provenance": "User-supplied online source; original URL/creator/license not supplied; source not committed."
+    }
+  ]
+}

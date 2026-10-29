@@ -1,0 +1,2266 @@
+{
+  "format_version": "1.1-review",
+  "dataset_id": "finals-edited-labels-2026-10-30-v1",
+  "status": "expected_answers_written_before_generation",
+  "member_5_approval": "pending",
+  "editing_style_approved_by_user": true,
+  "human_ground_truth_approval": "pending",
+  "proposed_evaluation_date": "2026-10-30",
+  "required_ruleset": "API contract v0.2",
+  "seed_sha256": "f09dcee9afe33702e41d277fa54b6b7e8891a8fc45b5e9c80f14b87937019cd6",
+  "sample_counts": {
+    "new_case_count": 24,
+    "source_photo_count": 11,
+    "approved_previews_included": 3,
+    "new_image_edits_required": 21,
+    "category_counts": {
+      "normal": 8,
+      "wrong_product": 4,
+      "substitution": 4,
+      "absent_mark": 4,
+      "hidden_mark": 2,
+      "hidden_text": 2
+    }
+  },
+  "provenance": "AI-edited online photographs supplied by user. Fictional labels; real source scenes approximated. Not 24 independent source photographs and not real deployment evidence.",
+  "split_policy": "Do not random-split related images. source_id and packaging_family_id group derived/correlated examples. No untouched holdout claimed for these user-reviewed development cases.",
+  "ground_truth_policy": "Quantities are separate from product names. null means visually unknowable, false means a clearly visible label with no halal mark. Verify every finished image against these prewritten targets before inference. Regenerate mismatches; do not tune targets to model predictions.",
+  "evaluation_status": "No RunPod calls, predictions, timing measurements or accuracy scores collected.",
+  "cases": [
+    {
+      "case_id": "L09",
+      "scenario": "normal",
+      "asset_state": "planned_before_generation",
+      "image_path": "tests/eval/finals/images/L09.png",
+      "source_id": "green",
+      "packaging_family_id": "green-cocoa-pouch",
+      "seed_tenant": "Sunrise Bakery SAMPLE",
+      "material_id": 6,
+      "supplier_id": 2,
+      "certificate_id": 3,
+      "proposed_expected_extraction": {
+        "product_name": "Cocoa Powder",
+        "brand": "SilverCocoa",
+        "manufacturer": "Silver Valley Foods",
+        "halal_mark_present": true
+      },
+      "proposed_expected_verdict": "covered",
+      "proposed_expected_initial_status": "auto_accepted",
+      "proposed_first_failing_rule": null,
+      "evaluation_fixture": {
+        "material": {
+          "id": 6,
+          "tenant": "Sunrise Bakery SAMPLE",
+          "name": "Cocoa Powder",
+          "supplier_id": 2,
+          "approved_brand": "SilverCocoa",
+          "approved_manufacturer": "Silver Valley Foods"
+        },
+        "certificate": {
+          "id": 3,
+          "supplier_id": 2,
+          "issuer": "SAMPLE Food Certification Council",
+          "cert_no": "SAMPLE-SVI-2026-001",
+          "holder_name": "Silver Valley Ingredients SAMPLE",
+          "expiry_date": "2027-09-30",
+          "scope": [
+            {
+              "product_name": "Cocoa Powder",
+              "brand": "SilverCocoa"
+            },
+            {
+              "product_name": "Vanilla Essence",
+              "brand": "SilverVanilla"
+            },
+            {
+              "product_name": "Cooking Chocolate",
+              "brand": "SilverCocoa"
+            },
+            {
+              "product_name": "Vegetable Oil",
+              "brand": "SilverPure"
+            },
+            {
+              "product_name": "Coconut Milk",
+              "brand": "SilverCoco"
+            },
+            {
+              "product_name": "Chocolate Chips",
+              "brand": "SilverCocoa"
+            },
+            {
+              "product_name": "Salt",
+              "brand": "SilverSalt"
+            },
+            {
+              "product_name": "Spice Mix",
+              "brand": "SilverSpice"
+            }
+          ],
+          "status": "active"
+        },
+        "today": "2026-10-30"
+      },
+      "evaluation_certificate_override": {},
+      "fixture_kind": "unchanged_seed_record",
+      "visual_review": {
+        "reviewer": null,
+        "result": "pending_generation",
+        "human_ground_truth_approval": "pending"
+      },
+      "rule_verification": {
+        "required_ruleset": "API contract v0.2: product-aware R2 and R6",
+        "current_branch_verified": false,
+        "reason": "Current branch lacks product-aware R2 and R6; do not replace target answers with v0.1 outputs."
+      },
+      "approved_preview_id": "preview-01-cocoa-green-label",
+      "visibility_notes": "Brand, product and manufacturer readable; generic HALAL/SAMPLE mark visible."
+    },
+    {
+      "case_id": "L10",
+      "scenario": "normal",
+      "asset_state": "planned_before_generation",
+      "image_path": "tests/eval/finals/images/L10.png",
+      "source_id": "prima",
+      "packaging_family_id": "prima-flour-sack",
+      "seed_tenant": "Crescent Caterer SAMPLE",
+      "material_id": 9,
+      "supplier_id": 1,
+      "certificate_id": 1,
+      "proposed_expected_extraction": {
+        "product_name": "Wheat Flour",
+        "brand": "GoldenMill",
+        "manufacturer": "Golden Grain Foods",
+        "halal_mark_present": true
+      },
+      "proposed_expected_verdict": "expiring",
+      "proposed_expected_initial_status": "auto_accepted",
+      "proposed_first_failing_rule": null,
+      "evaluation_fixture": {
+        "material": {
+          "id": 9,
+          "tenant": "Crescent Caterer SAMPLE",
+          "name": "Wheat Flour",
+          "supplier_id": 1,
+          "approved_brand": "GoldenMill",
+          "approved_manufacturer": "Golden Grain Foods"
+        },
+        "certificate": {
+          "id": 1,
+          "supplier_id": 1,
+          "issuer": "SAMPLE Food Certification Council",
+          "cert_no": "SAMPLE-GGS-2026-001",
+          "holder_name": "Golden Grain Supplies SAMPLE",
+          "expiry_date": "2026-11-30",
+          "scope": [
+            {
+              "product_name": "Wheat Flour",
+              "brand": "GoldenMill"
+            },
+            {
+              "product_name": "Bread Flour",
+              "brand": "GoldenMill"
+            },
+            {
+              "product_name": "Cake Flour",
+              "brand": "GoldenMill"
+            },
+            {
+              "product_name": "Corn Starch",
+              "brand": "GoldenMill"
+            },
+            {
+              "product_name": "Rice Flour",
+              "brand": "GoldenMill"
+            },
+            {
+              "product_name": "Baking Powder",
+              "brand": "GoldenMill"
+            },
+            {
+              "product_name": "Fine Sugar",
+              "brand": "SweetGold"
+            },
+            {
+              "product_name": "Brown Sugar",
+              "brand": "SweetGold"
+            },
+            {
+              "product_name": "Semolina",
+              "brand": "GoldenMill"
+            },
+            {
+              "product_name": "Potato Starch",
+              "brand": "GoldenMill"
+            }
+          ],
+          "status": "active"
+        },
+        "today": "2026-10-30"
+      },
+      "evaluation_certificate_override": {},
+      "fixture_kind": "unchanged_seed_record",
+      "visual_review": {
+        "reviewer": null,
+        "result": "pending_generation",
+        "human_ground_truth_approval": "pending"
+      },
+      "rule_verification": {
+        "required_ruleset": "API contract v0.2: product-aware R2 and R6",
+        "current_branch_verified": false,
+        "reason": "Current branch lacks product-aware R2 and R6; do not replace target answers with v0.1 outputs."
+      },
+      "approved_preview_id": "preview-02-wheat-flour-angled-sack",
+      "visibility_notes": "Brand, product and manufacturer readable; generic HALAL/SAMPLE mark visible."
+    },
+    {
+      "case_id": "L11",
+      "scenario": "normal",
+      "asset_state": "planned_before_generation",
+      "image_path": "tests/eval/finals/images/L11.png",
+      "source_id": "white",
+      "packaging_family_id": "white-label-cocoa-pouch",
+      "seed_tenant": "Sunrise Bakery SAMPLE",
+      "material_id": 6,
+      "supplier_id": 2,
+      "certificate_id": 3,
+      "proposed_expected_extraction": {
+        "product_name": "Cocoa Powder",
+        "brand": "SilverCocoa",
+        "manufacturer": "Silver Valley Foods",
+        "halal_mark_present": true
+      },
+      "proposed_expected_verdict": "covered",
+      "proposed_expected_initial_status": "auto_accepted",
+      "proposed_first_failing_rule": null,
+      "evaluation_fixture": {
+        "material": {
+          "id": 6,
+          "tenant": "Sunrise Bakery SAMPLE",
+          "name": "Cocoa Powder",
+          "supplier_id": 2,
+          "approved_brand": "SilverCocoa",
+          "approved_manufacturer": "Silver Valley Foods"
+        },
+        "certificate": {
+          "id": 3,
+          "supplier_id": 2,
+          "issuer": "SAMPLE Food Certification Council",
+          "cert_no": "SAMPLE-SVI-2026-001",
+          "holder_name": "Silver Valley Ingredients SAMPLE",
+          "expiry_date": "2027-09-30",
+          "scope": [
+            {
+              "product_name": "Cocoa Powder",
+              "brand": "SilverCocoa"
+            },
+            {
+              "product_name": "Vanilla Essence",
+              "brand": "SilverVanilla"
+            },
+            {
+              "product_name": "Cooking Chocolate",
+              "brand": "SilverCocoa"
+            },
+            {
+              "product_name": "Vegetable Oil",
+              "brand": "SilverPure"
+            },
+            {
+              "product_name": "Coconut Milk",
+              "brand": "SilverCoco"
+            },
+            {
+              "product_name": "Chocolate Chips",
+              "brand": "SilverCocoa"
+            },
+            {
+              "product_name": "Salt",
+              "brand": "SilverSalt"
+            },
+            {
+              "product_name": "Spice Mix",
+              "brand": "SilverSpice"
+            }
+          ],
+          "status": "active"
+        },
+        "today": "2026-10-30"
+      },
+      "evaluation_certificate_override": {},
+      "fixture_kind": "unchanged_seed_record",
+      "visual_review": {
+        "reviewer": null,
+        "result": "pending_generation",
+        "human_ground_truth_approval": "pending"
+      },
+      "rule_verification": {
+        "required_ruleset": "API contract v0.2: product-aware R2 and R6",
+        "current_branch_verified": false,
+        "reason": "Current branch lacks product-aware R2 and R6; do not replace target answers with v0.1 outputs."
+      },
+      "approved_preview_id": "preview-03-cocoa-small-white-label",
+      "visibility_notes": "Brand, product and manufacturer readable; generic HALAL/SAMPLE mark visible."
+    },
+    {
+      "case_id": "L12",
+      "scenario": "normal",
+      "asset_state": "planned_before_generation",
+      "image_path": "tests/eval/finals/images/L12.png",
+      "source_id": "bear",
+      "packaging_family_id": "bear-flour-sack",
+      "seed_tenant": "Sunrise Bakery SAMPLE",
+      "material_id": 1,
+      "supplier_id": 1,
+      "certificate_id": 1,
+      "proposed_expected_extraction": {
+        "product_name": "Wheat Flour",
+        "brand": "GoldenMill",
+        "manufacturer": "Golden Grain Foods",
+        "halal_mark_present": true
+      },
+      "proposed_expected_verdict": "expiring",
+      "proposed_expected_initial_status": "auto_accepted",
+      "proposed_first_failing_rule": null,
+      "evaluation_fixture": {
+        "material": {
+          "id": 1,
+          "tenant": "Sunrise Bakery SAMPLE",
+          "name": "Wheat Flour",
+          "supplier_id": 1,
+          "approved_brand": "GoldenMill",
+          "approved_manufacturer": "Golden Grain Foods"
+        },
+        "certificate": {
+          "id": 1,
+          "supplier_id": 1,
+          "issuer": "SAMPLE Food Certification Council",
+          "cert_no": "SAMPLE-GGS-2026-001",
+          "holder_name": "Golden Grain Supplies SAMPLE",
+          "expiry_date": "2026-11-30",
+          "scope": [
+            {
+              "product_name": "Wheat Flour",
+              "brand": "GoldenMill"
+            },
+            {
+              "product_name": "Bread Flour",
+              "brand": "GoldenMill"
+            },
+            {
+              "product_name": "Cake Flour",
+              "brand": "GoldenMill"
+            },
+            {
+              "product_name": "Corn Starch",
+              "brand": "GoldenMill"
+            },
+            {
+              "product_name": "Rice Flour",
+              "brand": "GoldenMill"
+            },
+            {
+              "product_name": "Baking Powder",
+              "brand": "GoldenMill"
+            },
+            {
+              "product_name": "Fine Sugar",
+              "brand": "SweetGold"
+            },
+            {
+              "product_name": "Brown Sugar",
+              "brand": "SweetGold"
+            },
+            {
+              "product_name": "Semolina",
+              "brand": "GoldenMill"
+            },
+            {
+              "product_name": "Potato Starch",
+              "brand": "GoldenMill"
+            }
+          ],
+          "status": "active"
+        },
+        "today": "2026-10-30"
+      },
+      "evaluation_certificate_override": {},
+      "fixture_kind": "unchanged_seed_record",
+      "visual_review": {
+        "reviewer": null,
+        "result": "pending_generation",
+        "human_ground_truth_approval": "pending"
+      },
+      "rule_verification": {
+        "required_ruleset": "API contract v0.2: product-aware R2 and R6",
+        "current_branch_verified": false,
+        "reason": "Current branch lacks product-aware R2 and R6; do not replace target answers with v0.1 outputs."
+      },
+      "visibility_notes": "Brand, product and manufacturer readable; generic HALAL/SAMPLE mark visible."
+    },
+    {
+      "case_id": "L13",
+      "scenario": "normal",
+      "asset_state": "planned_before_generation",
+      "image_path": "tests/eval/finals/images/L13.png",
+      "source_id": "kris",
+      "packaging_family_id": "kris-flour-sack",
+      "seed_tenant": "Sunrise Bakery SAMPLE",
+      "material_id": 2,
+      "supplier_id": 1,
+      "certificate_id": 1,
+      "proposed_expected_extraction": {
+        "product_name": "Bread Flour",
+        "brand": "GoldenMill",
+        "manufacturer": "Golden Grain Foods",
+        "halal_mark_present": true
+      },
+      "proposed_expected_verdict": "expiring",
+      "proposed_expected_initial_status": "auto_accepted",
+      "proposed_first_failing_rule": null,
+      "evaluation_fixture": {
+        "material": {
+          "id": 2,
+          "tenant": "Sunrise Bakery SAMPLE",
+          "name": "Bread Flour",
+          "supplier_id": 1,
+          "approved_brand": "GoldenMill",
+          "approved_manufacturer": "Golden Grain Foods"
+        },
+        "certificate": {
+          "id": 1,
+          "supplier_id": 1,
+          "issuer": "SAMPLE Food Certification Council",
+          "cert_no": "SAMPLE-GGS-2026-001",
+          "holder_name": "Golden Grain Supplies SAMPLE",
+          "expiry_date": "2026-11-30",
+          "scope": [
+            {
+              "product_name": "Wheat Flour",
+              "brand": "GoldenMill"
+            },
+            {
+              "product_name": "Bread Flour",
+              "brand": "GoldenMill"
+            },
+            {
+              "product_name": "Cake Flour",
+              "brand": "GoldenMill"
+            },
+            {
+              "product_name": "Corn Starch",
+              "brand": "GoldenMill"
+            },
+            {
+              "product_name": "Rice Flour",
+              "brand": "GoldenMill"
+            },
+            {
+              "product_name": "Baking Powder",
+              "brand": "GoldenMill"
+            },
+            {
+              "product_name": "Fine Sugar",
+              "brand": "SweetGold"
+            },
+            {
+              "product_name": "Brown Sugar",
+              "brand": "SweetGold"
+            },
+            {
+              "product_name": "Semolina",
+              "brand": "GoldenMill"
+            },
+            {
+              "product_name": "Potato Starch",
+              "brand": "GoldenMill"
+            }
+          ],
+          "status": "active"
+        },
+        "today": "2026-10-30"
+      },
+      "evaluation_certificate_override": {},
+      "fixture_kind": "unchanged_seed_record",
+      "visual_review": {
+        "reviewer": null,
+        "result": "pending_generation",
+        "human_ground_truth_approval": "pending"
+      },
+      "rule_verification": {
+        "required_ruleset": "API contract v0.2: product-aware R2 and R6",
+        "current_branch_verified": false,
+        "reason": "Current branch lacks product-aware R2 and R6; do not replace target answers with v0.1 outputs."
+      },
+      "visibility_notes": "Brand, product and manufacturer readable; generic HALAL/SAMPLE mark visible."
+    },
+    {
+      "case_id": "L14",
+      "scenario": "normal",
+      "asset_state": "planned_before_generation",
+      "image_path": "tests/eval/finals/images/L14.png",
+      "source_id": "caputo",
+      "packaging_family_id": "blue-flour-sack",
+      "seed_tenant": "Sunrise Bakery SAMPLE",
+      "material_id": 3,
+      "supplier_id": 1,
+      "certificate_id": 1,
+      "proposed_expected_extraction": {
+        "product_name": "Cake Flour",
+        "brand": "GoldenMill",
+        "manufacturer": "Golden Grain Foods",
+        "halal_mark_present": true
+      },
+      "proposed_expected_verdict": "expiring",
+      "proposed_expected_initial_status": "auto_accepted",
+      "proposed_first_failing_rule": null,
+      "evaluation_fixture": {
+        "material": {
+          "id": 3,
+          "tenant": "Sunrise Bakery SAMPLE",
+          "name": "Cake Flour",
+          "supplier_id": 1,
+          "approved_brand": "GoldenMill",
+          "approved_manufacturer": "Golden Grain Foods"
+        },
+        "certificate": {
+          "id": 1,
+          "supplier_id": 1,
+          "issuer": "SAMPLE Food Certification Council",
+          "cert_no": "SAMPLE-GGS-2026-001",
+          "holder_name": "Golden Grain Supplies SAMPLE",
+          "expiry_date": "2026-11-30",
+          "scope": [
+            {
+              "product_name": "Wheat Flour",
+              "brand": "GoldenMill"
+            },
+            {
+              "product_name": "Bread Flour",
+              "brand": "GoldenMill"
+            },
+            {
+              "product_name": "Cake Flour",
+              "brand": "GoldenMill"
+            },
+            {
+              "product_name": "Corn Starch",
+              "brand": "GoldenMill"
+            },
+            {
+              "product_name": "Rice Flour",
+              "brand": "GoldenMill"
+            },
+            {
+              "product_name": "Baking Powder",
+              "brand": "GoldenMill"
+            },
+            {
+              "product_name": "Fine Sugar",
+              "brand": "SweetGold"
+            },
+            {
+              "product_name": "Brown Sugar",
+              "brand": "SweetGold"
+            },
+            {
+              "product_name": "Semolina",
+              "brand": "GoldenMill"
+            },
+            {
+              "product_name": "Potato Starch",
+              "brand": "GoldenMill"
+            }
+          ],
+          "status": "active"
+        },
+        "today": "2026-10-30"
+      },
+      "evaluation_certificate_override": {},
+      "fixture_kind": "unchanged_seed_record",
+      "visual_review": {
+        "reviewer": null,
+        "result": "pending_generation",
+        "human_ground_truth_approval": "pending"
+      },
+      "rule_verification": {
+        "required_ruleset": "API contract v0.2: product-aware R2 and R6",
+        "current_branch_verified": false,
+        "reason": "Current branch lacks product-aware R2 and R6; do not replace target answers with v0.1 outputs."
+      },
+      "visibility_notes": "Brand, product and manufacturer readable; generic HALAL/SAMPLE mark visible."
+    },
+    {
+      "case_id": "L15",
+      "scenario": "normal",
+      "asset_state": "planned_before_generation",
+      "image_path": "tests/eval/finals/images/L15.png",
+      "source_id": "pipe",
+      "packaging_family_id": "prima-flour-sack",
+      "seed_tenant": "Crescent Caterer SAMPLE",
+      "material_id": 10,
+      "supplier_id": 1,
+      "certificate_id": 1,
+      "proposed_expected_extraction": {
+        "product_name": "Rice Flour",
+        "brand": "GoldenMill",
+        "manufacturer": "Golden Grain Foods",
+        "halal_mark_present": true
+      },
+      "proposed_expected_verdict": "expiring",
+      "proposed_expected_initial_status": "auto_accepted",
+      "proposed_first_failing_rule": null,
+      "evaluation_fixture": {
+        "material": {
+          "id": 10,
+          "tenant": "Crescent Caterer SAMPLE",
+          "name": "Rice Flour",
+          "supplier_id": 1,
+          "approved_brand": "GoldenMill",
+          "approved_manufacturer": "Golden Grain Foods"
+        },
+        "certificate": {
+          "id": 1,
+          "supplier_id": 1,
+          "issuer": "SAMPLE Food Certification Council",
+          "cert_no": "SAMPLE-GGS-2026-001",
+          "holder_name": "Golden Grain Supplies SAMPLE",
+          "expiry_date": "2026-11-30",
+          "scope": [
+            {
+              "product_name": "Wheat Flour",
+              "brand": "GoldenMill"
+            },
+            {
+              "product_name": "Bread Flour",
+              "brand": "GoldenMill"
+            },
+            {
+              "product_name": "Cake Flour",
+              "brand": "GoldenMill"
+            },
+            {
+              "product_name": "Corn Starch",
+              "brand": "GoldenMill"
+            },
+            {
+              "product_name": "Rice Flour",
+              "brand": "GoldenMill"
+            },
+            {
+              "product_name": "Baking Powder",
+              "brand": "GoldenMill"
+            },
+            {
+              "product_name": "Fine Sugar",
+              "brand": "SweetGold"
+            },
+            {
+              "product_name": "Brown Sugar",
+              "brand": "SweetGold"
+            },
+            {
+              "product_name": "Semolina",
+              "brand": "GoldenMill"
+            },
+            {
+              "product_name": "Potato Starch",
+              "brand": "GoldenMill"
+            }
+          ],
+          "status": "active"
+        },
+        "today": "2026-10-30"
+      },
+      "evaluation_certificate_override": {},
+      "fixture_kind": "unchanged_seed_record",
+      "visual_review": {
+        "reviewer": null,
+        "result": "pending_generation",
+        "human_ground_truth_approval": "pending"
+      },
+      "rule_verification": {
+        "required_ruleset": "API contract v0.2: product-aware R2 and R6",
+        "current_branch_verified": false,
+        "reason": "Current branch lacks product-aware R2 and R6; do not replace target answers with v0.1 outputs."
+      },
+      "visibility_notes": "Brand, product and manufacturer readable; generic HALAL/SAMPLE mark visible."
+    },
+    {
+      "case_id": "L16",
+      "scenario": "normal",
+      "asset_state": "planned_before_generation",
+      "image_path": "tests/eval/finals/images/L16.png",
+      "source_id": "bear-tilt",
+      "packaging_family_id": "bear-flour-sack",
+      "seed_tenant": "Crescent Caterer SAMPLE",
+      "material_id": 9,
+      "supplier_id": 1,
+      "certificate_id": 1,
+      "proposed_expected_extraction": {
+        "product_name": "Wheat Flour",
+        "brand": "GoldenMill",
+        "manufacturer": "Golden Grain Foods",
+        "halal_mark_present": true
+      },
+      "proposed_expected_verdict": "expiring",
+      "proposed_expected_initial_status": "auto_accepted",
+      "proposed_first_failing_rule": null,
+      "evaluation_fixture": {
+        "material": {
+          "id": 9,
+          "tenant": "Crescent Caterer SAMPLE",
+          "name": "Wheat Flour",
+          "supplier_id": 1,
+          "approved_brand": "GoldenMill",
+          "approved_manufacturer": "Golden Grain Foods"
+        },
+        "certificate": {
+          "id": 1,
+          "supplier_id": 1,
+          "issuer": "SAMPLE Food Certification Council",
+          "cert_no": "SAMPLE-GGS-2026-001",
+          "holder_name": "Golden Grain Supplies SAMPLE",
+          "expiry_date": "2026-11-30",
+          "scope": [
+            {
+              "product_name": "Wheat Flour",
+              "brand": "GoldenMill"
+            },
+            {
+              "product_name": "Bread Flour",
+              "brand": "GoldenMill"
+            },
+            {
+              "product_name": "Cake Flour",
+              "brand": "GoldenMill"
+            },
+            {
+              "product_name": "Corn Starch",
+              "brand": "GoldenMill"
+            },
+            {
+              "product_name": "Rice Flour",
+              "brand": "GoldenMill"
+            },
+            {
+              "product_name": "Baking Powder",
+              "brand": "GoldenMill"
+            },
+            {
+              "product_name": "Fine Sugar",
+              "brand": "SweetGold"
+            },
+            {
+              "product_name": "Brown Sugar",
+              "brand": "SweetGold"
+            },
+            {
+              "product_name": "Semolina",
+              "brand": "GoldenMill"
+            },
+            {
+              "product_name": "Potato Starch",
+              "brand": "GoldenMill"
+            }
+          ],
+          "status": "active"
+        },
+        "today": "2026-10-30"
+      },
+      "evaluation_certificate_override": {},
+      "fixture_kind": "unchanged_seed_record",
+      "visual_review": {
+        "reviewer": null,
+        "result": "pending_generation",
+        "human_ground_truth_approval": "pending"
+      },
+      "rule_verification": {
+        "required_ruleset": "API contract v0.2: product-aware R2 and R6",
+        "current_branch_verified": false,
+        "reason": "Current branch lacks product-aware R2 and R6; do not replace target answers with v0.1 outputs."
+      },
+      "visibility_notes": "Brand, product and manufacturer readable; generic HALAL/SAMPLE mark visible."
+    },
+    {
+      "case_id": "L17",
+      "scenario": "wrong_product",
+      "asset_state": "planned_before_generation",
+      "image_path": "tests/eval/finals/images/L17.png",
+      "source_id": "bear",
+      "packaging_family_id": "bear-flour-sack",
+      "seed_tenant": "Sunrise Bakery SAMPLE",
+      "material_id": 1,
+      "supplier_id": 1,
+      "certificate_id": 1,
+      "proposed_expected_extraction": {
+        "product_name": "Semolina",
+        "brand": "GoldenMill",
+        "manufacturer": "Golden Grain Foods",
+        "halal_mark_present": true
+      },
+      "proposed_expected_verdict": "substitution",
+      "proposed_expected_initial_status": "pending_review",
+      "proposed_first_failing_rule": "R2",
+      "evaluation_fixture": {
+        "material": {
+          "id": 1,
+          "tenant": "Sunrise Bakery SAMPLE",
+          "name": "Wheat Flour",
+          "supplier_id": 1,
+          "approved_brand": "GoldenMill",
+          "approved_manufacturer": "Golden Grain Foods"
+        },
+        "certificate": {
+          "id": 1,
+          "supplier_id": 1,
+          "issuer": "SAMPLE Food Certification Council",
+          "cert_no": "SAMPLE-GGS-2026-001",
+          "holder_name": "Golden Grain Supplies SAMPLE",
+          "expiry_date": "2026-11-30",
+          "scope": [
+            {
+              "product_name": "Wheat Flour",
+              "brand": "GoldenMill"
+            },
+            {
+              "product_name": "Bread Flour",
+              "brand": "GoldenMill"
+            },
+            {
+              "product_name": "Cake Flour",
+              "brand": "GoldenMill"
+            },
+            {
+              "product_name": "Corn Starch",
+              "brand": "GoldenMill"
+            },
+            {
+              "product_name": "Rice Flour",
+              "brand": "GoldenMill"
+            },
+            {
+              "product_name": "Baking Powder",
+              "brand": "GoldenMill"
+            },
+            {
+              "product_name": "Fine Sugar",
+              "brand": "SweetGold"
+            },
+            {
+              "product_name": "Brown Sugar",
+              "brand": "SweetGold"
+            },
+            {
+              "product_name": "Semolina",
+              "brand": "GoldenMill"
+            },
+            {
+              "product_name": "Potato Starch",
+              "brand": "GoldenMill"
+            }
+          ],
+          "status": "active"
+        },
+        "today": "2026-10-30"
+      },
+      "evaluation_certificate_override": {},
+      "fixture_kind": "unchanged_seed_record",
+      "visual_review": {
+        "reviewer": null,
+        "result": "pending_generation",
+        "human_ground_truth_approval": "pending"
+      },
+      "rule_verification": {
+        "required_ruleset": "API contract v0.2: product-aware R2 and R6",
+        "current_branch_verified": false,
+        "reason": "Current branch lacks product-aware R2 and R6; do not replace target answers with v0.1 outputs."
+      },
+      "visibility_notes": "Brand, product and manufacturer readable; generic HALAL/SAMPLE mark visible."
+    },
+    {
+      "case_id": "L18",
+      "scenario": "wrong_product",
+      "asset_state": "planned_before_generation",
+      "image_path": "tests/eval/finals/images/L18.png",
+      "source_id": "pipe",
+      "packaging_family_id": "prima-flour-sack",
+      "seed_tenant": "Crescent Caterer SAMPLE",
+      "material_id": 9,
+      "supplier_id": 1,
+      "certificate_id": 1,
+      "proposed_expected_extraction": {
+        "product_name": "Rice Flour",
+        "brand": "GoldenMill",
+        "manufacturer": "Golden Grain Foods",
+        "halal_mark_present": true
+      },
+      "proposed_expected_verdict": "substitution",
+      "proposed_expected_initial_status": "pending_review",
+      "proposed_first_failing_rule": "R2",
+      "evaluation_fixture": {
+        "material": {
+          "id": 9,
+          "tenant": "Crescent Caterer SAMPLE",
+          "name": "Wheat Flour",
+          "supplier_id": 1,
+          "approved_brand": "GoldenMill",
+          "approved_manufacturer": "Golden Grain Foods"
+        },
+        "certificate": {
+          "id": 1,
+          "supplier_id": 1,
+          "issuer": "SAMPLE Food Certification Council",
+          "cert_no": "SAMPLE-GGS-2026-001",
+          "holder_name": "Golden Grain Supplies SAMPLE",
+          "expiry_date": "2026-11-30",
+          "scope": [
+            {
+              "product_name": "Wheat Flour",
+              "brand": "GoldenMill"
+            },
+            {
+              "product_name": "Bread Flour",
+              "brand": "GoldenMill"
+            },
+            {
+              "product_name": "Cake Flour",
+              "brand": "GoldenMill"
+            },
+            {
+              "product_name": "Corn Starch",
+              "brand": "GoldenMill"
+            },
+            {
+              "product_name": "Rice Flour",
+              "brand": "GoldenMill"
+            },
+            {
+              "product_name": "Baking Powder",
+              "brand": "GoldenMill"
+            },
+            {
+              "product_name": "Fine Sugar",
+              "brand": "SweetGold"
+            },
+            {
+              "product_name": "Brown Sugar",
+              "brand": "SweetGold"
+            },
+            {
+              "product_name": "Semolina",
+              "brand": "GoldenMill"
+            },
+            {
+              "product_name": "Potato Starch",
+              "brand": "GoldenMill"
+            }
+          ],
+          "status": "active"
+        },
+        "today": "2026-10-30"
+      },
+      "evaluation_certificate_override": {},
+      "fixture_kind": "unchanged_seed_record",
+      "visual_review": {
+        "reviewer": null,
+        "result": "pending_generation",
+        "human_ground_truth_approval": "pending"
+      },
+      "rule_verification": {
+        "required_ruleset": "API contract v0.2: product-aware R2 and R6",
+        "current_branch_verified": false,
+        "reason": "Current branch lacks product-aware R2 and R6; do not replace target answers with v0.1 outputs."
+      },
+      "visibility_notes": "Brand, product and manufacturer readable; generic HALAL/SAMPLE mark visible."
+    },
+    {
+      "case_id": "L19",
+      "scenario": "wrong_product",
+      "asset_state": "planned_before_generation",
+      "image_path": "tests/eval/finals/images/L19.png",
+      "source_id": "kris",
+      "packaging_family_id": "kris-flour-sack",
+      "seed_tenant": "Sunrise Bakery SAMPLE",
+      "material_id": 2,
+      "supplier_id": 1,
+      "certificate_id": 1,
+      "proposed_expected_extraction": {
+        "product_name": "Wheat Flour",
+        "brand": "GoldenMill",
+        "manufacturer": "Golden Grain Foods",
+        "halal_mark_present": true
+      },
+      "proposed_expected_verdict": "substitution",
+      "proposed_expected_initial_status": "pending_review",
+      "proposed_first_failing_rule": "R2",
+      "evaluation_fixture": {
+        "material": {
+          "id": 2,
+          "tenant": "Sunrise Bakery SAMPLE",
+          "name": "Bread Flour",
+          "supplier_id": 1,
+          "approved_brand": "GoldenMill",
+          "approved_manufacturer": "Golden Grain Foods"
+        },
+        "certificate": {
+          "id": 1,
+          "supplier_id": 1,
+          "issuer": "SAMPLE Food Certification Council",
+          "cert_no": "SAMPLE-GGS-2026-001",
+          "holder_name": "Golden Grain Supplies SAMPLE",
+          "expiry_date": "2026-11-30",
+          "scope": [
+            {
+              "product_name": "Wheat Flour",
+              "brand": "GoldenMill"
+            },
+            {
+              "product_name": "Bread Flour",
+              "brand": "GoldenMill"
+            },
+            {
+              "product_name": "Cake Flour",
+              "brand": "GoldenMill"
+            },
+            {
+              "product_name": "Corn Starch",
+              "brand": "GoldenMill"
+            },
+            {
+              "product_name": "Rice Flour",
+              "brand": "GoldenMill"
+            },
+            {
+              "product_name": "Baking Powder",
+              "brand": "GoldenMill"
+            },
+            {
+              "product_name": "Fine Sugar",
+              "brand": "SweetGold"
+            },
+            {
+              "product_name": "Brown Sugar",
+              "brand": "SweetGold"
+            },
+            {
+              "product_name": "Semolina",
+              "brand": "GoldenMill"
+            },
+            {
+              "product_name": "Potato Starch",
+              "brand": "GoldenMill"
+            }
+          ],
+          "status": "active"
+        },
+        "today": "2026-10-30"
+      },
+      "evaluation_certificate_override": {},
+      "fixture_kind": "unchanged_seed_record",
+      "visual_review": {
+        "reviewer": null,
+        "result": "pending_generation",
+        "human_ground_truth_approval": "pending"
+      },
+      "rule_verification": {
+        "required_ruleset": "API contract v0.2: product-aware R2 and R6",
+        "current_branch_verified": false,
+        "reason": "Current branch lacks product-aware R2 and R6; do not replace target answers with v0.1 outputs."
+      },
+      "visibility_notes": "Brand, product and manufacturer readable; generic HALAL/SAMPLE mark visible."
+    },
+    {
+      "case_id": "L20",
+      "scenario": "wrong_product",
+      "asset_state": "planned_before_generation",
+      "image_path": "tests/eval/finals/images/L20.png",
+      "source_id": "box",
+      "packaging_family_id": "cocoa-carton",
+      "seed_tenant": "Sunrise Bakery SAMPLE",
+      "material_id": 6,
+      "supplier_id": 2,
+      "certificate_id": 3,
+      "proposed_expected_extraction": {
+        "product_name": "Cocoa Liquor",
+        "brand": "SilverCocoa",
+        "manufacturer": "Silver Valley Foods",
+        "halal_mark_present": true
+      },
+      "proposed_expected_verdict": "substitution",
+      "proposed_expected_initial_status": "pending_review",
+      "proposed_first_failing_rule": "R2",
+      "evaluation_fixture": {
+        "material": {
+          "id": 6,
+          "tenant": "Sunrise Bakery SAMPLE",
+          "name": "Cocoa Powder",
+          "supplier_id": 2,
+          "approved_brand": "SilverCocoa",
+          "approved_manufacturer": "Silver Valley Foods"
+        },
+        "certificate": {
+          "id": 3,
+          "supplier_id": 2,
+          "issuer": "SAMPLE Food Certification Council",
+          "cert_no": "SAMPLE-SVI-2026-001",
+          "holder_name": "Silver Valley Ingredients SAMPLE",
+          "expiry_date": "2027-09-30",
+          "scope": [
+            {
+              "product_name": "Cocoa Powder",
+              "brand": "SilverCocoa"
+            },
+            {
+              "product_name": "Vanilla Essence",
+              "brand": "SilverVanilla"
+            },
+            {
+              "product_name": "Cooking Chocolate",
+              "brand": "SilverCocoa"
+            },
+            {
+              "product_name": "Vegetable Oil",
+              "brand": "SilverPure"
+            },
+            {
+              "product_name": "Coconut Milk",
+              "brand": "SilverCoco"
+            },
+            {
+              "product_name": "Chocolate Chips",
+              "brand": "SilverCocoa"
+            },
+            {
+              "product_name": "Salt",
+              "brand": "SilverSalt"
+            },
+            {
+              "product_name": "Spice Mix",
+              "brand": "SilverSpice"
+            }
+          ],
+          "status": "active"
+        },
+        "today": "2026-10-30"
+      },
+      "evaluation_certificate_override": {},
+      "fixture_kind": "unchanged_seed_record",
+      "visual_review": {
+        "reviewer": null,
+        "result": "pending_generation",
+        "human_ground_truth_approval": "pending"
+      },
+      "rule_verification": {
+        "required_ruleset": "API contract v0.2: product-aware R2 and R6",
+        "current_branch_verified": false,
+        "reason": "Current branch lacks product-aware R2 and R6; do not replace target answers with v0.1 outputs."
+      },
+      "visibility_notes": "Brand, product and manufacturer readable; generic HALAL/SAMPLE mark visible."
+    },
+    {
+      "case_id": "L21",
+      "scenario": "substitution",
+      "asset_state": "planned_before_generation",
+      "image_path": "tests/eval/finals/images/L21.png",
+      "source_id": "bear-tilt",
+      "packaging_family_id": "bear-flour-sack",
+      "seed_tenant": "Sunrise Bakery SAMPLE",
+      "material_id": 1,
+      "supplier_id": 1,
+      "certificate_id": 1,
+      "proposed_expected_extraction": {
+        "product_name": "Wheat Flour",
+        "brand": "HarvestStone",
+        "manufacturer": "Golden Grain Foods",
+        "halal_mark_present": true
+      },
+      "proposed_expected_verdict": "substitution",
+      "proposed_expected_initial_status": "pending_review",
+      "proposed_first_failing_rule": "R2",
+      "evaluation_fixture": {
+        "material": {
+          "id": 1,
+          "tenant": "Sunrise Bakery SAMPLE",
+          "name": "Wheat Flour",
+          "supplier_id": 1,
+          "approved_brand": "GoldenMill",
+          "approved_manufacturer": "Golden Grain Foods"
+        },
+        "certificate": {
+          "id": 1,
+          "supplier_id": 1,
+          "issuer": "SAMPLE Food Certification Council",
+          "cert_no": "SAMPLE-GGS-2026-001",
+          "holder_name": "Golden Grain Supplies SAMPLE",
+          "expiry_date": "2026-11-30",
+          "scope": [
+            {
+              "product_name": "Wheat Flour",
+              "brand": "GoldenMill"
+            },
+            {
+              "product_name": "Bread Flour",
+              "brand": "GoldenMill"
+            },
+            {
+              "product_name": "Cake Flour",
+              "brand": "GoldenMill"
+            },
+            {
+              "product_name": "Corn Starch",
+              "brand": "GoldenMill"
+            },
+            {
+              "product_name": "Rice Flour",
+              "brand": "GoldenMill"
+            },
+            {
+              "product_name": "Baking Powder",
+              "brand": "GoldenMill"
+            },
+            {
+              "product_name": "Fine Sugar",
+              "brand": "SweetGold"
+            },
+            {
+              "product_name": "Brown Sugar",
+              "brand": "SweetGold"
+            },
+            {
+              "product_name": "Semolina",
+              "brand": "GoldenMill"
+            },
+            {
+              "product_name": "Potato Starch",
+              "brand": "GoldenMill"
+            }
+          ],
+          "status": "active"
+        },
+        "today": "2026-10-30"
+      },
+      "evaluation_certificate_override": {},
+      "fixture_kind": "unchanged_seed_record",
+      "visual_review": {
+        "reviewer": null,
+        "result": "pending_generation",
+        "human_ground_truth_approval": "pending"
+      },
+      "rule_verification": {
+        "required_ruleset": "API contract v0.2: product-aware R2 and R6",
+        "current_branch_verified": false,
+        "reason": "Current branch lacks product-aware R2 and R6; do not replace target answers with v0.1 outputs."
+      },
+      "visibility_notes": "Brand, product and manufacturer readable; generic HALAL/SAMPLE mark visible."
+    },
+    {
+      "case_id": "L22",
+      "scenario": "substitution",
+      "asset_state": "planned_before_generation",
+      "image_path": "tests/eval/finals/images/L22.png",
+      "source_id": "prima",
+      "packaging_family_id": "prima-flour-sack",
+      "seed_tenant": "Crescent Caterer SAMPLE",
+      "material_id": 9,
+      "supplier_id": 1,
+      "certificate_id": 1,
+      "proposed_expected_extraction": {
+        "product_name": "Wheat Flour",
+        "brand": "GoldenMill",
+        "manufacturer": "Meadow Forge Foods",
+        "halal_mark_present": true
+      },
+      "proposed_expected_verdict": "substitution",
+      "proposed_expected_initial_status": "pending_review",
+      "proposed_first_failing_rule": "R2",
+      "evaluation_fixture": {
+        "material": {
+          "id": 9,
+          "tenant": "Crescent Caterer SAMPLE",
+          "name": "Wheat Flour",
+          "supplier_id": 1,
+          "approved_brand": "GoldenMill",
+          "approved_manufacturer": "Golden Grain Foods"
+        },
+        "certificate": {
+          "id": 1,
+          "supplier_id": 1,
+          "issuer": "SAMPLE Food Certification Council",
+          "cert_no": "SAMPLE-GGS-2026-001",
+          "holder_name": "Golden Grain Supplies SAMPLE",
+          "expiry_date": "2026-11-30",
+          "scope": [
+            {
+              "product_name": "Wheat Flour",
+              "brand": "GoldenMill"
+            },
+            {
+              "product_name": "Bread Flour",
+              "brand": "GoldenMill"
+            },
+            {
+              "product_name": "Cake Flour",
+              "brand": "GoldenMill"
+            },
+            {
+              "product_name": "Corn Starch",
+              "brand": "GoldenMill"
+            },
+            {
+              "product_name": "Rice Flour",
+              "brand": "GoldenMill"
+            },
+            {
+              "product_name": "Baking Powder",
+              "brand": "GoldenMill"
+            },
+            {
+              "product_name": "Fine Sugar",
+              "brand": "SweetGold"
+            },
+            {
+              "product_name": "Brown Sugar",
+              "brand": "SweetGold"
+            },
+            {
+              "product_name": "Semolina",
+              "brand": "GoldenMill"
+            },
+            {
+              "product_name": "Potato Starch",
+              "brand": "GoldenMill"
+            }
+          ],
+          "status": "active"
+        },
+        "today": "2026-10-30"
+      },
+      "evaluation_certificate_override": {},
+      "fixture_kind": "unchanged_seed_record",
+      "visual_review": {
+        "reviewer": null,
+        "result": "pending_generation",
+        "human_ground_truth_approval": "pending"
+      },
+      "rule_verification": {
+        "required_ruleset": "API contract v0.2: product-aware R2 and R6",
+        "current_branch_verified": false,
+        "reason": "Current branch lacks product-aware R2 and R6; do not replace target answers with v0.1 outputs."
+      },
+      "visibility_notes": "Brand, product and manufacturer readable; generic HALAL/SAMPLE mark visible."
+    },
+    {
+      "case_id": "L23",
+      "scenario": "substitution",
+      "asset_state": "planned_before_generation",
+      "image_path": "tests/eval/finals/images/L23.png",
+      "source_id": "green",
+      "packaging_family_id": "green-cocoa-pouch",
+      "seed_tenant": "Sunrise Bakery SAMPLE",
+      "material_id": 6,
+      "supplier_id": 2,
+      "certificate_id": 3,
+      "proposed_expected_extraction": {
+        "product_name": "Cocoa Powder",
+        "brand": "AmberCocoa",
+        "manufacturer": "Silver Valley Foods",
+        "halal_mark_present": true
+      },
+      "proposed_expected_verdict": "substitution",
+      "proposed_expected_initial_status": "pending_review",
+      "proposed_first_failing_rule": "R2",
+      "evaluation_fixture": {
+        "material": {
+          "id": 6,
+          "tenant": "Sunrise Bakery SAMPLE",
+          "name": "Cocoa Powder",
+          "supplier_id": 2,
+          "approved_brand": "SilverCocoa",
+          "approved_manufacturer": "Silver Valley Foods"
+        },
+        "certificate": {
+          "id": 3,
+          "supplier_id": 2,
+          "issuer": "SAMPLE Food Certification Council",
+          "cert_no": "SAMPLE-SVI-2026-001",
+          "holder_name": "Silver Valley Ingredients SAMPLE",
+          "expiry_date": "2027-09-30",
+          "scope": [
+            {
+              "product_name": "Cocoa Powder",
+              "brand": "SilverCocoa"
+            },
+            {
+              "product_name": "Vanilla Essence",
+              "brand": "SilverVanilla"
+            },
+            {
+              "product_name": "Cooking Chocolate",
+              "brand": "SilverCocoa"
+            },
+            {
+              "product_name": "Vegetable Oil",
+              "brand": "SilverPure"
+            },
+            {
+              "product_name": "Coconut Milk",
+              "brand": "SilverCoco"
+            },
+            {
+              "product_name": "Chocolate Chips",
+              "brand": "SilverCocoa"
+            },
+            {
+              "product_name": "Salt",
+              "brand": "SilverSalt"
+            },
+            {
+              "product_name": "Spice Mix",
+              "brand": "SilverSpice"
+            }
+          ],
+          "status": "active"
+        },
+        "today": "2026-10-30"
+      },
+      "evaluation_certificate_override": {},
+      "fixture_kind": "unchanged_seed_record",
+      "visual_review": {
+        "reviewer": null,
+        "result": "pending_generation",
+        "human_ground_truth_approval": "pending"
+      },
+      "rule_verification": {
+        "required_ruleset": "API contract v0.2: product-aware R2 and R6",
+        "current_branch_verified": false,
+        "reason": "Current branch lacks product-aware R2 and R6; do not replace target answers with v0.1 outputs."
+      },
+      "visibility_notes": "Brand, product and manufacturer readable; generic HALAL/SAMPLE mark visible."
+    },
+    {
+      "case_id": "L24",
+      "scenario": "substitution",
+      "asset_state": "planned_before_generation",
+      "image_path": "tests/eval/finals/images/L24.png",
+      "source_id": "pink",
+      "packaging_family_id": "white-label-cocoa-pouch",
+      "seed_tenant": "Sunrise Bakery SAMPLE",
+      "material_id": 6,
+      "supplier_id": 2,
+      "certificate_id": 3,
+      "proposed_expected_extraction": {
+        "product_name": "Cocoa Powder",
+        "brand": "SilverCocoa",
+        "manufacturer": "Riverbend Foods",
+        "halal_mark_present": true
+      },
+      "proposed_expected_verdict": "substitution",
+      "proposed_expected_initial_status": "pending_review",
+      "proposed_first_failing_rule": "R2",
+      "evaluation_fixture": {
+        "material": {
+          "id": 6,
+          "tenant": "Sunrise Bakery SAMPLE",
+          "name": "Cocoa Powder",
+          "supplier_id": 2,
+          "approved_brand": "SilverCocoa",
+          "approved_manufacturer": "Silver Valley Foods"
+        },
+        "certificate": {
+          "id": 3,
+          "supplier_id": 2,
+          "issuer": "SAMPLE Food Certification Council",
+          "cert_no": "SAMPLE-SVI-2026-001",
+          "holder_name": "Silver Valley Ingredients SAMPLE",
+          "expiry_date": "2027-09-30",
+          "scope": [
+            {
+              "product_name": "Cocoa Powder",
+              "brand": "SilverCocoa"
+            },
+            {
+              "product_name": "Vanilla Essence",
+              "brand": "SilverVanilla"
+            },
+            {
+              "product_name": "Cooking Chocolate",
+              "brand": "SilverCocoa"
+            },
+            {
+              "product_name": "Vegetable Oil",
+              "brand": "SilverPure"
+            },
+            {
+              "product_name": "Coconut Milk",
+              "brand": "SilverCoco"
+            },
+            {
+              "product_name": "Chocolate Chips",
+              "brand": "SilverCocoa"
+            },
+            {
+              "product_name": "Salt",
+              "brand": "SilverSalt"
+            },
+            {
+              "product_name": "Spice Mix",
+              "brand": "SilverSpice"
+            }
+          ],
+          "status": "active"
+        },
+        "today": "2026-10-30"
+      },
+      "evaluation_certificate_override": {},
+      "fixture_kind": "unchanged_seed_record",
+      "visual_review": {
+        "reviewer": null,
+        "result": "pending_generation",
+        "human_ground_truth_approval": "pending"
+      },
+      "rule_verification": {
+        "required_ruleset": "API contract v0.2: product-aware R2 and R6",
+        "current_branch_verified": false,
+        "reason": "Current branch lacks product-aware R2 and R6; do not replace target answers with v0.1 outputs."
+      },
+      "visibility_notes": "Brand, product and manufacturer readable; generic HALAL/SAMPLE mark visible."
+    },
+    {
+      "case_id": "L25",
+      "scenario": "absent_mark",
+      "asset_state": "planned_before_generation",
+      "image_path": "tests/eval/finals/images/L25.png",
+      "source_id": "caputo",
+      "packaging_family_id": "blue-flour-sack",
+      "seed_tenant": "Sunrise Bakery SAMPLE",
+      "material_id": 1,
+      "supplier_id": 1,
+      "certificate_id": 1,
+      "proposed_expected_extraction": {
+        "product_name": "Wheat Flour",
+        "brand": "GoldenMill",
+        "manufacturer": "Golden Grain Foods",
+        "halal_mark_present": false
+      },
+      "proposed_expected_verdict": "needs_human",
+      "proposed_expected_initial_status": "pending_review",
+      "proposed_first_failing_rule": "R6",
+      "evaluation_fixture": {
+        "material": {
+          "id": 1,
+          "tenant": "Sunrise Bakery SAMPLE",
+          "name": "Wheat Flour",
+          "supplier_id": 1,
+          "approved_brand": "GoldenMill",
+          "approved_manufacturer": "Golden Grain Foods"
+        },
+        "certificate": {
+          "id": 1,
+          "supplier_id": 1,
+          "issuer": "SAMPLE Food Certification Council",
+          "cert_no": "SAMPLE-GGS-2026-001",
+          "holder_name": "Golden Grain Supplies SAMPLE",
+          "expiry_date": "2026-11-30",
+          "scope": [
+            {
+              "product_name": "Wheat Flour",
+              "brand": "GoldenMill"
+            },
+            {
+              "product_name": "Bread Flour",
+              "brand": "GoldenMill"
+            },
+            {
+              "product_name": "Cake Flour",
+              "brand": "GoldenMill"
+            },
+            {
+              "product_name": "Corn Starch",
+              "brand": "GoldenMill"
+            },
+            {
+              "product_name": "Rice Flour",
+              "brand": "GoldenMill"
+            },
+            {
+              "product_name": "Baking Powder",
+              "brand": "GoldenMill"
+            },
+            {
+              "product_name": "Fine Sugar",
+              "brand": "SweetGold"
+            },
+            {
+              "product_name": "Brown Sugar",
+              "brand": "SweetGold"
+            },
+            {
+              "product_name": "Semolina",
+              "brand": "GoldenMill"
+            },
+            {
+              "product_name": "Potato Starch",
+              "brand": "GoldenMill"
+            }
+          ],
+          "status": "active"
+        },
+        "today": "2026-10-30"
+      },
+      "evaluation_certificate_override": {},
+      "fixture_kind": "unchanged_seed_record",
+      "visual_review": {
+        "reviewer": null,
+        "result": "pending_generation",
+        "human_ground_truth_approval": "pending"
+      },
+      "rule_verification": {
+        "required_ruleset": "API contract v0.2: product-aware R2 and R6",
+        "current_branch_verified": false,
+        "reason": "Current branch lacks product-aware R2 and R6; do not replace target answers with v0.1 outputs."
+      },
+      "visibility_notes": "Full label visible; no halal symbol or claim anywhere on package. Mark false, not null."
+    },
+    {
+      "case_id": "L26",
+      "scenario": "absent_mark",
+      "asset_state": "planned_before_generation",
+      "image_path": "tests/eval/finals/images/L26.png",
+      "source_id": "pipe",
+      "packaging_family_id": "prima-flour-sack",
+      "seed_tenant": "Crescent Caterer SAMPLE",
+      "material_id": 10,
+      "supplier_id": 1,
+      "certificate_id": 1,
+      "proposed_expected_extraction": {
+        "product_name": "Rice Flour",
+        "brand": "GoldenMill",
+        "manufacturer": "Golden Grain Foods",
+        "halal_mark_present": false
+      },
+      "proposed_expected_verdict": "needs_human",
+      "proposed_expected_initial_status": "pending_review",
+      "proposed_first_failing_rule": "R6",
+      "evaluation_fixture": {
+        "material": {
+          "id": 10,
+          "tenant": "Crescent Caterer SAMPLE",
+          "name": "Rice Flour",
+          "supplier_id": 1,
+          "approved_brand": "GoldenMill",
+          "approved_manufacturer": "Golden Grain Foods"
+        },
+        "certificate": {
+          "id": 1,
+          "supplier_id": 1,
+          "issuer": "SAMPLE Food Certification Council",
+          "cert_no": "SAMPLE-GGS-2026-001",
+          "holder_name": "Golden Grain Supplies SAMPLE",
+          "expiry_date": "2026-11-30",
+          "scope": [
+            {
+              "product_name": "Wheat Flour",
+              "brand": "GoldenMill"
+            },
+            {
+              "product_name": "Bread Flour",
+              "brand": "GoldenMill"
+            },
+            {
+              "product_name": "Cake Flour",
+              "brand": "GoldenMill"
+            },
+            {
+              "product_name": "Corn Starch",
+              "brand": "GoldenMill"
+            },
+            {
+              "product_name": "Rice Flour",
+              "brand": "GoldenMill"
+            },
+            {
+              "product_name": "Baking Powder",
+              "brand": "GoldenMill"
+            },
+            {
+              "product_name": "Fine Sugar",
+              "brand": "SweetGold"
+            },
+            {
+              "product_name": "Brown Sugar",
+              "brand": "SweetGold"
+            },
+            {
+              "product_name": "Semolina",
+              "brand": "GoldenMill"
+            },
+            {
+              "product_name": "Potato Starch",
+              "brand": "GoldenMill"
+            }
+          ],
+          "status": "active"
+        },
+        "today": "2026-10-30"
+      },
+      "evaluation_certificate_override": {},
+      "fixture_kind": "unchanged_seed_record",
+      "visual_review": {
+        "reviewer": null,
+        "result": "pending_generation",
+        "human_ground_truth_approval": "pending"
+      },
+      "rule_verification": {
+        "required_ruleset": "API contract v0.2: product-aware R2 and R6",
+        "current_branch_verified": false,
+        "reason": "Current branch lacks product-aware R2 and R6; do not replace target answers with v0.1 outputs."
+      },
+      "visibility_notes": "Full label visible; no halal symbol or claim anywhere on package. Mark false, not null."
+    },
+    {
+      "case_id": "L27",
+      "scenario": "absent_mark",
+      "asset_state": "planned_before_generation",
+      "image_path": "tests/eval/finals/images/L27.png",
+      "source_id": "green",
+      "packaging_family_id": "green-cocoa-pouch",
+      "seed_tenant": "Sunrise Bakery SAMPLE",
+      "material_id": 6,
+      "supplier_id": 2,
+      "certificate_id": 3,
+      "proposed_expected_extraction": {
+        "product_name": "Cocoa Powder",
+        "brand": "SilverCocoa",
+        "manufacturer": "Silver Valley Foods",
+        "halal_mark_present": false
+      },
+      "proposed_expected_verdict": "needs_human",
+      "proposed_expected_initial_status": "pending_review",
+      "proposed_first_failing_rule": "R6",
+      "evaluation_fixture": {
+        "material": {
+          "id": 6,
+          "tenant": "Sunrise Bakery SAMPLE",
+          "name": "Cocoa Powder",
+          "supplier_id": 2,
+          "approved_brand": "SilverCocoa",
+          "approved_manufacturer": "Silver Valley Foods"
+        },
+        "certificate": {
+          "id": 3,
+          "supplier_id": 2,
+          "issuer": "SAMPLE Food Certification Council",
+          "cert_no": "SAMPLE-SVI-2026-001",
+          "holder_name": "Silver Valley Ingredients SAMPLE",
+          "expiry_date": "2027-09-30",
+          "scope": [
+            {
+              "product_name": "Cocoa Powder",
+              "brand": "SilverCocoa"
+            },
+            {
+              "product_name": "Vanilla Essence",
+              "brand": "SilverVanilla"
+            },
+            {
+              "product_name": "Cooking Chocolate",
+              "brand": "SilverCocoa"
+            },
+            {
+              "product_name": "Vegetable Oil",
+              "brand": "SilverPure"
+            },
+            {
+              "product_name": "Coconut Milk",
+              "brand": "SilverCoco"
+            },
+            {
+              "product_name": "Chocolate Chips",
+              "brand": "SilverCocoa"
+            },
+            {
+              "product_name": "Salt",
+              "brand": "SilverSalt"
+            },
+            {
+              "product_name": "Spice Mix",
+              "brand": "SilverSpice"
+            }
+          ],
+          "status": "active"
+        },
+        "today": "2026-10-30"
+      },
+      "evaluation_certificate_override": {},
+      "fixture_kind": "unchanged_seed_record",
+      "visual_review": {
+        "reviewer": null,
+        "result": "pending_generation",
+        "human_ground_truth_approval": "pending"
+      },
+      "rule_verification": {
+        "required_ruleset": "API contract v0.2: product-aware R2 and R6",
+        "current_branch_verified": false,
+        "reason": "Current branch lacks product-aware R2 and R6; do not replace target answers with v0.1 outputs."
+      },
+      "visibility_notes": "Full label visible; no halal symbol or claim anywhere on package. Mark false, not null."
+    },
+    {
+      "case_id": "L28",
+      "scenario": "absent_mark",
+      "asset_state": "planned_before_generation",
+      "image_path": "tests/eval/finals/images/L28.png",
+      "source_id": "grass",
+      "packaging_family_id": "brown-cocoa-pouch",
+      "seed_tenant": "Sunrise Bakery SAMPLE",
+      "material_id": 6,
+      "supplier_id": 2,
+      "certificate_id": 3,
+      "proposed_expected_extraction": {
+        "product_name": "Cocoa Powder",
+        "brand": "SilverCocoa",
+        "manufacturer": "Silver Valley Foods",
+        "halal_mark_present": false
+      },
+      "proposed_expected_verdict": "needs_human",
+      "proposed_expected_initial_status": "pending_review",
+      "proposed_first_failing_rule": "R6",
+      "evaluation_fixture": {
+        "material": {
+          "id": 6,
+          "tenant": "Sunrise Bakery SAMPLE",
+          "name": "Cocoa Powder",
+          "supplier_id": 2,
+          "approved_brand": "SilverCocoa",
+          "approved_manufacturer": "Silver Valley Foods"
+        },
+        "certificate": {
+          "id": 3,
+          "supplier_id": 2,
+          "issuer": "SAMPLE Food Certification Council",
+          "cert_no": "SAMPLE-SVI-2026-001",
+          "holder_name": "Silver Valley Ingredients SAMPLE",
+          "expiry_date": "2027-09-30",
+          "scope": [
+            {
+              "product_name": "Cocoa Powder",
+              "brand": "SilverCocoa"
+            },
+            {
+              "product_name": "Vanilla Essence",
+              "brand": "SilverVanilla"
+            },
+            {
+              "product_name": "Cooking Chocolate",
+              "brand": "SilverCocoa"
+            },
+            {
+              "product_name": "Vegetable Oil",
+              "brand": "SilverPure"
+            },
+            {
+              "product_name": "Coconut Milk",
+              "brand": "SilverCoco"
+            },
+            {
+              "product_name": "Chocolate Chips",
+              "brand": "SilverCocoa"
+            },
+            {
+              "product_name": "Salt",
+              "brand": "SilverSalt"
+            },
+            {
+              "product_name": "Spice Mix",
+              "brand": "SilverSpice"
+            }
+          ],
+          "status": "active"
+        },
+        "today": "2026-10-30"
+      },
+      "evaluation_certificate_override": {},
+      "fixture_kind": "unchanged_seed_record",
+      "visual_review": {
+        "reviewer": null,
+        "result": "pending_generation",
+        "human_ground_truth_approval": "pending"
+      },
+      "rule_verification": {
+        "required_ruleset": "API contract v0.2: product-aware R2 and R6",
+        "current_branch_verified": false,
+        "reason": "Current branch lacks product-aware R2 and R6; do not replace target answers with v0.1 outputs."
+      },
+      "visibility_notes": "Full label visible; no halal symbol or claim anywhere on package. Mark false, not null."
+    },
+    {
+      "case_id": "L29",
+      "scenario": "hidden_mark",
+      "asset_state": "planned_before_generation",
+      "image_path": "tests/eval/finals/images/L29.png",
+      "source_id": "prima",
+      "packaging_family_id": "prima-flour-sack",
+      "seed_tenant": "Crescent Caterer SAMPLE",
+      "material_id": 9,
+      "supplier_id": 1,
+      "certificate_id": 1,
+      "proposed_expected_extraction": {
+        "product_name": "Wheat Flour",
+        "brand": "GoldenMill",
+        "manufacturer": "Golden Grain Foods",
+        "halal_mark_present": null
+      },
+      "proposed_expected_verdict": "needs_human",
+      "proposed_expected_initial_status": "pending_review",
+      "proposed_first_failing_rule": "R6",
+      "evaluation_fixture": {
+        "material": {
+          "id": 9,
+          "tenant": "Crescent Caterer SAMPLE",
+          "name": "Wheat Flour",
+          "supplier_id": 1,
+          "approved_brand": "GoldenMill",
+          "approved_manufacturer": "Golden Grain Foods"
+        },
+        "certificate": {
+          "id": 1,
+          "supplier_id": 1,
+          "issuer": "SAMPLE Food Certification Council",
+          "cert_no": "SAMPLE-GGS-2026-001",
+          "holder_name": "Golden Grain Supplies SAMPLE",
+          "expiry_date": "2026-11-30",
+          "scope": [
+            {
+              "product_name": "Wheat Flour",
+              "brand": "GoldenMill"
+            },
+            {
+              "product_name": "Bread Flour",
+              "brand": "GoldenMill"
+            },
+            {
+              "product_name": "Cake Flour",
+              "brand": "GoldenMill"
+            },
+            {
+              "product_name": "Corn Starch",
+              "brand": "GoldenMill"
+            },
+            {
+              "product_name": "Rice Flour",
+              "brand": "GoldenMill"
+            },
+            {
+              "product_name": "Baking Powder",
+              "brand": "GoldenMill"
+            },
+            {
+              "product_name": "Fine Sugar",
+              "brand": "SweetGold"
+            },
+            {
+              "product_name": "Brown Sugar",
+              "brand": "SweetGold"
+            },
+            {
+              "product_name": "Semolina",
+              "brand": "GoldenMill"
+            },
+            {
+              "product_name": "Potato Starch",
+              "brand": "GoldenMill"
+            }
+          ],
+          "status": "active"
+        },
+        "today": "2026-10-30"
+      },
+      "evaluation_certificate_override": {},
+      "fixture_kind": "unchanged_seed_record",
+      "visual_review": {
+        "reviewer": null,
+        "result": "pending_generation",
+        "human_ground_truth_approval": "pending"
+      },
+      "rule_verification": {
+        "required_ruleset": "API contract v0.2: product-aware R2 and R6",
+        "current_branch_verified": false,
+        "reason": "Current branch lacks product-aware R2 and R6; do not replace target answers with v0.1 outputs."
+      },
+      "visibility_notes": "Entire possible mark area covered by opaque tape; other three fields readable. Mark null, not false."
+    },
+    {
+      "case_id": "L30",
+      "scenario": "hidden_mark",
+      "asset_state": "planned_before_generation",
+      "image_path": "tests/eval/finals/images/L30.png",
+      "source_id": "white",
+      "packaging_family_id": "white-label-cocoa-pouch",
+      "seed_tenant": "Sunrise Bakery SAMPLE",
+      "material_id": 6,
+      "supplier_id": 2,
+      "certificate_id": 3,
+      "proposed_expected_extraction": {
+        "product_name": "Cocoa Powder",
+        "brand": "SilverCocoa",
+        "manufacturer": "Silver Valley Foods",
+        "halal_mark_present": null
+      },
+      "proposed_expected_verdict": "needs_human",
+      "proposed_expected_initial_status": "pending_review",
+      "proposed_first_failing_rule": "R6",
+      "evaluation_fixture": {
+        "material": {
+          "id": 6,
+          "tenant": "Sunrise Bakery SAMPLE",
+          "name": "Cocoa Powder",
+          "supplier_id": 2,
+          "approved_brand": "SilverCocoa",
+          "approved_manufacturer": "Silver Valley Foods"
+        },
+        "certificate": {
+          "id": 3,
+          "supplier_id": 2,
+          "issuer": "SAMPLE Food Certification Council",
+          "cert_no": "SAMPLE-SVI-2026-001",
+          "holder_name": "Silver Valley Ingredients SAMPLE",
+          "expiry_date": "2027-09-30",
+          "scope": [
+            {
+              "product_name": "Cocoa Powder",
+              "brand": "SilverCocoa"
+            },
+            {
+              "product_name": "Vanilla Essence",
+              "brand": "SilverVanilla"
+            },
+            {
+              "product_name": "Cooking Chocolate",
+              "brand": "SilverCocoa"
+            },
+            {
+              "product_name": "Vegetable Oil",
+              "brand": "SilverPure"
+            },
+            {
+              "product_name": "Coconut Milk",
+              "brand": "SilverCoco"
+            },
+            {
+              "product_name": "Chocolate Chips",
+              "brand": "SilverCocoa"
+            },
+            {
+              "product_name": "Salt",
+              "brand": "SilverSalt"
+            },
+            {
+              "product_name": "Spice Mix",
+              "brand": "SilverSpice"
+            }
+          ],
+          "status": "active"
+        },
+        "today": "2026-10-30"
+      },
+      "evaluation_certificate_override": {},
+      "fixture_kind": "unchanged_seed_record",
+      "visual_review": {
+        "reviewer": null,
+        "result": "pending_generation",
+        "human_ground_truth_approval": "pending"
+      },
+      "rule_verification": {
+        "required_ruleset": "API contract v0.2: product-aware R2 and R6",
+        "current_branch_verified": false,
+        "reason": "Current branch lacks product-aware R2 and R6; do not replace target answers with v0.1 outputs."
+      },
+      "visibility_notes": "Entire possible mark area covered by opaque tape; other three fields readable. Mark null, not false."
+    },
+    {
+      "case_id": "L31",
+      "scenario": "hidden_text",
+      "asset_state": "planned_before_generation",
+      "image_path": "tests/eval/finals/images/L31.png",
+      "source_id": "kris",
+      "packaging_family_id": "kris-flour-sack",
+      "seed_tenant": "Sunrise Bakery SAMPLE",
+      "material_id": 2,
+      "supplier_id": 1,
+      "certificate_id": 1,
+      "proposed_expected_extraction": {
+        "product_name": null,
+        "brand": "GoldenMill",
+        "manufacturer": "Golden Grain Foods",
+        "halal_mark_present": true
+      },
+      "proposed_expected_verdict": "needs_human",
+      "proposed_expected_initial_status": "pending_review",
+      "proposed_first_failing_rule": "R1",
+      "evaluation_fixture": {
+        "material": {
+          "id": 2,
+          "tenant": "Sunrise Bakery SAMPLE",
+          "name": "Bread Flour",
+          "supplier_id": 1,
+          "approved_brand": "GoldenMill",
+          "approved_manufacturer": "Golden Grain Foods"
+        },
+        "certificate": {
+          "id": 1,
+          "supplier_id": 1,
+          "issuer": "SAMPLE Food Certification Council",
+          "cert_no": "SAMPLE-GGS-2026-001",
+          "holder_name": "Golden Grain Supplies SAMPLE",
+          "expiry_date": "2026-11-30",
+          "scope": [
+            {
+              "product_name": "Wheat Flour",
+              "brand": "GoldenMill"
+            },
+            {
+              "product_name": "Bread Flour",
+              "brand": "GoldenMill"
+            },
+            {
+              "product_name": "Cake Flour",
+              "brand": "GoldenMill"
+            },
+            {
+              "product_name": "Corn Starch",
+              "brand": "GoldenMill"
+            },
+            {
+              "product_name": "Rice Flour",
+              "brand": "GoldenMill"
+            },
+            {
+              "product_name": "Baking Powder",
+              "brand": "GoldenMill"
+            },
+            {
+              "product_name": "Fine Sugar",
+              "brand": "SweetGold"
+            },
+            {
+              "product_name": "Brown Sugar",
+              "brand": "SweetGold"
+            },
+            {
+              "product_name": "Semolina",
+              "brand": "GoldenMill"
+            },
+            {
+              "product_name": "Potato Starch",
+              "brand": "GoldenMill"
+            }
+          ],
+          "status": "active"
+        },
+        "today": "2026-10-30"
+      },
+      "evaluation_certificate_override": {},
+      "fixture_kind": "unchanged_seed_record",
+      "visual_review": {
+        "reviewer": null,
+        "result": "pending_generation",
+        "human_ground_truth_approval": "pending"
+      },
+      "rule_verification": {
+        "required_ruleset": "API contract v0.2: product-aware R2 and R6",
+        "current_branch_verified": false,
+        "reason": "Current branch lacks product-aware R2 and R6; do not replace target answers with v0.1 outputs."
+      },
+      "visibility_notes": "product_name fully hidden with opaque tape and no duplicate visible; other fields and mark readable."
+    },
+    {
+      "case_id": "L32",
+      "scenario": "hidden_text",
+      "asset_state": "planned_before_generation",
+      "image_path": "tests/eval/finals/images/L32.png",
+      "source_id": "pink",
+      "packaging_family_id": "white-label-cocoa-pouch",
+      "seed_tenant": "Sunrise Bakery SAMPLE",
+      "material_id": 6,
+      "supplier_id": 2,
+      "certificate_id": 3,
+      "proposed_expected_extraction": {
+        "product_name": "Cocoa Powder",
+        "brand": "SilverCocoa",
+        "manufacturer": null,
+        "halal_mark_present": true
+      },
+      "proposed_expected_verdict": "needs_human",
+      "proposed_expected_initial_status": "pending_review",
+      "proposed_first_failing_rule": "R1",
+      "evaluation_fixture": {
+        "material": {
+          "id": 6,
+          "tenant": "Sunrise Bakery SAMPLE",
+          "name": "Cocoa Powder",
+          "supplier_id": 2,
+          "approved_brand": "SilverCocoa",
+          "approved_manufacturer": "Silver Valley Foods"
+        },
+        "certificate": {
+          "id": 3,
+          "supplier_id": 2,
+          "issuer": "SAMPLE Food Certification Council",
+          "cert_no": "SAMPLE-SVI-2026-001",
+          "holder_name": "Silver Valley Ingredients SAMPLE",
+          "expiry_date": "2027-09-30",
+          "scope": [
+            {
+              "product_name": "Cocoa Powder",
+              "brand": "SilverCocoa"
+            },
+            {
+              "product_name": "Vanilla Essence",
+              "brand": "SilverVanilla"
+            },
+            {
+              "product_name": "Cooking Chocolate",
+              "brand": "SilverCocoa"
+            },
+            {
+              "product_name": "Vegetable Oil",
+              "brand": "SilverPure"
+            },
+            {
+              "product_name": "Coconut Milk",
+              "brand": "SilverCoco"
+            },
+            {
+              "product_name": "Chocolate Chips",
+              "brand": "SilverCocoa"
+            },
+            {
+              "product_name": "Salt",
+              "brand": "SilverSalt"
+            },
+            {
+              "product_name": "Spice Mix",
+              "brand": "SilverSpice"
+            }
+          ],
+          "status": "active"
+        },
+        "today": "2026-10-30"
+      },
+      "evaluation_certificate_override": {},
+      "fixture_kind": "unchanged_seed_record",
+      "visual_review": {
+        "reviewer": null,
+        "result": "pending_generation",
+        "human_ground_truth_approval": "pending"
+      },
+      "rule_verification": {
+        "required_ruleset": "API contract v0.2: product-aware R2 and R6",
+        "current_branch_verified": false,
+        "reason": "Current branch lacks product-aware R2 and R6; do not replace target answers with v0.1 outputs."
+      },
+      "visibility_notes": "manufacturer fully hidden with opaque tape and no duplicate visible; other fields and mark readable."
+    }
+  ]
+}

@@ -1,8 +1,10 @@
 # Label evaluation
 
-This folder holds eight synthetic label photos with expected answers, the
-scripts that collect live model predictions and score them, and the results
-of the live run.
+Finals additions: [24 edited label cases and review gallery](finals/README.md).
+The historical eight-image results below are preserved separately.
+
+Eight synthetic label photos with expected answers, the scripts that collect
+live model predictions and score them, and the results of the live run.
 
 ## The live run got every verdict right
 
