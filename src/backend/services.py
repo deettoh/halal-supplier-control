@@ -20,6 +20,9 @@ from backend.schemas import (
     DemoContext,
     LabelExtraction,
     MaterialResponse,
+    NamedDemoContext,
+    RenewalDecisionRequest,
+    RenewalResponse,
     RuleResult,
 )
 
@@ -403,7 +406,7 @@ def decide_delivery(
 
 def renew_certificate(
     session: Session,
-    context: DemoContext,
+    context: NamedDemoContext,
     request: CertificateCreateRequest,
     payload: bytes | None,
 ) -> CertificateResponse:
@@ -414,19 +417,21 @@ def renew_certificate(
     if supplier is None:
         raise HTTPException(404, "Supplier not found")
     stored = _stored_photo(payload) if payload is not None else None
-    for old in session.scalars(
-        select(db.Certificate).where(
-            db.Certificate.supplier_id == owner,
-            db.Certificate.status == "active",
+    if (
+        session.scalar(
+            select(db.Certificate.id).where(
+                db.Certificate.supplier_id == owner,
+                db.Certificate.status == "pending",
+            )
         )
+        is not None
     ):
-        old.status = "superseded"
-    session.flush()
+        raise HTTPException(409, "A renewal is already waiting for review")
     row = db.Certificate(
         supplier_id=owner,
         **request.model_dump(exclude={"image"}),
         image_bytes=stored,
-        status="active",
+        status="pending",
     )
     session.add(row)
     session.flush()
@@ -442,9 +447,9 @@ def renew_certificate(
         session.add(
             db.ActivityLog(
                 tenant=tenant,
-                actor=f"supplier:{owner}",
+                actor=context.name,
                 role=context.role,
-                action="certificate_renewed",
+                action="certificate_submitted",
             )
         )
     session.commit()
@@ -459,7 +464,7 @@ def certificate_photo(
     )
     if context.role == "supplier":
         query = query.where(db.Certificate.supplier_id == supplier_id(context))
-    else:
+    elif context.role != "reviewer":
         linked = select(db.Material.id).where(
             db.Material.supplier_id == db.Certificate.supplier_id,
             db.Material.tenant == context.tenant,
@@ -469,3 +474,111 @@ def certificate_photo(
     if payload is None:
         raise HTTPException(404, "Certificate photo not found")
     return payload
+
+
+def named_context(
+    session: Session, context: DemoContext, person_id: int
+) -> NamedDemoContext:
+    """Bind a demo person to their declared role and organisation."""
+    person = session.get(db.Person, person_id)
+    if person is None or (person.role, person.tenant) != (
+        context.role,
+        context.tenant,
+    ):
+        raise HTTPException(403, "Demo person not permitted")
+    return NamedDemoContext(
+        role=context.role,
+        tenant=context.tenant,
+        person_id=person.id,
+        name=person.name,
+        title=person.title,
+    )
+
+
+def pending_renewals(session: Session) -> list[RenewalResponse]:
+    rows = session.execute(
+        select(db.Certificate, db.Supplier)
+        .join(db.Supplier, db.Supplier.id == db.Certificate.supplier_id)
+        .where(db.Certificate.status == "pending")
+        .order_by(db.Certificate.created_at, db.Certificate.id)
+    )
+    result = []
+    for renewal, supplier in rows:
+        current = session.scalar(
+            select(db.Certificate).where(
+                db.Certificate.supplier_id == supplier.id,
+                db.Certificate.status == "active",
+            )
+        )
+        result.append(
+            RenewalResponse(
+                renewal=certificate_response(renewal),
+                current=certificate_response(current) if current else None,
+                supplier_name=supplier.name,
+            )
+        )
+    return result
+
+
+def decide_renewal(
+    session: Session,
+    context: NamedDemoContext,
+    renewal_id: int,
+    request: RenewalDecisionRequest,
+) -> CertificateResponse:
+    # Supplier locking matches submission: one lock order serializes competing
+    # submissions/decisions and preserves the single active certificate.
+    owner = session.scalar(
+        select(db.Certificate.supplier_id).where(
+            db.Certificate.id == renewal_id
+        )
+    )
+    if owner is None:
+        raise HTTPException(404, "Renewal not found")
+    session.execute(
+        select(db.Supplier).where(db.Supplier.id == owner).with_for_update()
+    )
+    row = session.scalar(
+        select(db.Certificate)
+        .where(db.Certificate.id == renewal_id)
+        .with_for_update()
+        .execution_options(populate_existing=True)
+    )
+    if row is None:
+        raise HTTPException(404, "Renewal not found")
+    if row.status != "pending":
+        raise HTTPException(409, "Renewal already reviewed")
+    if request.decision == "verify":
+        for old in session.scalars(
+            select(db.Certificate).where(
+                db.Certificate.supplier_id == owner,
+                db.Certificate.status == "active",
+            )
+        ):
+            old.status = "superseded"
+        session.flush()
+        row.status = "active"
+    else:
+        row.status = "rejected"
+    row.review_note = request.note
+    row.reviewed_by = context.name
+    tenants = session.scalars(
+        select(db.Material.tenant)
+        .where(db.Material.supplier_id == owner)
+        .distinct()
+        .order_by(db.Material.tenant)
+    )
+    for tenant in tenants:
+        session.add(
+            db.ActivityLog(
+                tenant=tenant,
+                actor=context.name,
+                role=context.role,
+                action="certificate_renewed"
+                if request.decision == "verify"
+                else "certificate_rejected",
+                reason=request.note,
+            )
+        )
+    session.commit()
+    return certificate_response(row)

@@ -23,7 +23,10 @@ CERTIFICATE_JPEG = images.as_jpeg(
 
 
 def headers(role: str = "supervisor", tenant: str = BAKERY) -> dict[str, str]:
-    return {"X-Demo-Role": role, "X-Demo-Tenant": tenant}
+    result = {"X-Demo-Role": role, "X-Demo-Tenant": tenant}
+    if role == "supplier":
+        result["X-Demo-Person"] = "6" if tenant == "2" else "5"
+    return result
 
 
 def add_delivery(
@@ -239,7 +242,7 @@ def test_supplier_sees_only_own_active_and_superseded_certificates(
 
 
 @pytest.mark.parametrize(
-    ("tenant", "status"), [("abc", 422), ("0", 422), ("999", 404)]
+    ("tenant", "status"), [("abc", 403), ("0", 403), ("999", 403)]
 )
 def test_supplier_identity_is_validated(
     api_client: TestClient,

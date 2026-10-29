@@ -5,19 +5,23 @@ FastAPI's `/docs` page and `/openapi.json` are the generated
 reference, and the request and response models are in
 `src/backend/schemas.py`. Business logic is in `src/backend/services.py`.
 
-## Identify the caller with two headers
+## Identify the caller with demo headers
 
-Every business route needs `X-Demo-Role` (`staff`, `supervisor` or
-`supplier`) and `X-Demo-Tenant`. For staff and supervisors the tenant is the
-SME name, for example `Sunrise Bakery SAMPLE`. For a supplier it is the
-supplier ID as a string, for example `1`. These headers simulate Orbyte's
-login and aren't authentication.
+Every business route needs `X-Demo-Role` (`staff`, `supervisor`, `supplier`
+or `reviewer`) and `X-Demo-Tenant`. For staff and supervisors the tenant is
+the SME name, for example `Sunrise Bakery SAMPLE`. For a supplier it is the
+supplier ID as a string, for example `1`, and for the registry reviewer it is
+`registry`. These headers simulate Orbyte's login and aren't authentication.
 
 The route dependencies check the role, and the services check ownership by
 filtering materials, deliveries and activity to the caller's SME and by taking
 a supplier's ID from the `X-Demo-Tenant` header.
 
-## Eleven routes under `/api`
+Supplier and reviewer requests also need `X-Demo-Person`, the ID of a person
+in the `people` list in `src/seed/seed.json`. The backend returns 403 when
+that person's role and tenant don't match the other two headers.
+
+## Thirteen routes under `/api`
 
 | Method | Path | Role | Request | Success |
 |---|---|---|---|---|
@@ -27,11 +31,13 @@ a supplier's ID from the `X-Demo-Tenant` header.
 | GET | `/api/deliveries` | supervisor | `status=pending_review` | 200, the SME's review queue |
 | POST | `/api/deliveries/{id}/decision` | supervisor | JSON `decision` (`accept` or `reject`), `reason` | 200, the updated delivery |
 | GET | `/api/activity` | supervisor | - | 200, the SME's activity log, newest first |
-| GET | `/api/certificates` | supplier | - | 200, the supplier's active and superseded certificates |
-| POST | `/api/certificates` | supplier | multipart `issuer`, `cert_no`, `holder_name`, `expiry_date`, `scope`, optional `image` | 201, the new active certificate |
+| GET | `/api/certificates` | supplier | - | 200, the supplier's active, superseded, pending and rejected certificates |
+| POST | `/api/certificates` | supplier | multipart `issuer`, `cert_no`, `holder_name`, `expiry_date`, `scope`, optional `image` | 201, the pending renewal |
 | POST | `/api/certificates/extract` | supplier | multipart `image` | 501, not implemented |
 | GET | `/api/deliveries/{id}/image` | staff, supervisor | - | 200, JPEG of the SME's delivery photo |
-| GET | `/api/certificates/{id}/image` | staff, supervisor, supplier | - | 200, JPEG for the owning supplier or a linked SME |
+| GET | `/api/certificates/{id}/image` | staff, supervisor, supplier, reviewer | - | 200, JPEG for the owning supplier, a linked SME or the registry reviewer |
+| GET | `/api/registry/renewals` | reviewer | - | 200, pending renewals, oldest first, each with the current certificate and the supplier name |
+| POST | `/api/registry/renewals/{id}/decision` | reviewer | JSON `decision` (`verify` or `reject`), nonblank `note` | 200, the updated certificate |
 
 To recount the routes, run `grep -cE '^@app\.(get|post)' src/backend/main.py`.
 
@@ -45,9 +51,9 @@ response.
 
 | Status | Cause |
 |---|---|
-| 403 | Role not allowed on this route |
+| 403 | A role not allowed on this route or a person who doesn't match the role and tenant |
 | 404 | Unknown record or one owned by another SME or supplier |
-| 409 | A decision on a delivery already decided or still being checked |
+| 409 | A decision on a delivery already decided or still being checked, a second pending renewal, or a decision on a renewal already reviewed |
 | 413 | Upload larger than 10 MiB |
 | 422 | Missing or invalid headers, fields or image |
 | 501 | `POST /api/certificates/extract` |
@@ -108,11 +114,22 @@ expires within 60 days, the verdict is `expiring`.
 A decision needs `accept` or `reject` and a nonblank reason. The delivery row
 is locked, and the decision and its activity row commit together.
 
-A renewal locks the supplier, marks the active certificate `superseded`,
-inserts the new one as `active`, and writes one `certificate_renewed` row per
-linked SME. All four steps run in one transaction. Coverage is computed on
-every read, so each linked SME sees the renewal at once. A renewal request with
-its JSON `scope` field looks like this:
+A supplier submission locks the supplier, saves the renewal as `pending` and
+writes a `certificate_submitted` row to each linked SME's log. Coverage stays
+the same until a reviewer verifies the renewal. A supplier with a pending
+renewal gets 409 on a second submission.
+
+The reviewer queue lists each pending renewal as `{renewal, current,
+supplier_name}`, oldest first, where `current` is the active certificate or
+`null`. A reviewer decision needs `verify` or `reject` and a nonblank note.
+Verifying makes the renewal active and supersedes the old certificate.
+Rejecting marks the renewal rejected and keeps the old certificate active. The
+backend locks the supplier, so one of two concurrent decisions wins and the
+other gets 409. The decision and its activity rows commit together.
+Certificate responses also have two nullable fields, the reviewer's note in
+`review_note` and the reviewer's name in `reviewed_by`.
+
+A submission with its JSON `scope` field looks like this:
 
 ```javascript
 const data = new FormData();
@@ -123,19 +140,22 @@ data.append("expiry_date", "2027-11-30");
 data.append("scope", JSON.stringify([{ product_name: "Wheat Flour", brand: "GoldenMill" }]));
 await fetch("/api/certificates", {
   method: "POST",
-  headers: { "X-Demo-Role": "supplier", "X-Demo-Tenant": "1" },
+  headers: { "X-Demo-Role": "supplier", "X-Demo-Tenant": "1", "X-Demo-Person": "5" },
   body: data, // the browser sets the multipart boundary
 });
 ```
 
 Issuer and holder name allow 200 characters and the certificate number 100.
 
-## The activity log has five actions
+## The activity log has seven actions
 
 Activity `action` is one of `auto_accepted`, `pending_review`, `accepted`,
-`rejected` or `certificate_renewed`. The API, the seed loader and a
-database constraint enforce this list. The demo headers carry no individual
-user, so the actor is `staff`, `supervisor` or `supplier:{id}`.
+`rejected`, `certificate_submitted`, `certificate_renewed` or
+`certificate_rejected`. The API, the seed loader and a database constraint
+enforce this list. For a delivery event, the actor is `staff` or
+`supervisor`. A certificate event writes one row to each linked SME. The
+actor is the supplier contact's name for a submission and the reviewer's name
+for a decision, and a decision row has the reviewer's note as its `reason`.
 
 ## Photos are stored and served as JPEG
 

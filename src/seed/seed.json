@@ -290,5 +290,56 @@
     }
   ],
   "deliveries": [],
-  "activity_log": []
+  "activity_log": [],
+  "people": [
+    {
+      "id": 1,
+      "name": "Aina",
+      "title": "Receiving staff",
+      "role": "staff",
+      "tenant": "Sunrise Bakery SAMPLE"
+    },
+    {
+      "id": 2,
+      "name": "Farid",
+      "title": "Halal supervisor",
+      "role": "supervisor",
+      "tenant": "Sunrise Bakery SAMPLE"
+    },
+    {
+      "id": 3,
+      "name": "Mei Ling",
+      "title": "Receiving staff",
+      "role": "staff",
+      "tenant": "Crescent Caterer SAMPLE"
+    },
+    {
+      "id": 4,
+      "name": "Ravi",
+      "title": "Halal supervisor",
+      "role": "supervisor",
+      "tenant": "Crescent Caterer SAMPLE"
+    },
+    {
+      "id": 5,
+      "name": "Hakim",
+      "title": "Supplier contact",
+      "role": "supplier",
+      "tenant": "1"
+    },
+    {
+      "id": 6,
+      "name": "Priya",
+      "title": "Supplier contact",
+      "role": "supplier",
+      "tenant": "2"
+    },
+    {
+      "id": 7,
+      "name": "Nadia",
+      "title": "Registry reviewer",
+      "role": "reviewer",
+      "tenant": "registry"
+    }
+  ]
 }

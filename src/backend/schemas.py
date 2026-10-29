@@ -23,7 +23,7 @@ NonEmptyText = Annotated[
     str, StringConstraints(strip_whitespace=True, min_length=1)
 ]
 RecordId = Annotated[int, Field(gt=0)]
-DemoRole = Literal["staff", "supervisor", "supplier"]
+DemoRole = Literal["staff", "supervisor", "supplier", "reviewer"]
 Coverage = Literal["covered", "expiring", "not_covered"]
 Verdict = Literal[
     "covered", "expiring", "substitution", "not_covered", "needs_human"
@@ -31,13 +31,15 @@ Verdict = Literal[
 DeliveryStatus = Literal[
     "auto_accepted", "pending_review", "accepted", "rejected"
 ]
-CertificateStatus = Literal["active", "superseded"]
+CertificateStatus = Literal["active", "superseded", "pending", "rejected"]
 ActivityAction = Literal[
     "auto_accepted",
     "pending_review",
     "accepted",
     "rejected",
     "certificate_renewed",
+    "certificate_submitted",
+    "certificate_rejected",
 ]
 RuleName = Literal["R1", "R2", "R3", "R4", "R5", "R6"]
 RULE_ORDER: tuple[RuleName, ...] = get_args(RuleName)
@@ -72,6 +74,14 @@ class DemoContext(APIModel):
     tenant: NonEmptyText = Field(
         description="SME identifier; for supplier role, the supplier ID"
     )
+
+
+class NamedDemoContext(DemoContext):
+    """Validated identity for certificate submissions and registry review."""
+
+    person_id: RecordId
+    name: NonEmptyText
+    title: NonEmptyText
 
 
 class DeliveryCreateRequest(APIModel):
@@ -188,6 +198,19 @@ class CertificateResponse(APIModel):
     scope: list[CertificateScopeItem]
     image: str | None
     status: CertificateStatus
+    review_note: str | None = None
+    reviewed_by: str | None = None
+
+
+class RenewalResponse(APIModel):
+    renewal: CertificateResponse
+    current: CertificateResponse | None
+    supplier_name: NonEmptyText
+
+
+class RenewalDecisionRequest(APIModel):
+    decision: Literal["verify", "reject"]
+    note: NonEmptyText
 
 
 class CertificateExtractRequest(APIModel):
@@ -216,7 +239,7 @@ class ActivityResponse(APIModel):
     actor: NonEmptyText
     role: DemoRole
     action: ActivityAction = Field(
-        description="Delivery status event or certificate_renewed"
+        description="Delivery status event or certificate submission/review"
     )
     delivery_id: RecordId | None
     reason: str | None

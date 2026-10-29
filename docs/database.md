@@ -4,10 +4,11 @@ The app stores its records and photos in PostgreSQL through SQLAlchemy. The
 models and the session helpers are in `src/backend/db.py`, and the API models
 in `src/backend/schemas.py` are defined separately.
 
-## Five tables hold all the data
+## Six tables hold the data
 
 | Table | Contents | Scope |
 |---|---|---|
+| `people` | Fictional name, title, role and tenant | Demo identities |
 | `suppliers` | Supplier IDs and names | Shared by every SME |
 | `certificates` | Issuer, number, holder, expiry, scope, photo and version status | Shared, one active row per supplier |
 | `materials` | Approved product, supplier, brand and manufacturer | One SME (`tenant`) |
@@ -19,9 +20,10 @@ a supplier, and coverage is computed from that supplier's active certificate
 on every read.
 
 Constraints in the database enforce the allowed statuses and actions, at most
-one active certificate per supplier, matching tenants on linked rows, and both
-a decision actor and a nonblank reason on decided deliveries. Queries still
-filter by SME and check supplier ownership in `services.py`.
+one active and one pending certificate per supplier, matching tenants on
+linked rows, and both a decision actor and a nonblank reason on decided
+deliveries. Queries still filter by SME and check supplier ownership in
+`services.py`.
 
 Photos are stored as JPEG in the `image_bytes` column (PostgreSQL `BYTEA`) and
 load only when read. The `image` column holds the photo's API URL.
@@ -43,7 +45,7 @@ doesn't load `.env` by itself, so local commands pass `--env-file .env`.
 
 To create the tables without starting the server, run
 `uv run --env-file .env python src/backend/db.py`. It prints
-`Connected to PostgreSQL. All five tables are ready.`
+`Connected to PostgreSQL. Application tables are ready.`
 
 To inspect or stop the database, run:
 
@@ -56,8 +58,13 @@ docker compose stop postgres   # keeps the data volume
 
 With `DATABASE_URL` set, the app does this before serving requests:
 
-1. Creates any missing tables and adds the `image_bytes` column to older
-   tables that lack it. It doesn't drop or alter existing columns.
+1. Creates any missing tables, such as `people`, and adds any missing columns
+   to older tables, such as `image_bytes` and the review columns on
+   `certificates`. Older certificates get the upgrade time as `created_at`,
+   the field the reviewer queue is sorted by. It also widens the status,
+   action and role checks for renewal review and adds the index that allows at
+   most one pending certificate per supplier. It doesn't drop existing columns
+   or data.
 2. Loads `src/seed/seed.json` into tables that are still empty. The format is
    in [the seed README](../src/seed/README.md).
 3. Fills missing certificate photos from the seed PNGs and converts any
@@ -73,7 +80,7 @@ startup fails.
 
 ## Reset the demo data
 
-The reset replaces the data in all five tables with `src/seed/seed.json`,
+The reset replaces the data in all six tables with `src/seed/seed.json`,
 for both SMEs and every supplier. Uploads, decisions, renewals and the
 activity log are removed. Stop the app first, then run from the repo root:
 

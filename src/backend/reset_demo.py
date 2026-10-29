@@ -21,7 +21,7 @@ from backend.seed import DEFAULT_SEED_PATH, load_seed, seed_empty_tables
 def reset_demo_database(
     engine: Engine | None = None, seed_path: Path = DEFAULT_SEED_PATH
 ) -> dict[str, int]:
-    """Replace all five tables atomically, retaining schema and ID sequences.
+    """Replace application data atomically, retaining schema and ID sequences.
 
     Call only while the application is stopped. Caller must explicitly intend
     to discard existing uploads, renewals, decisions and audit history.
@@ -49,6 +49,7 @@ def reset_demo_database(
             db.Material,
             db.Certificate,
             db.Supplier,
+            db.Person,
         ):
             session.execute(delete(model))
         return seed_empty_tables(

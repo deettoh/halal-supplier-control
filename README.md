@@ -54,8 +54,8 @@ check that reading against the masterlist and the supplier's certificate. A
 Covered or Expiring delivery is accepted automatically. Anything else waits
 for the Halal Supervisor, who accepts or rejects it with a reason. The app
 flags substitutions and expired certificates at receiving instead of at the
-audit. After one supplier renewal in the shared registry, every SME that buys
-from that supplier sees the new coverage.
+audit. Once a registry reviewer verifies a supplier's renewal, every SME that
+buys from that supplier sees the new coverage.
 
 | Step | In Halal Supplier Control |
 |---|---|
@@ -75,9 +75,9 @@ on whether anything is halal.
   shows which rules failed.
 - **Supervisor review.** Only the Halal Supervisor can accept or reject a
   flagged delivery, and each decision needs a reason.
-- **One certificate registry for every SME.** When a supplier renews a
-  certificate once, every SME that buys from that supplier sees the new
-  coverage on its own items.
+- **One certificate registry for every SME.** When a registry reviewer
+  verifies a supplier's renewal, every SME that buys from that supplier sees
+  the new coverage on its own items.
 - **Activity log.** Every check, decision and renewal is logged with the role,
   action and time.
 - **Review when the model fails.** After a timeout or endpoint error on a

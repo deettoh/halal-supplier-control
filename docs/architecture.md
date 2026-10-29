@@ -67,11 +67,14 @@ table and the API routes are in [the API reference](api.md).
 
 Certificates belong to suppliers instead of SMEs. Each material in an SME's
 masterlist points to a supplier, and the backend computes coverage for that
-material from that supplier's active certificate on every read. When a
-supplier renews, the new certificate becomes active, the old one becomes
-superseded, and every linked SME sees the new coverage on its next request.
-The backend adds a `certificate_renewed` row to each linked SME's activity
-log. SMEs don't see each other's materials or deliveries.
+material from that supplier's active certificate on every read. A renewal from
+a supplier stays pending, with no effect on coverage, until a registry
+reviewer verifies or rejects it with a note. Verifying makes the renewal
+active and supersedes the old certificate, and every linked SME sees the new
+coverage on its next request. Rejecting keeps the old certificate active. The
+backend adds a row to each linked SME's activity log for the submission and
+for the decision, with the person's name as the actor. SMEs don't see each
+other's materials or deliveries.
 
 ## Without a label reading, the supervisor reviews the delivery
 

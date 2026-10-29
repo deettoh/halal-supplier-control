@@ -1,8 +1,9 @@
 # Seed data
 
-`seed.json` holds the fictional demo data: 2 suppliers, 4 certificates and 16
-materials across Sunrise Bakery SAMPLE and Crescent Caterer SAMPLE. The
-certificate images in `certificates/` are AI-generated PNGs marked SAMPLE.
+`seed.json` holds the fictional demo data: 2 suppliers, 4 certificates, 16
+materials across Sunrise Bakery SAMPLE and Crescent Caterer SAMPLE, and 7
+people. The certificate images in `certificates/` are AI-generated PNGs
+marked SAMPLE.
 
 To recount the rows, run:
 
@@ -11,15 +12,16 @@ python3 -c 'import json; print({k: len(v) for k, v in json.load(open("src/seed/s
 ```
 
 Startup loads this file into empty tables, and the demo reset loads it into
-all tables (see [the database guide](../../docs/database.md)). Startup skips
-seeding when the file is missing and stops when the file fails validation.
+all tables (see [the database guide](../../docs/database.md)). When the file
+is missing, startup skips seeding, and it stops when the file fails
+validation.
 
-## The file has five arrays
+## The file has six arrays
 
 The top-level object has `suppliers`, `certificates`, `materials`,
-`deliveries` and `activity_log`. An omitted array counts as empty. Every row
-needs a positive integer `id`, unique within its array, and unknown fields
-are rejected. Dates use `YYYY-MM-DD`, and timestamps need a timezone.
+`deliveries`, `activity_log` and `people`. An omitted array counts as empty.
+Every row needs a positive integer `id`, unique within its array, and unknown
+fields are rejected. Dates use `YYYY-MM-DD`, and timestamps need a timezone.
 
 ```json
 {
@@ -46,6 +48,10 @@ are rejected. Dates use `YYYY-MM-DD`, and timestamps need a timezone.
 }
 ```
 
+- People need `id`, `name`, `title`, `role` and `tenant`. The role is
+  `staff`, `supervisor`, `supplier` or `reviewer`. The reviewer's tenant is
+  `registry`, and a supplier contact's tenant is the supplier ID as a string.
+  The `X-Demo-Person` header names one of these people.
 - `scope` is a list of `{product_name, brand}` objects. A `null` brand means
   no brand restriction for that product. A plain product-name string is also
   accepted and becomes an object with a `null` brand.
@@ -56,9 +62,9 @@ are rejected. Dates use `YYYY-MM-DD`, and timestamps need a timezone.
   six ordered `rule_results`, `verdict`, `status` and an image. A decided
   delivery needs `decided_by` and a `reason`.
 - Activity rows need `tenant`, `actor`, `role` and `action`. The action is
-  one of `auto_accepted`, `pending_review`, `accepted`, `rejected` or
-  `certificate_renewed`. A row without `created_at` gets the startup time in
-  UTC.
+  one of `auto_accepted`, `pending_review`, `accepted`, `rejected`,
+  `certificate_submitted`, `certificate_renewed` or `certificate_rejected`. A
+  row without `created_at` gets the startup time in UTC.
 
 ## Startup loads rows once and fills missing photos
 

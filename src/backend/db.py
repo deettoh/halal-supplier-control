@@ -1,4 +1,4 @@
-"""SQLAlchemy models and lazy PostgreSQL access for the five MVP tables.
+"""SQLAlchemy models and lazy PostgreSQL access for the application tables.
 
 Importing this module never connects or creates tables. Initialise explicitly:
     uv run --env-file .env python src/backend/db.py
@@ -44,7 +44,8 @@ STARTUP_LOCK = 0x48414C414C4442
 BUSINESS_TIMEZONE = ZoneInfo("Asia/Kuala_Lumpur")
 ACTIVITY_ACTION_CHECK = (
     "action IN ('auto_accepted', 'pending_review', 'accepted', "
-    "'rejected', 'certificate_renewed')"
+    "'rejected', 'certificate_renewed', 'certificate_submitted', "
+    "'certificate_rejected')"
 )
 
 
@@ -68,13 +69,40 @@ class Supplier(Base):
     name: Mapped[str] = mapped_column(String(200))
 
 
+class Person(Base):
+    """Fictional demo identities shared with the named-person work."""
+
+    __tablename__ = "people"
+    __table_args__ = (
+        CheckConstraint(
+            "role IN ('staff', 'supervisor', 'supplier', 'reviewer')",
+            name="ck_person_role",
+        ),
+        CheckConstraint("length(trim(tenant)) > 0", name="ck_person_tenant"),
+    )
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    name: Mapped[str] = mapped_column(String(200))
+    title: Mapped[str] = mapped_column(String(200))
+    role: Mapped[str] = mapped_column(String(30))
+    tenant: Mapped[str] = mapped_column(String(100))
+
+
 class Certificate(Base):
     """Shared supplier registry; intentionally has no SME tenant column."""
 
     __tablename__ = "certificates"
     __table_args__ = (
         CheckConstraint(
-            "status IN ('active', 'superseded')", name="ck_certificate_status"
+            "status IN ('active', 'superseded', 'pending', 'rejected')",
+            name="ck_certificate_status",
+        ),
+        Index(
+            "uq_certificate_pending_supplier",
+            "supplier_id",
+            unique=True,
+            postgresql_where=text("status = 'pending'"),
+            sqlite_where=text("status = 'pending'"),
         ),
         Index(
             "uq_certificate_active_supplier",
@@ -99,6 +127,11 @@ class Certificate(Base):
         LargeBinary, deferred=True
     )
     status: Mapped[str] = mapped_column(String(20), default="active")
+    review_note: Mapped[str | None] = mapped_column(Text)
+    reviewed_by: Mapped[str | None] = mapped_column(String(200))
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), default=utc_now
+    )
 
 
 class Material(Base):
@@ -181,7 +214,7 @@ class ActivityLog(Base):
         CheckConstraint("length(trim(tenant)) > 0", name="ck_activity_tenant"),
         CheckConstraint(ACTIVITY_ACTION_CHECK, name="ck_activity_action"),
         CheckConstraint(
-            "role IN ('staff', 'supervisor', 'supplier')",
+            "role IN ('staff', 'supervisor', 'supplier', 'reviewer')",
             name="ck_activity_role",
         ),
         Index("ix_activity_tenant_created_at", "tenant", "created_at"),
@@ -318,6 +351,77 @@ def _upgrade_activity_actions(connection: Connection) -> None:
     )
 
 
+def _upgrade_renewal_review(connection: Connection) -> None:
+    """Narrow, transactional upgrade from the v0.1 PostgreSQL schema."""
+    if connection.dialect.name != "postgresql":
+        return
+    schema = database_schema(connection)
+    certs = qualified_table_name(connection, "certificates")
+    columns = {
+        item["name"]
+        for item in inspect(connection).get_columns("certificates", schema)
+    }
+    for name in ("review_note", "reviewed_by"):
+        if name not in columns:
+            column = Base.metadata.tables["certificates"].c[name]
+            definition = str(
+                CreateColumn(column).compile(dialect=connection.dialect)
+            )
+            connection.execute(
+                text(f"ALTER TABLE {certs} ADD COLUMN {definition}")
+            )
+    if "created_at" not in columns:
+        connection.execute(
+            text(
+                f"ALTER TABLE {certs} ADD COLUMN created_at "
+                "TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP"
+            )
+        )
+    checks = (
+        (
+            "certificates",
+            "ck_certificate_status",
+            "pending",
+            "status IN ('active', 'superseded', 'pending', 'rejected')",
+        ),
+        (
+            "activity_log",
+            "ck_activity_action",
+            "certificate_submitted",
+            ACTIVITY_ACTION_CHECK,
+        ),
+        (
+            "activity_log",
+            "ck_activity_role",
+            "reviewer",
+            "role IN ('staff', 'supervisor', 'supplier', 'reviewer')",
+        ),
+    )
+    for table_name, name, marker, expression in checks:
+        constraints = inspect(connection).get_check_constraints(
+            table_name, schema
+        )
+        previous = next(
+            (item for item in constraints if item["name"] == name), None
+        )
+        if previous is not None and marker in previous["sqltext"]:
+            continue
+        table = qualified_table_name(connection, table_name)
+        if previous is not None:
+            connection.execute(
+                text(f"ALTER TABLE {table} DROP CONSTRAINT {name}")
+            )
+        connection.execute(
+            text(
+                f"ALTER TABLE {table} ADD CONSTRAINT {name} "
+                f"CHECK ({expression})"
+            )
+        )
+    for index in Base.metadata.tables["certificates"].indexes:
+        if index.name == "uq_certificate_pending_supplier":
+            index.create(connection, checkfirst=True)
+
+
 def _initialize_schema(connection: Connection) -> None:
     lock_startup(connection)
     Base.metadata.create_all(connection)
@@ -341,12 +445,13 @@ def _initialize_schema(connection: Connection) -> None:
                 text(f"ALTER TABLE {qualified} ADD COLUMN {definition}")
             )
     _upgrade_activity_actions(connection)
+    _upgrade_renewal_review(connection)
 
 
 def init_db(engine: Engine | Connection | None = None) -> None:
-    """Create tables and upgrade image columns and activity actions.
+    """Create tables and apply documented image, audit and renewal upgrades.
 
-    Only the documented image/action upgrades are automatic. Other schema
+    Upgrades run under the startup lock in one transaction. Other schema
     changes still require an explicit migration.
     """
     target = get_engine() if engine is None else engine
@@ -375,7 +480,7 @@ def main() -> int:
             file=sys.stderr,
         )
         return 1
-    print("Connected to PostgreSQL. All five tables are ready.")
+    print("Connected to PostgreSQL. Application tables are ready.")
     return 0
 
 

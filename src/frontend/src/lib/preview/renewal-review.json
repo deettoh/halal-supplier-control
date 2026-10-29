@@ -1,0 +1,237 @@
+{
+  "supplier_headers": {
+    "X-Demo-Role": "supplier",
+    "X-Demo-Tenant": "1",
+    "X-Demo-Person": "5"
+  },
+  "reviewer_headers": {
+    "X-Demo-Role": "reviewer",
+    "X-Demo-Tenant": "registry",
+    "X-Demo-Person": "7"
+  },
+  "pending_queue": [
+    {
+      "renewal": {
+        "id": 5,
+        "supplier_id": 1,
+        "issuer": "SAMPLE Food Certification Council",
+        "cert_no": "SAMPLE-RENEWAL",
+        "holder_name": "Golden Grain Supplies SAMPLE",
+        "expiry_date": "2027-12-31",
+        "scope": [
+          {
+            "product_name": "Wheat Flour",
+            "brand": "GoldenMill"
+          },
+          {
+            "product_name": "Bread Flour",
+            "brand": "GoldenMill"
+          },
+          {
+            "product_name": "Cake Flour",
+            "brand": "GoldenMill"
+          },
+          {
+            "product_name": "Corn Starch",
+            "brand": "GoldenMill"
+          },
+          {
+            "product_name": "Rice Flour",
+            "brand": "GoldenMill"
+          },
+          {
+            "product_name": "Baking Powder",
+            "brand": "GoldenMill"
+          },
+          {
+            "product_name": "Fine Sugar",
+            "brand": "SweetGold"
+          },
+          {
+            "product_name": "Brown Sugar",
+            "brand": "SweetGold"
+          },
+          {
+            "product_name": "Semolina",
+            "brand": "GoldenMill"
+          },
+          {
+            "product_name": "Potato Starch",
+            "brand": "GoldenMill"
+          }
+        ],
+        "status": "pending",
+        "image": null,
+        "review_note": null,
+        "reviewed_by": null
+      },
+      "current": {
+        "id": 1,
+        "supplier_id": 1,
+        "issuer": "SAMPLE Food Certification Council",
+        "cert_no": "SAMPLE-GGS-2026-001",
+        "holder_name": "Golden Grain Supplies SAMPLE",
+        "expiry_date": "2026-11-30",
+        "scope": [
+          {
+            "product_name": "Wheat Flour",
+            "brand": "GoldenMill"
+          },
+          {
+            "product_name": "Bread Flour",
+            "brand": "GoldenMill"
+          },
+          {
+            "product_name": "Cake Flour",
+            "brand": "GoldenMill"
+          },
+          {
+            "product_name": "Corn Starch",
+            "brand": "GoldenMill"
+          },
+          {
+            "product_name": "Rice Flour",
+            "brand": "GoldenMill"
+          },
+          {
+            "product_name": "Baking Powder",
+            "brand": "GoldenMill"
+          },
+          {
+            "product_name": "Fine Sugar",
+            "brand": "SweetGold"
+          },
+          {
+            "product_name": "Brown Sugar",
+            "brand": "SweetGold"
+          },
+          {
+            "product_name": "Semolina",
+            "brand": "GoldenMill"
+          },
+          {
+            "product_name": "Potato Starch",
+            "brand": "GoldenMill"
+          }
+        ],
+        "status": "active",
+        "image": "/api/certificates/1/image",
+        "review_note": null,
+        "reviewed_by": null
+      },
+      "supplier_name": "Golden Grain Supplies SAMPLE"
+    }
+  ],
+  "verify_request": {
+    "decision": "verify",
+    "note": "Matches the issuer certificate"
+  },
+  "verified_certificate": {
+    "id": 5,
+    "supplier_id": 1,
+    "issuer": "SAMPLE Food Certification Council",
+    "cert_no": "SAMPLE-RENEWAL",
+    "holder_name": "Golden Grain Supplies SAMPLE",
+    "expiry_date": "2027-12-31",
+    "scope": [
+      {
+        "product_name": "Wheat Flour",
+        "brand": "GoldenMill"
+      },
+      {
+        "product_name": "Bread Flour",
+        "brand": "GoldenMill"
+      },
+      {
+        "product_name": "Cake Flour",
+        "brand": "GoldenMill"
+      },
+      {
+        "product_name": "Corn Starch",
+        "brand": "GoldenMill"
+      },
+      {
+        "product_name": "Rice Flour",
+        "brand": "GoldenMill"
+      },
+      {
+        "product_name": "Baking Powder",
+        "brand": "GoldenMill"
+      },
+      {
+        "product_name": "Fine Sugar",
+        "brand": "SweetGold"
+      },
+      {
+        "product_name": "Brown Sugar",
+        "brand": "SweetGold"
+      },
+      {
+        "product_name": "Semolina",
+        "brand": "GoldenMill"
+      },
+      {
+        "product_name": "Potato Starch",
+        "brand": "GoldenMill"
+      }
+    ],
+    "status": "active",
+    "image": null,
+    "review_note": "Matches the issuer certificate",
+    "reviewed_by": "Nadia"
+  },
+  "rejected_certificate": {
+    "id": 5,
+    "supplier_id": 1,
+    "issuer": "SAMPLE Food Certification Council",
+    "cert_no": "SAMPLE-RENEWAL",
+    "holder_name": "Golden Grain Supplies SAMPLE",
+    "expiry_date": "2027-12-31",
+    "scope": [
+      {
+        "product_name": "Wheat Flour",
+        "brand": "GoldenMill"
+      },
+      {
+        "product_name": "Bread Flour",
+        "brand": "GoldenMill"
+      },
+      {
+        "product_name": "Cake Flour",
+        "brand": "GoldenMill"
+      },
+      {
+        "product_name": "Corn Starch",
+        "brand": "GoldenMill"
+      },
+      {
+        "product_name": "Rice Flour",
+        "brand": "GoldenMill"
+      },
+      {
+        "product_name": "Baking Powder",
+        "brand": "GoldenMill"
+      },
+      {
+        "product_name": "Fine Sugar",
+        "brand": "SweetGold"
+      },
+      {
+        "product_name": "Brown Sugar",
+        "brand": "SweetGold"
+      },
+      {
+        "product_name": "Semolina",
+        "brand": "GoldenMill"
+      },
+      {
+        "product_name": "Potato Starch",
+        "brand": "GoldenMill"
+      }
+    ],
+    "status": "rejected",
+    "image": null,
+    "review_note": "Document details do not match",
+    "reviewed_by": "Nadia"
+  }
+}
