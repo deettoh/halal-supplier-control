@@ -140,7 +140,7 @@ def delivery_payload() -> dict[str, Any]:
             {"rule": "R1", "passed": False, "detail": "Extraction timed out"},
             *[
                 {"rule": f"R{i}", "passed": None, "detail": "Not evaluated"}
-                for i in range(2, 6)
+                for i in range(2, 7)
             ],
         ],
         "verdict": "needs_human",
@@ -318,7 +318,7 @@ def test_delivery_response_supports_failed_extraction() -> None:
 def test_response_requires_complete_ordered_checklist() -> None:
     payload = delivery_payload()
     payload["rule_results"].reverse()
-    with pytest.raises(ValidationError, match="R1 to R5"):
+    with pytest.raises(ValidationError, match="R1 to R6"):
         DeliveryResponse.model_validate(payload)
     payload["rule_results"] = []
     with pytest.raises(ValidationError):

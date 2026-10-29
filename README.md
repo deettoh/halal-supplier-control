@@ -1,8 +1,8 @@
 # Halal Supplier Control
 
 > Checks every ingredient delivered to a halal-certified micro food business
-> against its Raw Material Masterlist and the supplier's halal certificate,
-> for the business's receiving staff and its Halal Supervisor.
+> against the business's Raw Material Masterlist and the supplier's halal
+> certificate, for the business's receiving staff and its Halal Supervisor.
 
 ---
 
@@ -41,25 +41,27 @@ A halal-certified micro food business has to show at any audit that every
 ingredient comes from a supplier with a current, in-scope halal certificate,
 and today that proof is kept in folders, WhatsApp photos and spreadsheets. An
 expired supplier certificate counts the same as none. A supplier can also
-deliver a different brand of the same ingredient, and nobody notices until an
-auditor compares the labels with the masterlist. A failed audit can lead to
-suspension of the certificate and the loss of customers who depend on it.
+deliver a different brand of the same ingredient, and the substitution can go
+unnoticed until an auditor compares the labels with the masterlist. A failed
+audit can lead to suspension of the certificate and the loss of customers who
+depend on it.
 
 ### Solution
 
 At receiving, staff photograph the delivered item's label. A vision model
-reads the product name, brand, manufacturer and halal mark, and five rules
-check them against the masterlist and the supplier's certificate. A clean
-delivery is logged automatically. Anything else waits for the Halal
-Supervisor, who accepts or rejects it with a reason. Substitutions and expired
-certificates are caught at the door instead of at the audit, and one supplier
-renewal in the shared registry updates every SME that buys from that supplier.
+reads the product name, brand, manufacturer and halal mark. Six rules then
+check that reading against the masterlist and the supplier's certificate. A
+Covered or Expiring delivery is accepted automatically. Anything else waits
+for the Halal Supervisor, who accepts or rejects it with a reason. The app
+flags substitutions and expired certificates at receiving instead of at the
+audit. Once a registry reviewer verifies a supplier's renewal, every SME that
+buys from that supplier sees the new coverage.
 
 | Step | In Halal Supplier Control |
 |---|---|
 | Trigger | A delivery arrives and staff photograph its label |
 | Data | The SME's masterlist and the shared supplier certificate registry |
-| Decision | The model reads the label, and rules R1 to R5 give the verdict |
+| Decision | The model reads the label, and rules R1 to R6 give the verdict |
 | Approval | Only the Halal Supervisor can accept or reject a flagged delivery with a required reason |
 | Outcome | Verdict with a rule checklist, delivery status, masterlist coverage and an activity log row |
 
@@ -68,19 +70,19 @@ on whether anything is halal.
 
 ### Key features
 
-- **Verdict with a rule checklist.** Rules R1 to R5 compare the label fields
-  with the masterlist and the supplier's active certificate, and the verdict
-  shows which rule failed.
+- **Verdict with a rule checklist.** Rules R1 to R6 compare the label fields
+  with the masterlist and the supplier's active certificate, and the checklist
+  shows which rules failed.
 - **Supervisor review.** Only the Halal Supervisor can accept or reject a
   flagged delivery, and each decision needs a reason.
-- **One certificate registry for every SME.** When a supplier renews a
-  certificate once, every SME that buys from that supplier sees its own items
-  change from Expiring to Covered.
+- **One certificate registry for every SME.** When a registry reviewer
+  verifies a supplier's renewal, every SME that buys from that supplier sees
+  the new coverage on its own items.
 - **Activity log.** Every check, decision and renewal is logged with the role,
   action and time.
-- **Review when the model fails.** A timeout or endpoint error on a photo
-  with no cached label saves the delivery for the supervisor with the error
-  recorded.
+- **Review when the model fails.** After a timeout or endpoint error on a
+  photo with no cached label, the backend saves the delivery for the
+  supervisor with the error recorded.
 
 ### Tech stack
 
@@ -115,7 +117,7 @@ To list the top level, run `git ls-tree --name-only HEAD`.
 │   ├── SDC2026_READMElater_TechDeclaration.pdf  # Technical & Tools Declaration
 │   ├── SDC2026_READMElater_Replit_POU.pdf       # Replit proof of use
 │   └── SDC2026_READMElater_Runpod_POU.pdf       # RunPod proof of use
-├── tests/                   # Backend and frontend-contract tests
+├── tests/                   # Backend, frontend-contract and evaluation tests
 │   └── eval/                # Synthetic label set, scorer and live results
 ├── .env.example             # Example environment variables
 ├── .gitattributes
@@ -130,17 +132,17 @@ To list the top level, run `git ls-tree --name-only HEAD`.
 
 ### Architecture
 
-FastAPI on Replit serves the React app and the API, and stores everything in
-Replit PostgreSQL. The backend sends each label photo to Qwen3-VL-8B-Instruct
-on a RunPod Serverless endpoint, which returns the fields as JSON, and Python
-rules decide the verdict.
+FastAPI on Replit serves the React app and the API, and stores the records
+and photos in Replit PostgreSQL. The backend sends each label photo to
+Qwen3-VL-8B-Instruct on a RunPod Serverless endpoint, which returns the fields
+as JSON, and Python rules decide the verdict.
 
 ```mermaid
 flowchart LR
     browser[Browser: staff, supervisor, supplier]
     subgraph replit[Replit Autoscale]
         api[FastAPI: React build and /api]
-        rules[Rules R1 to R5]
+        rules[Rules R1 to R6]
         db[(Replit PostgreSQL)]
     end
     subgraph runpod[RunPod Serverless]
@@ -209,7 +211,7 @@ pnpm --dir src/frontend test --run && pnpm --dir src/frontend lint
 ```
 
 CI runs the backend and frontend checks on every pull request and on `main`.
-At this commit, `uv run pytest -q` reports 259 passed and 114 skipped, where
+At this commit, `uv run pytest -q` reports 267 passed and 114 skipped, where
 the skipped tests need PostgreSQL (`--run-db`) or the live endpoint
 (`--run-live`). `pnpm --dir src/frontend test --run` reports 81 passed.
 
@@ -227,8 +229,7 @@ the skipped tests need PostgreSQL (`--run-db`) or the live endpoint
 - **Secrets.** `DATABASE_URL`, `RUNPOD_ENDPOINT_URL` and `RUNPOD_API_KEY` are
   Replit Secrets, and the repository holds no keys.
 - **Workspace.** The team pulls `main` into the Replit workspace to publish,
-  and uses its Shell for the live model test and the production database
-  reset.
+  and uses its Shell for the live test and the production database reset.
 
 Proof of use: [`submission/SDC2026_READMElater_Replit_POU.pdf`](submission/SDC2026_READMElater_Replit_POU.pdf)
 

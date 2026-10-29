@@ -37,6 +37,7 @@ def test_prepared_examples_validate_and_keep_three_state_checks() -> None:
         None,
         True,
         True,
+        None,
     ]
     assert partial["verdict"] == "needs_human"
 

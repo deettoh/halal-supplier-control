@@ -1,5 +1,6 @@
 """Regression checks for rule evaluation and recognized demo issuers."""
 
+import re
 from datetime import date, timedelta
 
 import pytest
@@ -14,10 +15,17 @@ LABEL = {
     "halal_mark_present": True,
 }
 MATERIAL = {
+    "name": "Wheat Flour",
     "approved_brand": "GoldenMill",
     "approved_manufacturer": "Golden Grain Foods",
 }
 TODAY = date(2026, 10, 22)
+CERTIFICATE = {
+    "scope": ["Wheat Flour", "Semolina"],
+    "expiry_date": "2027-12-31",
+    "issuer": "SAMPLE Food Certification Council",
+}
+NO_MARK_DETAIL = "No halal mark visible, supervisor review required."
 
 
 @pytest.mark.parametrize(
@@ -42,6 +50,7 @@ def test_expiry_boundaries(days_remaining: int, expected: Verdict) -> None:
         "R3",
         "R4",
         "R5",
+        "R6",
     ]
     assert result["rule_results"][4]["passed"] is True
 
@@ -98,3 +107,99 @@ def test_scope_formats_share_product_matching(scope: object) -> None:
     )
     assert result["verdict"] == "covered"
     assert result["rule_results"][2]["passed"] is True
+
+
+def test_other_product_from_approved_supplier_is_substitution() -> None:
+    result = evaluate(
+        {**LABEL, "product_name": "Semolina"},
+        MATERIAL,
+        {
+            "scope": ["Wheat Flour", "Semolina"],
+            "expiry_date": "2027-12-31",
+            "issuer": "SAMPLE Food Certification Council",
+        },
+        TODAY,
+    )
+    assert result["verdict"] == "substitution"
+    assert result["rule_results"][1] == {
+        "rule": "R2",
+        "passed": False,
+        "detail": 'Product mismatch: label says "Semolina", '
+        'approved material is "Wheat Flour".',
+    }
+
+
+def test_brand_failure_reports_its_score() -> None:
+    result = evaluate(
+        {**LABEL, "brand": "ALT SAMPLE BRAND"},
+        MATERIAL,
+        None,
+        TODAY,
+    )
+    assert result["verdict"] == "substitution"
+    assert re.fullmatch(
+        r"Brand score \d+\.\d is below 90\.",
+        result["rule_results"][1]["detail"],
+    )
+
+
+def test_r2_detail_lists_every_failing_part() -> None:
+    result = evaluate(
+        {**LABEL, "product_name": "Semolina", "brand": "ALT SAMPLE BRAND"},
+        MATERIAL,
+        None,
+        TODAY,
+    )
+    assert re.fullmatch(
+        r'Product mismatch: label says "Semolina", approved material is '
+        r'"Wheat Flour"\. Brand score \d+\.\d is below 90\.',
+        result["rule_results"][1]["detail"],
+    )
+
+
+@pytest.mark.parametrize(
+    ("halal_mark_present", "passed", "verdict", "detail"),
+    [
+        (True, True, "covered", "Halal mark visible on label."),
+        (False, False, "needs_human", NO_MARK_DETAIL),
+        (None, False, "needs_human", NO_MARK_DETAIL),
+    ],
+)
+def test_halal_mark_decides_r6(
+    halal_mark_present: bool | None,
+    passed: bool,
+    verdict: Verdict,
+    detail: str,
+) -> None:
+    result = evaluate(
+        {**LABEL, "halal_mark_present": halal_mark_present},
+        MATERIAL,
+        CERTIFICATE,
+        TODAY,
+    )
+    assert result["verdict"] == verdict
+    assert result["rule_results"][-1] == {
+        "rule": "R6",
+        "passed": passed,
+        "detail": detail,
+    }
+
+
+def test_r6_not_evaluated_when_label_incomplete() -> None:
+    result = evaluate({}, MATERIAL, CERTIFICATE, TODAY)
+    assert result["rule_results"][-1] == {
+        "rule": "R6",
+        "passed": None,
+        "detail": "Not evaluated: label information incomplete.",
+    }
+
+
+def test_product_mismatch_outranks_missing_halal_mark() -> None:
+    result = evaluate(
+        {**LABEL, "product_name": "Semolina", "halal_mark_present": False},
+        MATERIAL,
+        CERTIFICATE,
+        TODAY,
+    )
+    assert result["verdict"] == "substitution"
+    assert result["rule_results"][-1]["passed"] is False

@@ -72,7 +72,8 @@ def generate() -> dict[str, Any]:
                     "product_name": m["name"],
                     "brand": m["approved_brand"],
                     "manufacturer": m["approved_manufacturer"],
-                    "halal_mark_present": None,
+                    # coverage ignores the halal mark
+                    "halal_mark_present": True,
                 },
                 m,
                 cert,
@@ -89,13 +90,14 @@ def generate() -> dict[str, Any]:
             snapshot.setdefault(m["tenant"], []).append(row)
         snapshots[bits] = snapshot
     cases: list[dict[str, Any]] = []
-    for case_id, filename, brand, product, manufacturer, title in [
+    for case_id, filename, brand, product, manufacturer, has_mark, title in [
         (
             "alt-brand",
             "label-alt-brand.jpg",
             "ALT SAMPLE BRAND",
             "Cocoa Powder",
             "Silver Valley Foods",
+            False,
             "Changed brand",
         ),
         (
@@ -104,6 +106,7 @@ def generate() -> dict[str, Any]:
             "SilverCocoa",
             "Cocoa Powder",
             "Silver Valley Foods",
+            True,
             "Matching cocoa label",
         ),
         (
@@ -112,6 +115,7 @@ def generate() -> dict[str, Any]:
             "SilverCocoa",
             "Cocoa Powder",
             None,
+            False,
             "Manufacturer unreadable",
         ),
         (
@@ -120,6 +124,7 @@ def generate() -> dict[str, Any]:
             "GoldenMill",
             "Wheat Flour",
             "Golden Grain Foods",
+            True,
             "Expiring flour record",
         ),
     ]:
@@ -131,7 +136,7 @@ def generate() -> dict[str, Any]:
             "product_name": product,
             "brand": brand,
             "manufacturer": manufacturer,
-            "halal_mark_present": False,
+            "halal_mark_present": has_mark,
         }
         responses_by_renewal = {}
         for bits in ["00", "10", "01", "11"]:

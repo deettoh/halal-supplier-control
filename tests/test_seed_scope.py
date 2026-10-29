@@ -165,6 +165,7 @@ def test_scope_brand_restrictions(scope: object, matches: bool) -> None:
             "halal_mark_present": True,
         },
         {
+            "name": "Cocoa Powder",
             "approved_brand": "SilverCocoa",
             "approved_manufacturer": "Silver Valley Foods",
         },
