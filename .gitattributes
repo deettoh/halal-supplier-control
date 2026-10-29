@@ -1,3 +1,7 @@
 # Keep hash-identified evaluation inputs identical on every checkout.
 tests/eval/expected_results.json -text whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol
 tests/eval/images/*.png binary
+
+# Finals review inputs are hash-identified and must remain byte-identical.
+tests/eval/finals/*.json -text whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol
+tests/eval/finals/images/*.png binary
