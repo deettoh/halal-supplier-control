@@ -10,6 +10,8 @@ from sqlalchemy.orm import Session, undefer
 
 from backend import db, images
 from backend.schemas import (
+    RULE_ORDER,
+    RULE_ORDER_ERROR,
     ActivityAction,
     APIModel,
     CertificateScopeItem,
@@ -74,7 +76,9 @@ class DeliverySeed(SeedImage):
     tenant: NonEmptyText
     material_id: RecordId
     extracted: LabelExtraction | None
-    rule_results: list[RuleResult] = Field(min_length=5, max_length=5)
+    rule_results: list[RuleResult] = Field(
+        min_length=len(RULE_ORDER), max_length=len(RULE_ORDER)
+    )
     verdict: Verdict
     status: DeliveryStatus
     error: str | None = None
@@ -84,14 +88,8 @@ class DeliverySeed(SeedImage):
 
     @model_validator(mode="after")
     def check_checklist(self) -> "DeliverySeed":
-        if [item.rule for item in self.rule_results] != [
-            "R1",
-            "R2",
-            "R3",
-            "R4",
-            "R5",
-        ]:
-            raise ValueError("rule_results must contain R1 to R5 in order")
+        if tuple(item.rule for item in self.rule_results) != RULE_ORDER:
+            raise ValueError(RULE_ORDER_ERROR)
         return self
 
 

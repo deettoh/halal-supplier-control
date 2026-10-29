@@ -10,6 +10,7 @@ from sqlalchemy.orm import Session
 
 from backend import db, extract, images, rules
 from backend.schemas import (
+    RULE_ORDER,
     ActivityResponse,
     CertificateCreateRequest,
     CertificateResponse,
@@ -222,14 +223,14 @@ def _failed_checks(message: str) -> list[dict[str, object]]:
     return [
         RuleResult.model_validate(
             {
-                "rule": f"R{number}",
-                "passed": False if number == 1 else None,
+                "rule": rule,
+                "passed": False if rule == "R1" else None,
                 "detail": message
-                if number == 1
+                if rule == "R1"
                 else "Not evaluated: label extraction failed.",
             }
         ).model_dump()
-        for number in range(1, 6)
+        for rule in RULE_ORDER
     ]
 
 
