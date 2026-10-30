@@ -851,14 +851,17 @@ def test_demo_reset_restores_seed_photos_and_removes_workflows(
         session.commit()
     for _ in range(2):
         counts = reset_demo_database(engine)
+        seed = SeedData.model_validate_json(DEFAULT_SEED_PATH.read_text())
         assert counts == {
-            "sme_settings": 2,
-            "suppliers": 2,
-            "certificates": 4,
-            "materials": 16,
-            "deliveries": 0,
-            "activity_log": 1,
-            "people": 7,
+            name: len(getattr(seed, name))
+            for name in (
+                "suppliers",
+                "certificates",
+                "materials",
+                "deliveries",
+                "activity_log",
+                "people",
+            )
         }
         with Session(engine) as session:
             seed = SeedData.model_validate_json(DEFAULT_SEED_PATH.read_text())
@@ -880,6 +883,24 @@ def test_demo_reset_restores_seed_photos_and_removes_workflows(
                 assert restored.image_bytes == images.as_jpeg(
                     (DEFAULT_SEED_PATH.parent / source.image_file).read_bytes()
                 )
+            for source_event in seed.activity_log:
+                restored_event = session.get(ActivityLog, source_event.id)
+                assert restored_event is not None
+                for field in (
+                    "actor",
+                    "actor_title",
+                    "role",
+                    "action",
+                    "material_name",
+                    "verdict",
+                    "supplier_name",
+                    "delivery_id",
+                    "reason",
+                    "tenant",
+                ):
+                    assert getattr(restored_event, field) == getattr(
+                        source_event, field
+                    )
             saved = session.get(Supplier, 1)
             assert saved is not None and saved.name == seed.suppliers[0].name
     with Session(engine) as session:
