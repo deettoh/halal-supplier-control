@@ -1,0 +1,357 @@
+{
+  "mode": "live",
+  "model": "qwen/qwen3-vl-8b-instruct",
+  "temperature": 0.0,
+  "prompt_sha256": "8becf1b0a009fd997ec3e90f247923953f35968964363162d2e7ba3707f68f75",
+  "run_id": "788b8640-92a0-4562-a3eb-9addb7956287",
+  "expected_sha256": "1f72cd146709a4f8cdde6e3c08612346924ccdb67ba808da4ef80ce3754ef910",
+  "code_revision": "ef451fdf5b8acca43a32044041a1dd40d1faaacf",
+  "code_sha256": {
+    "src/backend/extract.py": "5c7857a2fdb0dffc05ac5576e4f430e9000cffcc1941f981fb2e0918210a2149",
+    "src/backend/images.py": "6c8c37131fc965a0217aeb0c51368e4c8c3e2e16c5ad174777cdd596b5bf0ce4",
+    "src/backend/rules.py": "8d062f0489122aa85dfd7d6fca124692ee84a03d16bb9e8eb097081a395ae6d3",
+    "src/backend/schemas.py": "2bdfd9cd815cb00d89412b2ee87e34a482190323db9a99aeeea48def15bb2571",
+    "tests/eval/collect_predictions.py": "6d502f6867ccf3114e4b620dbb159ea2607e3c7e9ffbc7ab26d827367f306b7d"
+  },
+  "started_at": "2026-10-30T05:45:11.313552+00:00",
+  "completed_at": "2026-10-30T05:46:14.005120+00:00",
+  "timing_scope": "extraction_seconds includes preprocessing, client setup, network, queue/cold-start wait, inference and response validation; rules_seconds measures offline rules only; file reading excluded",
+  "predictions": [
+    {
+      "case_id": "L09",
+      "image_sha256": "3a2dccbd24ca8e801b11d0286884eb93cbb542e0019c7c89e71c9605503bcade",
+      "extracted": {
+        "product_name": "Cocoa Powder",
+        "brand": "SilverCocoa",
+        "manufacturer": "Silver Valley Foods",
+        "halal_mark_present": true
+      },
+      "verdict": "covered",
+      "error": null,
+      "extraction_seconds": 3.753336900146678,
+      "rules_seconds": 0.00025860010646283627
+    },
+    {
+      "case_id": "L10",
+      "image_sha256": "1541d5027f299c6f3da9d0bf3d5b71471ea00544975c1e9db160dc1fc1ca555d",
+      "extracted": {
+        "product_name": "Wheat Flour",
+        "brand": "GoldenMill",
+        "manufacturer": "Golden Grain Foods",
+        "halal_mark_present": true
+      },
+      "verdict": "expiring",
+      "error": null,
+      "extraction_seconds": 2.7540249000303447,
+      "rules_seconds": 0.0003228001296520233
+    },
+    {
+      "case_id": "L11",
+      "image_sha256": "e8db0acbc1f649508082c99810f512fd412b164179f8b309a43172de9a0f0864",
+      "extracted": {
+        "product_name": "Cocoa Powder 200 G",
+        "brand": "SilverCocoa",
+        "manufacturer": "Silver Valley Foods",
+        "halal_mark_present": true
+      },
+      "verdict": "substitution",
+      "error": null,
+      "extraction_seconds": 3.236423800000921,
+      "rules_seconds": 0.00017559994012117386
+    },
+    {
+      "case_id": "L12",
+      "image_sha256": "0a284f9433255979168dd8995c1c7122266cf1fcba733e464cb25712480bf902",
+      "extracted": {
+        "product_name": "Wheat Flour",
+        "brand": "GoldenMill",
+        "manufacturer": "Golden Grain Foods",
+        "halal_mark_present": true
+      },
+      "verdict": "expiring",
+      "error": null,
+      "extraction_seconds": 3.507919500116259,
+      "rules_seconds": 0.0002372001763433218
+    },
+    {
+      "case_id": "L13",
+      "image_sha256": "91aae1ae6046cbc65a7063936c48f0ff6b69d6d52a8e3a8c6dcff2819f2adab2",
+      "extracted": {
+        "product_name": "Bread Flour",
+        "brand": "GoldenMill",
+        "manufacturer": "Golden Grain Foods",
+        "halal_mark_present": true
+      },
+      "verdict": "expiring",
+      "error": null,
+      "extraction_seconds": 3.315703900065273,
+      "rules_seconds": 0.0001634999644011259
+    },
+    {
+      "case_id": "L14",
+      "image_sha256": "4c7f524173dfb4de3c0f4a3b76c11da8172ecb3f3c7377d1e020d360930c2648",
+      "extracted": {
+        "product_name": "Cake Flour",
+        "brand": "GoldenMill",
+        "manufacturer": "Golden Grain Foods",
+        "halal_mark_present": true
+      },
+      "verdict": "expiring",
+      "error": null,
+      "extraction_seconds": 3.4357338999398053,
+      "rules_seconds": 0.0000654000323265791
+    },
+    {
+      "case_id": "L15",
+      "image_sha256": "02e8c74da3fef057785c6f162d498022780c970ab0285e552032b7528b6109f5",
+      "extracted": {
+        "product_name": "Rice Flour",
+        "brand": "GoldenMill",
+        "manufacturer": "Golden Grain Foods",
+        "halal_mark_present": true
+      },
+      "verdict": "expiring",
+      "error": null,
+      "extraction_seconds": 2.3349140000063926,
+      "rules_seconds": 0.00005979998968541622
+    },
+    {
+      "case_id": "L16",
+      "image_sha256": "2c3a7b6671de43187a500aec1d2a490d25ca17df3d396bdf0f6f959e9bab2359",
+      "extracted": {
+        "product_name": "Wheat Flour",
+        "brand": "GoldenMill",
+        "manufacturer": "Golden Grain Foods",
+        "halal_mark_present": true
+      },
+      "verdict": "expiring",
+      "error": null,
+      "extraction_seconds": 2.5987348000053316,
+      "rules_seconds": 0.00009430013597011566
+    },
+    {
+      "case_id": "L17",
+      "image_sha256": "92c7327c38877b8d570f0f972f7ff3ae017ee83e7678f6c1f0e94b703bfcbbc6",
+      "extracted": {
+        "product_name": "Semolina",
+        "brand": "GoldenMill",
+        "manufacturer": "Golden Grain Foods",
+        "halal_mark_present": true
+      },
+      "verdict": "substitution",
+      "error": null,
+      "extraction_seconds": 2.4026240000966936,
+      "rules_seconds": 0.00005669984966516495
+    },
+    {
+      "case_id": "L18",
+      "image_sha256": "5969f3d8870b853c1c34ec6815ef03d1dea3b03d5620211fe50f4d0f6259aedb",
+      "extracted": {
+        "product_name": "Rice Flour",
+        "brand": "GoldenMill",
+        "manufacturer": "Golden Grain Foods",
+        "halal_mark_present": true
+      },
+      "verdict": "substitution",
+      "error": null,
+      "extraction_seconds": 2.232535900082439,
+      "rules_seconds": 0.00007040007039904594
+    },
+    {
+      "case_id": "L19",
+      "image_sha256": "94795d2b352ae87e7760d6ed93024a2efc2794803e8ef375ac45a177767ca516",
+      "extracted": {
+        "product_name": "Wheat Flour",
+        "brand": "GoldenMill",
+        "manufacturer": "Golden Grain Foods",
+        "halal_mark_present": true
+      },
+      "verdict": "substitution",
+      "error": null,
+      "extraction_seconds": 2.4324181000702083,
+      "rules_seconds": 0.000059399986639618874
+    },
+    {
+      "case_id": "L20",
+      "image_sha256": "ce91df0afc0254363fde00e2797219810f9b7c21756f2850484f325f14250faf",
+      "extracted": {
+        "product_name": "Cocoa Liquor",
+        "brand": "SilverCocoa",
+        "manufacturer": "Silver Valley Foods",
+        "halal_mark_present": true
+      },
+      "verdict": "substitution",
+      "error": null,
+      "extraction_seconds": 2.245091099990532,
+      "rules_seconds": 0.0000996000599116087
+    },
+    {
+      "case_id": "L21",
+      "image_sha256": "83b3585f84afa395d379af9f6109a478bd4b0f96858b6fcf841fa48afe0f2731",
+      "extracted": {
+        "product_name": "Wheat Flour",
+        "brand": "HarvestStone",
+        "manufacturer": "Golden Grain Foods",
+        "halal_mark_present": true
+      },
+      "verdict": "substitution",
+      "error": null,
+      "extraction_seconds": 2.4023476999718696,
+      "rules_seconds": 0.00007060007192194462
+    },
+    {
+      "case_id": "L22",
+      "image_sha256": "fa562fcb0d9727f328b7e45429f42c4122ad42e17075b0ccadd453dddf4b63c4",
+      "extracted": {
+        "product_name": "WHEAT FLOUR",
+        "brand": "GoldenMill",
+        "manufacturer": "Meadow Forge Foods",
+        "halal_mark_present": true
+      },
+      "verdict": "substitution",
+      "error": null,
+      "extraction_seconds": 2.3277319001499563,
+      "rules_seconds": 0.00006569991819560528
+    },
+    {
+      "case_id": "L23",
+      "image_sha256": "e45e58dd341f722c0dc4b85ed4271f9ffad77341ef23ac2fea9b5e0050b406f7",
+      "extracted": {
+        "product_name": "Cocoa Powder",
+        "brand": "AmberCocoa",
+        "manufacturer": "Silver Valley Foods",
+        "halal_mark_present": true
+      },
+      "verdict": "substitution",
+      "error": null,
+      "extraction_seconds": 2.3685347998980433,
+      "rules_seconds": 0.00008539995178580284
+    },
+    {
+      "case_id": "L24",
+      "image_sha256": "6d95730b79313b18f5f7b7ade481fc954cb45abb85cdd790168d12d27cd1accc",
+      "extracted": {
+        "product_name": "Cocoa Powder",
+        "brand": "SilverCocoa",
+        "manufacturer": "Riverbend Foods",
+        "halal_mark_present": true
+      },
+      "verdict": "substitution",
+      "error": null,
+      "extraction_seconds": 2.5516420998610556,
+      "rules_seconds": 0.00009660003706812859
+    },
+    {
+      "case_id": "L25",
+      "image_sha256": "c3b313df1ad22ad82df803e6719e7d3bb50b3885415610515e9a8d9156eb30a5",
+      "extracted": {
+        "product_name": "Wheat Flour",
+        "brand": "GoldenMill",
+        "manufacturer": "Golden Grain Foods",
+        "halal_mark_present": null
+      },
+      "verdict": "needs_human",
+      "error": null,
+      "extraction_seconds": 2.4579974999651313,
+      "rules_seconds": 0.00006280001252889633
+    },
+    {
+      "case_id": "L26",
+      "image_sha256": "a086a750aef8fc9fa150d1ebf9edd4f4cf0662b0a34246661d5c82e14c5ab60d",
+      "extracted": {
+        "product_name": "Rice Flour",
+        "brand": "GoldenMill",
+        "manufacturer": "Golden Grain Foods",
+        "halal_mark_present": null
+      },
+      "verdict": "needs_human",
+      "error": null,
+      "extraction_seconds": 2.212874799966812,
+      "rules_seconds": 0.000059099867939949036
+    },
+    {
+      "case_id": "L27",
+      "image_sha256": "cc0623de6af7d6910e01212ddf6ccdd6e71fc3296f6b14a32e63f45356cd30cc",
+      "extracted": {
+        "product_name": "Cocoa Powder",
+        "brand": "SilverCocoa",
+        "manufacturer": "Silver Valley Foods",
+        "halal_mark_present": null
+      },
+      "verdict": "needs_human",
+      "error": null,
+      "extraction_seconds": 2.325036099879071,
+      "rules_seconds": 0.00008039991371333599
+    },
+    {
+      "case_id": "L28",
+      "image_sha256": "acc35089855f373b83cf57cf8c29ea2978ac22cb23b4c8a179cd691ca793be53",
+      "extracted": {
+        "product_name": "Cocoa Powder",
+        "brand": "SilverCocoa",
+        "manufacturer": "Silver Valley Foods",
+        "halal_mark_present": null
+      },
+      "verdict": "needs_human",
+      "error": null,
+      "extraction_seconds": 2.2738364001270384,
+      "rules_seconds": 0.00005759997293353081
+    },
+    {
+      "case_id": "L29",
+      "image_sha256": "c9336cf6eb884812ce635fe862c7f861deb4323f9ca8064c202cc2a5b3179c99",
+      "extracted": {
+        "product_name": "Wheat Flour",
+        "brand": "GoldenMill",
+        "manufacturer": "Golden Grain Foods",
+        "halal_mark_present": null
+      },
+      "verdict": "needs_human",
+      "error": null,
+      "extraction_seconds": 2.279844000004232,
+      "rules_seconds": 0.00006949994713068008
+    },
+    {
+      "case_id": "L30",
+      "image_sha256": "d32ea7a65eaa2b35e177e176353ae7ffac0566a766153b7ab96440e713611358",
+      "extracted": {
+        "product_name": "Cocoa Powder",
+        "brand": "SilverCocoa",
+        "manufacturer": "Silver Valley Foods",
+        "halal_mark_present": null
+      },
+      "verdict": "needs_human",
+      "error": null,
+      "extraction_seconds": 2.199633000185713,
+      "rules_seconds": 0.00010999990627169609
+    },
+    {
+      "case_id": "L31",
+      "image_sha256": "6c31bbf598c95eef960255a6dceb3e44967acfcf35dbb8d45243d3aeb92fbd9d",
+      "extracted": {
+        "product_name": null,
+        "brand": "GoldenMill",
+        "manufacturer": "Golden Grain Foods",
+        "halal_mark_present": true
+      },
+      "verdict": "needs_human",
+      "error": null,
+      "extraction_seconds": 2.4159925000276417,
+      "rules_seconds": 0.000043899985030293465
+    },
+    {
+      "case_id": "L32",
+      "image_sha256": "941ffd4518b341919548029d4915ee48e732782462128562fdeb672646e38f4b",
+      "extracted": {
+        "product_name": "Cocoa Powder",
+        "brand": "SilverCocoa",
+        "manufacturer": "Sunrise Bakery",
+        "halal_mark_present": true
+      },
+      "verdict": "substitution",
+      "error": null,
+      "extraction_seconds": 2.5262529000174254,
+      "rules_seconds": 0.00006589991971850395
+    }
+  ]
+}

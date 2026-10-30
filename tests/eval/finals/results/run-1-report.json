@@ -1,0 +1,694 @@
+{
+  "report_version": "0.1",
+  "source": "saved_predictions",
+  "mode": "live",
+  "live_inference_verified": false,
+  "dataset_approved": false,
+  "limitations": [
+    "Modes are declared by the input, not independently verified.",
+    "Proposal or stub/cache scores are not live model accuracy.",
+    "No image reading, production rules or timing are run here."
+  ],
+  "counts": {
+    "expected_cases": 24,
+    "prediction_records": 24,
+    "missing_predictions": 0,
+    "upstream_errors": 0,
+    "unreadable_guesses": 1
+  },
+  "metrics": {
+    "schema_success": {
+      "correct": 24,
+      "total": 24,
+      "percent": 100.0
+    },
+    "field_accuracy": {
+      "correct": 87,
+      "total": 88,
+      "percent": 98.86
+    },
+    "text_literal_accuracy": {
+      "correct": 68,
+      "total": 70,
+      "percent": 97.14
+    },
+    "text_normalized_accuracy": {
+      "correct": 69,
+      "total": 70,
+      "percent": 98.57
+    },
+    "mark_accuracy": {
+      "correct": 18,
+      "total": 18,
+      "percent": 100.0
+    },
+    "whole_readable_label_accuracy": {
+      "correct": 21,
+      "total": 22,
+      "percent": 95.45
+    },
+    "unreadable_abstention": {
+      "correct": 7,
+      "total": 8,
+      "percent": 87.5
+    },
+    "verdict_accuracy": {
+      "correct": 22,
+      "total": 24,
+      "percent": 91.67
+    },
+    "initial_status_accuracy": {
+      "correct": null,
+      "total": null,
+      "percent": null
+    }
+  },
+  "per_field": {
+    "product_name": {
+      "correct": 22,
+      "total": 23,
+      "percent": 95.65
+    },
+    "brand": {
+      "correct": 24,
+      "total": 24,
+      "percent": 100.0
+    },
+    "manufacturer": {
+      "correct": 23,
+      "total": 23,
+      "percent": 100.0
+    },
+    "halal_mark_present": {
+      "correct": 18,
+      "total": 18,
+      "percent": 100.0
+    }
+  },
+  "cases": [
+    {
+      "case_id": "L09",
+      "schema_valid": true,
+      "error_present": false,
+      "issues": [],
+      "fields": {
+        "product_name": {
+          "literal": true,
+          "normalized": true
+        },
+        "brand": {
+          "literal": true,
+          "normalized": true
+        },
+        "manufacturer": {
+          "literal": true,
+          "normalized": true
+        },
+        "halal_mark_present": {
+          "literal": true,
+          "normalized": true
+        }
+      },
+      "verdict_correct": true,
+      "initial_status_correct": null
+    },
+    {
+      "case_id": "L10",
+      "schema_valid": true,
+      "error_present": false,
+      "issues": [],
+      "fields": {
+        "product_name": {
+          "literal": true,
+          "normalized": true
+        },
+        "brand": {
+          "literal": true,
+          "normalized": true
+        },
+        "manufacturer": {
+          "literal": true,
+          "normalized": true
+        },
+        "halal_mark_present": {
+          "literal": true,
+          "normalized": true
+        }
+      },
+      "verdict_correct": true,
+      "initial_status_correct": null
+    },
+    {
+      "case_id": "L11",
+      "schema_valid": true,
+      "error_present": false,
+      "issues": [],
+      "fields": {
+        "product_name": {
+          "literal": false,
+          "normalized": false
+        },
+        "brand": {
+          "literal": true,
+          "normalized": true
+        },
+        "manufacturer": {
+          "literal": true,
+          "normalized": true
+        },
+        "halal_mark_present": {
+          "literal": true,
+          "normalized": true
+        }
+      },
+      "verdict_correct": false,
+      "initial_status_correct": null
+    },
+    {
+      "case_id": "L12",
+      "schema_valid": true,
+      "error_present": false,
+      "issues": [],
+      "fields": {
+        "product_name": {
+          "literal": true,
+          "normalized": true
+        },
+        "brand": {
+          "literal": true,
+          "normalized": true
+        },
+        "manufacturer": {
+          "literal": true,
+          "normalized": true
+        },
+        "halal_mark_present": {
+          "literal": true,
+          "normalized": true
+        }
+      },
+      "verdict_correct": true,
+      "initial_status_correct": null
+    },
+    {
+      "case_id": "L13",
+      "schema_valid": true,
+      "error_present": false,
+      "issues": [],
+      "fields": {
+        "product_name": {
+          "literal": true,
+          "normalized": true
+        },
+        "brand": {
+          "literal": true,
+          "normalized": true
+        },
+        "manufacturer": {
+          "literal": true,
+          "normalized": true
+        },
+        "halal_mark_present": {
+          "literal": true,
+          "normalized": true
+        }
+      },
+      "verdict_correct": true,
+      "initial_status_correct": null
+    },
+    {
+      "case_id": "L14",
+      "schema_valid": true,
+      "error_present": false,
+      "issues": [],
+      "fields": {
+        "product_name": {
+          "literal": true,
+          "normalized": true
+        },
+        "brand": {
+          "literal": true,
+          "normalized": true
+        },
+        "manufacturer": {
+          "literal": true,
+          "normalized": true
+        },
+        "halal_mark_present": {
+          "literal": true,
+          "normalized": true
+        }
+      },
+      "verdict_correct": true,
+      "initial_status_correct": null
+    },
+    {
+      "case_id": "L15",
+      "schema_valid": true,
+      "error_present": false,
+      "issues": [],
+      "fields": {
+        "product_name": {
+          "literal": true,
+          "normalized": true
+        },
+        "brand": {
+          "literal": true,
+          "normalized": true
+        },
+        "manufacturer": {
+          "literal": true,
+          "normalized": true
+        },
+        "halal_mark_present": {
+          "literal": true,
+          "normalized": true
+        }
+      },
+      "verdict_correct": true,
+      "initial_status_correct": null
+    },
+    {
+      "case_id": "L16",
+      "schema_valid": true,
+      "error_present": false,
+      "issues": [],
+      "fields": {
+        "product_name": {
+          "literal": true,
+          "normalized": true
+        },
+        "brand": {
+          "literal": true,
+          "normalized": true
+        },
+        "manufacturer": {
+          "literal": true,
+          "normalized": true
+        },
+        "halal_mark_present": {
+          "literal": true,
+          "normalized": true
+        }
+      },
+      "verdict_correct": true,
+      "initial_status_correct": null
+    },
+    {
+      "case_id": "L17",
+      "schema_valid": true,
+      "error_present": false,
+      "issues": [],
+      "fields": {
+        "product_name": {
+          "literal": true,
+          "normalized": true
+        },
+        "brand": {
+          "literal": true,
+          "normalized": true
+        },
+        "manufacturer": {
+          "literal": true,
+          "normalized": true
+        },
+        "halal_mark_present": {
+          "literal": true,
+          "normalized": true
+        }
+      },
+      "verdict_correct": true,
+      "initial_status_correct": null
+    },
+    {
+      "case_id": "L18",
+      "schema_valid": true,
+      "error_present": false,
+      "issues": [],
+      "fields": {
+        "product_name": {
+          "literal": true,
+          "normalized": true
+        },
+        "brand": {
+          "literal": true,
+          "normalized": true
+        },
+        "manufacturer": {
+          "literal": true,
+          "normalized": true
+        },
+        "halal_mark_present": {
+          "literal": true,
+          "normalized": true
+        }
+      },
+      "verdict_correct": true,
+      "initial_status_correct": null
+    },
+    {
+      "case_id": "L19",
+      "schema_valid": true,
+      "error_present": false,
+      "issues": [],
+      "fields": {
+        "product_name": {
+          "literal": true,
+          "normalized": true
+        },
+        "brand": {
+          "literal": true,
+          "normalized": true
+        },
+        "manufacturer": {
+          "literal": true,
+          "normalized": true
+        },
+        "halal_mark_present": {
+          "literal": true,
+          "normalized": true
+        }
+      },
+      "verdict_correct": true,
+      "initial_status_correct": null
+    },
+    {
+      "case_id": "L20",
+      "schema_valid": true,
+      "error_present": false,
+      "issues": [],
+      "fields": {
+        "product_name": {
+          "literal": true,
+          "normalized": true
+        },
+        "brand": {
+          "literal": true,
+          "normalized": true
+        },
+        "manufacturer": {
+          "literal": true,
+          "normalized": true
+        },
+        "halal_mark_present": {
+          "literal": true,
+          "normalized": true
+        }
+      },
+      "verdict_correct": true,
+      "initial_status_correct": null
+    },
+    {
+      "case_id": "L21",
+      "schema_valid": true,
+      "error_present": false,
+      "issues": [],
+      "fields": {
+        "product_name": {
+          "literal": true,
+          "normalized": true
+        },
+        "brand": {
+          "literal": true,
+          "normalized": true
+        },
+        "manufacturer": {
+          "literal": true,
+          "normalized": true
+        },
+        "halal_mark_present": {
+          "literal": true,
+          "normalized": true
+        }
+      },
+      "verdict_correct": true,
+      "initial_status_correct": null
+    },
+    {
+      "case_id": "L22",
+      "schema_valid": true,
+      "error_present": false,
+      "issues": [],
+      "fields": {
+        "product_name": {
+          "literal": false,
+          "normalized": true
+        },
+        "brand": {
+          "literal": true,
+          "normalized": true
+        },
+        "manufacturer": {
+          "literal": true,
+          "normalized": true
+        },
+        "halal_mark_present": {
+          "literal": true,
+          "normalized": true
+        }
+      },
+      "verdict_correct": true,
+      "initial_status_correct": null
+    },
+    {
+      "case_id": "L23",
+      "schema_valid": true,
+      "error_present": false,
+      "issues": [],
+      "fields": {
+        "product_name": {
+          "literal": true,
+          "normalized": true
+        },
+        "brand": {
+          "literal": true,
+          "normalized": true
+        },
+        "manufacturer": {
+          "literal": true,
+          "normalized": true
+        },
+        "halal_mark_present": {
+          "literal": true,
+          "normalized": true
+        }
+      },
+      "verdict_correct": true,
+      "initial_status_correct": null
+    },
+    {
+      "case_id": "L24",
+      "schema_valid": true,
+      "error_present": false,
+      "issues": [],
+      "fields": {
+        "product_name": {
+          "literal": true,
+          "normalized": true
+        },
+        "brand": {
+          "literal": true,
+          "normalized": true
+        },
+        "manufacturer": {
+          "literal": true,
+          "normalized": true
+        },
+        "halal_mark_present": {
+          "literal": true,
+          "normalized": true
+        }
+      },
+      "verdict_correct": true,
+      "initial_status_correct": null
+    },
+    {
+      "case_id": "L25",
+      "schema_valid": true,
+      "error_present": false,
+      "issues": [],
+      "fields": {
+        "product_name": {
+          "literal": true,
+          "normalized": true
+        },
+        "brand": {
+          "literal": true,
+          "normalized": true
+        },
+        "manufacturer": {
+          "literal": true,
+          "normalized": true
+        },
+        "halal_mark_present": null
+      },
+      "verdict_correct": true,
+      "initial_status_correct": null
+    },
+    {
+      "case_id": "L26",
+      "schema_valid": true,
+      "error_present": false,
+      "issues": [],
+      "fields": {
+        "product_name": {
+          "literal": true,
+          "normalized": true
+        },
+        "brand": {
+          "literal": true,
+          "normalized": true
+        },
+        "manufacturer": {
+          "literal": true,
+          "normalized": true
+        },
+        "halal_mark_present": null
+      },
+      "verdict_correct": true,
+      "initial_status_correct": null
+    },
+    {
+      "case_id": "L27",
+      "schema_valid": true,
+      "error_present": false,
+      "issues": [],
+      "fields": {
+        "product_name": {
+          "literal": true,
+          "normalized": true
+        },
+        "brand": {
+          "literal": true,
+          "normalized": true
+        },
+        "manufacturer": {
+          "literal": true,
+          "normalized": true
+        },
+        "halal_mark_present": null
+      },
+      "verdict_correct": true,
+      "initial_status_correct": null
+    },
+    {
+      "case_id": "L28",
+      "schema_valid": true,
+      "error_present": false,
+      "issues": [],
+      "fields": {
+        "product_name": {
+          "literal": true,
+          "normalized": true
+        },
+        "brand": {
+          "literal": true,
+          "normalized": true
+        },
+        "manufacturer": {
+          "literal": true,
+          "normalized": true
+        },
+        "halal_mark_present": null
+      },
+      "verdict_correct": true,
+      "initial_status_correct": null
+    },
+    {
+      "case_id": "L29",
+      "schema_valid": true,
+      "error_present": false,
+      "issues": [],
+      "fields": {
+        "product_name": {
+          "literal": true,
+          "normalized": true
+        },
+        "brand": {
+          "literal": true,
+          "normalized": true
+        },
+        "manufacturer": {
+          "literal": true,
+          "normalized": true
+        },
+        "halal_mark_present": null
+      },
+      "verdict_correct": true,
+      "initial_status_correct": null
+    },
+    {
+      "case_id": "L30",
+      "schema_valid": true,
+      "error_present": false,
+      "issues": [],
+      "fields": {
+        "product_name": {
+          "literal": true,
+          "normalized": true
+        },
+        "brand": {
+          "literal": true,
+          "normalized": true
+        },
+        "manufacturer": {
+          "literal": true,
+          "normalized": true
+        },
+        "halal_mark_present": null
+      },
+      "verdict_correct": true,
+      "initial_status_correct": null
+    },
+    {
+      "case_id": "L31",
+      "schema_valid": true,
+      "error_present": false,
+      "issues": [],
+      "fields": {
+        "product_name": null,
+        "brand": {
+          "literal": true,
+          "normalized": true
+        },
+        "manufacturer": {
+          "literal": true,
+          "normalized": true
+        },
+        "halal_mark_present": {
+          "literal": true,
+          "normalized": true
+        }
+      },
+      "verdict_correct": true,
+      "initial_status_correct": null
+    },
+    {
+      "case_id": "L32",
+      "schema_valid": true,
+      "error_present": false,
+      "issues": [],
+      "fields": {
+        "product_name": {
+          "literal": true,
+          "normalized": true
+        },
+        "brand": {
+          "literal": true,
+          "normalized": true
+        },
+        "manufacturer": null,
+        "halal_mark_present": {
+          "literal": true,
+          "normalized": true
+        }
+      },
+      "verdict_correct": false,
+      "initial_status_correct": null
+    }
+  ],
+  "inputs": {
+    "expected_sha256": "1f72cd146709a4f8cdde6e3c08612346924ccdb67ba808da4ef80ce3754ef910",
+    "predictions_sha256": "81d345ae6b166d35106de2170efa5d03e84bcfa5b9baff1bded31b808bcabfb5"
+  }
+}

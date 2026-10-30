@@ -43,46 +43,72 @@ URLs/creators/licenses were not supplied; source files are not redistributed
 in this repository. Generated edits are not proof of source usage rights.
 
 Product name excludes separately printed quantity (for example 200 G).
-true means a visible generic halal mark; false means no visible mark on a
-fully visible label; null means the mark/field is hidden and cannot be read.
-Do not infer a hidden field from brand familiarity or packaging appearance.
+Commit ef451fd records the user's revised mark-target policy: true means a
+visible generic mark; null means no positive visible mark, covering both
+clearly absent marks (L25-L28) and hidden marks (L29-L30). The original plan
+preserves the previous false-for-absent convention. The production schema
+still accepts false; only evaluation targets changed. Hidden text remains
+null. Do not infer hidden fields from brand or packaging familiarity.
 
-## Rule dependency: required before task 4.3
+The legacy scorer calls all null-target matches unreadable_abstention.
+For this revision that includes four clearly absent marks, so the summary
+labels it null_target_match. mark_accuracy now covers present-mark targets
+only; it must not be described as accuracy on both present and absent marks.
 
-Targets follow API contract v0.2: R2 checks the product name and R6 checks the
-halal mark. Current branch rules still have v0.1 R2 and R1-R5 only. Do not
-rewrite expected answers to fit that older implementation. Missing v0.2 rules
-will give misleading verdict scores even if extraction is correct. The fixed
-fixture date is 2026-10-30; the unchanged active flour certificate expires on
-2026-11-30, so normal flour deliveries are expiring, not covered.
+## Rule compatibility and review
 
-No model inference, live accuracy, timings or repeatability results have been
-collected for this set. Human image/ground-truth approval remains pending;
-approving the initial editing style does not approve all 24 final cases.
+Production includes product-aware R2 and halal-mark R6. All 24 revised
+expected extractions produce the predeclared verdict, initial status and
+first failing rule. L11 stays Cocoa Powder, excluding quantity. Its previous
+quantity-in-name prediction remains an error rather than a revised target.
 
-## Review and run
+The original planned JSON is preserved. Integrity tests permit exactly the
+four mark corrections in commit ef451fd and reject other unrecorded changes.
+The user approved the corrected evaluation and requested a three-pass rerun.
+The committed expected-results file is kept byte-identical throughout this
+experiment, including preparation-era pending review metadata. Current
+approval and execution context are recorded separately in results notes.
+Member 1's independent sign-off is not claimed.
 
-Open review.html locally to inspect each image and its expected fields.
-Check spelling, readability, absent versus hidden marks, and absence of
-duplicate text revealing hidden fields. Obtain Member 1's verdict agreement.
-Record human sign-off only after it actually occurs, before collecting model
-predictions. Do not adjust ground truth to match predictions.
+## Run and summarize
 
-After the R2/R6 changes merge, collect three live runs with distinct output
-paths from the repository root (PowerShell):
+From the repository root in PowerShell, with RunPod credentials in .env:
 
 ```powershell
 $env:PYTHONPATH='src'
-uv run --env-file .env python tests/eval/collect_predictions.py --expected tests/eval/finals/expected_results.json --output tests/eval/finals/results/run-1-predictions.json
-uv run python tests/eval/run_eval.py --expected tests/eval/finals/expected_results.json --predictions tests/eval/finals/results/run-1-predictions.json --output tests/eval/finals/results/run-1-report.json
+foreach ($run in 1..3) {
+    $predictions = "tests/eval/finals/results/run-$run-predictions.json"
+    $report = "tests/eval/finals/results/run-$run-report.json"
+    uv run --env-file .env python tests/eval/collect_predictions.py --expected tests/eval/finals/expected_results.json --output $predictions
+    if ($LASTEXITCODE -ne 0) { throw "Collection failed: run $run" }
+    uv run python tests/eval/run_eval.py --expected tests/eval/finals/expected_results.json --predictions $predictions --output $report
+    if ($LASTEXITCODE -ne 0) { throw "Scoring failed: run $run" }
+}
+uv run python tests/eval/summarize_runs.py --expected tests/eval/finals/expected_results.json --predictions tests/eval/finals/results/run-1-predictions.json tests/eval/finals/results/run-2-predictions.json tests/eval/finals/results/run-3-predictions.json --output-dir tests/eval/finals/results
 ```
 
-Repeat for run-2 and run-3. The collector disables the demo cache. Report
-extraction, verdicts, null abstention, failed requests and per-case verdict
-consistency separately. The collector tests extraction plus offline rules,
-not the full delivery API or supervisor workflow, and it does not provide
-per-check timing measurements. Keep the original eight-image results separate
-from finals results and include dataset IDs/denominators in the report.
+The collector disables cache and retries, saves each completed case, and
+refuses to overwrite predictions. An interrupted run has completed_at=null;
+retain it and select a fresh output path for another run. The summary requires
+three distinct completed run IDs, matching expected/image hashes and matching
+model/prompt/code hashes. Three matching failures earn no consistency credit.
+Failed requests remain in the verdict denominator.
+
+Per-image extraction_seconds includes preprocessing, client setup, network,
+queue/cold-start wait, inference and response validation, excluding file read.
+rules_seconds measures offline rules separately. Successful and failed
+requests have separate latency populations; p95 uses nearest rank. These are
+not complete delivery API or supervisor workflow timings. Initial application
+status is not measured. The original eight-photo batch had no per-image model
+latency; manual-check timing is a different measurement.
+
+Reports: [combined Markdown](results/summary.md),
+[combined JSON](results/summary.json), and
+[execution context](results/execution-notes.md).
+Raw predictions and individual reports are retained alongside these.
+24 cases repeated three times are 72 attempts, not independent photographs.
+This is a development/regression rerun following target revision after earlier
+outputs were seen; no untouched holdout or real delivery accuracy is claimed.
 
 ## Asset preparation validation
 
