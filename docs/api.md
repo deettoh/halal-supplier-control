@@ -24,7 +24,7 @@ backend validates that person against both role and tenant; mismatch gives
 
 This branch implements named identities, enriched logs and Hold only. Expiry
 checking remains deferred and contract/OpenAPI versions stay 0.1.0 pending
-full v0.2 completion. See [phase-1 integration and seed handoff](backend-v02-phase1-handoff.md).
+full v0.2 completion.
 
 
 ## Routes under `/api`
