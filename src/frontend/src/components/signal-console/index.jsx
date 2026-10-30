@@ -41,9 +41,11 @@ export default function LandingScene() {
     progressRef = useRef({ value: 0 }),
     invalidateRef = useRef(() => {}),
     controller = useRef(),
+    layoutRef = useRef({}),
     engaged = useRef(false);
   const [stage, setStage] = useState(0),
     [field, setField] = useState("brand"),
+    [rule, setRule] = useState("R2"),
     [playing, setPlaying] = useState(false),
     [held, setHeld] = useState(false);
   const [less, setLess] = useState(() => mediaReduced() || storedReduced());
@@ -78,6 +80,7 @@ export default function LandingScene() {
       controller.current = createSceneController({
         root: root.current,
         progressRef,
+        layoutRef,
         invalidate: () => invalidateRef.current(),
         onStageChange: setStage,
         onPlaybackChange: setPlaying,
@@ -100,6 +103,11 @@ export default function LandingScene() {
     engaged.current = true;
     controller.current?.pause();
     setField(value);
+  }
+  function selectRule(value) {
+    engaged.current = true;
+    controller.current?.pause();
+    setRule(value);
   }
   function toggleMotion() {
     if (mediaReduced() || forcedStatic) return;
@@ -181,8 +189,11 @@ export default function LandingScene() {
                 <SceneCanvas
                   progressRef={progressRef}
                   invalidateRef={invalidateRef}
+                  layoutRef={layoutRef}
                   selectedField={field}
                   onSelect={selectField}
+                  selectedRule={rule}
+                  onSelectRule={selectRule}
                   onStarted={onStarted}
                   onReady={onReady}
                   onFailure={onFailure}
@@ -192,7 +203,12 @@ export default function LandingScene() {
           </div>
         )}
         {(!can3D || !ready) && (
-          <SceneFallback selectedField={field} onSelect={selectField} />
+          <SceneFallback
+            selectedField={field}
+            onSelect={selectField}
+            selectedRule={rule}
+            onSelectRule={selectRule}
+          />
         )}
         <div
           className={"decision-drawer " + (held ? "confirmed" : "")}
@@ -253,10 +269,13 @@ export default function LandingScene() {
             {stage === 1
               ? "Select a field to compare the reading with the approved material."
               : stage === 2
-                ? "The first non-passing rule explains the review."
+                ? "Select a check to see its reason."
                 : stage === 3
                   ? "The supervisor records a reason and a next step."
                   : "Illustrative SAMPLE journey. No live records change."}
+          </span>
+          <span className="scene-disclosure">
+            Prepared SAMPLE · No live model call or record changes.
           </span>
         </div>
         <div

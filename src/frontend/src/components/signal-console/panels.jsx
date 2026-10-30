@@ -1,11 +1,5 @@
 import React from "react";
-import {
-  Camera,
-  FileText,
-  ListChecks,
-  ChevronRight,
-  CircleAlert,
-} from "lucide-react";
+import { Camera, FileText, ListChecks, ChevronRight } from "lucide-react";
 import data from "../../lib/preview/data.json";
 export const sampleCase = data.cases.find((c) => c.id === "alt-brand");
 export const sampleDelivery = sampleCase.responses["6"];
@@ -31,6 +25,8 @@ export function EvidencePlane({
   kind,
   selectedField = "brand",
   onSelect = () => {},
+  selectedRule = "R2",
+  onSelectRule = () => {},
   inCanvas = false,
 }) {
   const Icon =
@@ -42,6 +38,9 @@ export function EvidencePlane({
         ? "The reading"
         : "The checks";
   const selected = fields[selectedField];
+  const check =
+    sampleDelivery.rule_results.find((r) => r.rule === selectedRule) ??
+    sampleDelivery.rule_results[1];
   return (
     <article
       data-kind={kind}
@@ -58,6 +57,9 @@ export function EvidencePlane({
             : kind === "reading"
               ? "Model"
               : "Rules"}
+          {kind === "rules" && (
+            <span className="rule-result">Substitution</span>
+          )}
         </span>
       </div>
       {kind === "source" ? (
@@ -111,49 +113,49 @@ export function EvidencePlane({
                   : "The manufacturer matches. The brand still differs."}
             </p>
           </div>
-          <div className="reading-foot">
-            <span className="small-dot" />
-            Prepared example. No live model call.
-          </div>
         </>
       ) : (
         <>
           <ol className="rule-list">
             {sampleDelivery.rule_results.map((rule) => (
-              <li
-                key={rule.rule}
-                className={rule.rule === "R2" ? "rule-highlight" : ""}
-                title={rule.detail}
-              >
-                <span className="rule-id">{rule.rule}</span>
-                <span>{ruleNames[rule.rule]}</span>
-                <span
+              <li key={rule.rule}>
+                <button
+                  type="button"
                   className={
-                    "rule-state " + (rule.passed === true ? "pass" : "review")
+                    "rule-row " +
+                    (rule.rule === check.rule ? "rule-highlight" : "")
                   }
+                  aria-pressed={rule.rule === check.rule}
+                  aria-label={`${rule.rule} ${ruleNames[rule.rule]} ${rule.passed === true ? "Pass" : rule.passed === false ? "Review" : "Not read"}`}
+                  onClick={() => onSelectRule(rule.rule)}
                 >
-                  {rule.passed === true
-                    ? "Pass"
-                    : rule.passed === false
-                      ? "Review"
-                      : "Not read"}
-                </span>
+                  <span className="rule-id">{rule.rule}</span>
+                  <span>{ruleNames[rule.rule]}</span>
+                  <span
+                    className={
+                      "rule-state " + (rule.passed === true ? "pass" : "review")
+                    }
+                  >
+                    {rule.passed === true
+                      ? "Pass"
+                      : rule.passed === false
+                        ? "Review"
+                        : "Not read"}
+                  </span>
+                </button>
               </li>
             ))}
           </ol>
-          <div className="rule-outcome">
-            <span className="outline-dot" />
-            <div>
-              <strong>Substitution</strong>
-              <span>First issue: the brand differs.</span>
-            </div>
-            <CircleAlert aria-hidden="true" />
+          <div
+            className="rule-detail"
+            role="status"
+            aria-label="Selected check reason"
+          >
+            <strong>
+              {check.rule} · {ruleNames[check.rule]}
+            </strong>
+            <p>{check.detail}</p>
           </div>
-          <p className="rule-footnote">
-            Illustrative SAMPLE journey.
-            <br />
-            Checks prepared with the production rules.
-          </p>
         </>
       )}
     </article>

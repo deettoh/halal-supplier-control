@@ -2,9 +2,15 @@ import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { ScrollToPlugin } from "gsap/ScrollToPlugin";
 import { scenePose } from "./scene-pose.js";
+import {
+  fitSceneBounds,
+  fallbackSceneBounds,
+  sceneSpace,
+} from "./scene-layout.js";
 export function createSceneController({
   root,
   progressRef,
+  layoutRef = { current: {} },
   invalidate,
   onStageChange,
   onPlaybackChange,
@@ -26,7 +32,22 @@ export function createSceneController({
     w = stage.clientWidth;
     h = stage.clientHeight;
     mobile = w <= 760;
+    const heading = root.querySelector(".scene-heading");
+    layoutRef.current = {
+      heading,
+      headingHeight: heading.offsetHeight || 80,
+      controlsTop: root.querySelector(".scene-controls")?.offsetTop || h * 0.72,
+      drawerHeight: root.querySelector(".decision-drawer")?.offsetHeight || 0,
+    };
+    // Anchor the decision above the complete control group, including its note.
+    // A percentage alone overlaps controls as their copy wraps or viewport shrinks.
+    const drawer = root.querySelector(".decision-drawer");
+    if (drawer)
+      drawer.style.bottom = reducedMotion
+        ? ""
+        : `${h - layoutRef.current.controlsTop + 20}px`;
   }
+  measure();
   function render() {
     if (destroyed) return;
     const p = progressRef.current.value,
@@ -64,7 +85,6 @@ export function createSceneController({
       el.inert = pose.copyAway > 0.9;
     });
     heading.style.opacity = pose.heading;
-    heading.style.transform = `translateY(${(1 - pose.heading) * 16}px)`;
     drawer.style.opacity = pose.decision;
     drawer.style.transform = `translate(-50%,${(1 - pose.decision) * 24}px)`;
     drawer.inert = pose.decision < 0.95;
@@ -86,7 +106,7 @@ export function createSceneController({
         Math.min((w * 0.77) / 300, (h * 0.43) / 438) *
         (1 - pose.decision * 0.12);
     const x = mobile ? 0 : w * 0.202 * (1 - pose.expand);
-    const y = mobile
+    let y = mobile
       ? h * 0.04 +
         (-h * 0.065 - h * 0.04) * pose.expand -
         pose.decision * h * 0.09
@@ -94,6 +114,19 @@ export function createSceneController({
         h * 0.005 * pose.expand -
         pose.open * h * 0.1 -
         pose.decision * h * 0.07;
+    if (pose.heading > 0) {
+      const bounds = fallbackSceneBounds(pose, { h, scale, y, mobile });
+      const layout = layoutRef.current;
+      const fit = fitSceneBounds(bounds, sceneSpace(layout, pose));
+      const amount = 1 + (fit.scale - 1) * pose.heading;
+      const origin = h * (mobile ? 0.53 : 0.51) + y;
+      y +=
+        ((bounds.top + bounds.bottom) / 2 - origin) * (1 - amount) +
+        fit.shift * pose.heading;
+      scale *= amount;
+      const fitted = fallbackSceneBounds(pose, { h, scale, y, mobile });
+      heading.style.transform = `translate3d(0,${Math.max(12, fitted.top - layout.headingHeight - 24)}px,0)`;
+    }
     position.style.transform = `translate(-50%,-50%) translate3d(${x}px,${y}px,0) scale(${scale})`;
     world.style.transform = `rotateX(${pose.rotation[0]}deg) rotateY(${pose.rotation[1]}deg) rotateZ(${pose.rotation[2]}deg)`;
     [
@@ -248,6 +281,21 @@ export function createSceneController({
     window.addEventListener(type, interrupt, { passive: true }),
   );
   document.addEventListener("visibilitychange", hidden);
+  const observer =
+    typeof ResizeObserver === "undefined"
+      ? null
+      : new ResizeObserver(() => {
+          measure();
+          render();
+        });
+  [
+    stage,
+    root.querySelector(".scene-heading"),
+    root.querySelector(".scene-controls"),
+    root.querySelector(".decision-drawer"),
+  ]
+    .filter(Boolean)
+    .forEach((el) => observer?.observe(el));
   render();
   return {
     goToStage,
@@ -255,6 +303,8 @@ export function createSceneController({
     pause,
     destroy() {
       destroyed = true;
+      observer?.disconnect();
+      root.querySelector(".decision-drawer").style.bottom = "";
       root.style.removeProperty("--scan-progress");
       root.style.removeProperty("--scan-opacity");
       if (canScroll)

@@ -1,6 +1,11 @@
 import React from "react";
 import { EvidencePlane } from "./panels.jsx";
-export function SceneFallback({ selectedField, onSelect }) {
+export function SceneFallback({
+  selectedField,
+  onSelect,
+  selectedRule,
+  onSelectRule,
+}) {
   return (
     <div className="sc-fallback">
       <div className="console-position">
@@ -20,6 +25,8 @@ export function SceneFallback({ selectedField, onSelect }) {
               kind={kind}
               selectedField={selectedField}
               onSelect={onSelect}
+              selectedRule={selectedRule}
+              onSelectRule={onSelectRule}
             />
           ))}
           <div className="console-foot">

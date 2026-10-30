@@ -1,23 +1,25 @@
 import React, { Suspense, useMemo, useRef, useEffect } from "react";
 import { Canvas, useFrame, useLoader, useThree } from "@react-three/fiber";
-import { Html } from "@react-three/drei/web/Html";
 import { GLTFLoader } from "three/addons/loaders/GLTFLoader.js";
-import { MathUtils, PCFShadowMap } from "three";
+import { MathUtils, PCFShadowMap, Vector3, Matrix4 } from "three";
 import { scenePose } from "./scene-pose.js";
+import { fitSceneBounds, cssPlaneMatrix, sceneSpace } from "./scene-layout.js";
 import { EvidencePlane } from "./panels.jsx";
 
 function ConsoleModel({
   progressRef,
   invalidateRef,
-  selectedField,
-  onSelect,
+  layoutRef,
+  panelRefs,
   onReady,
   onFailure,
 }) {
   const gltf = useLoader(GLTFLoader, "/media/signal-console.glb");
-  const root = useRef(),
-    htmlGroups = useRef({});
+  const root = useRef();
   const { viewport, size, camera, invalidate, gl } = useThree();
+  const point = useMemo(() => new Vector3(), []);
+  const projection = useMemo(() => new Matrix4(), []);
+  const local = useMemo(() => new Matrix4(), []);
   const model = useMemo(() => {
     const clone = gltf.scene.clone(true);
     clone.traverse((o) => {
@@ -30,6 +32,15 @@ function ConsoleModel({
     });
     return clone;
   }, [gltf.scene]);
+  const trays = useMemo(
+    () =>
+      ["Shell", "Edge", "PhotoTray", "ReadingTray", "RulesTray"].map((name) => {
+        const mesh = model.getObjectByName(name);
+        mesh.geometry.computeBoundingBox();
+        return mesh;
+      }),
+    [model],
+  );
   useEffect(() => {
     invalidateRef.current = invalidate;
     gl.domElement.setAttribute("aria-hidden", "true");
@@ -77,16 +88,10 @@ function ConsoleModel({
       ["source", "PhotoTray", "photo"],
       ["reading", "ReadingTray", "reading"],
       ["rules", "RulesTray", "rules"],
-    ].forEach(([kind, node, key]) => {
+    ].forEach(([, node, key]) => {
       const position = pose[key];
       const object = model.getObjectByName(node);
       if (object) object.position.set(...position);
-      if (htmlGroups.current[kind])
-        htmlGroups.current[kind].position.set(
-          position[0],
-          position[1],
-          position[2] + 0.055,
-        );
     });
     ["Shell", "Edge"].forEach((name) => {
       const o = model.getObjectByName(name);
@@ -94,64 +99,133 @@ function ConsoleModel({
         o.material.opacity = 1 - pose.open * (name === "Shell" ? 0.92 : 0.62);
     });
     root.current.updateWorldMatrix(true, true);
+    function bounds() {
+      let top = Infinity,
+        bottom = -Infinity;
+      for (const mesh of trays) {
+        const { min, max } = mesh.geometry.boundingBox;
+        for (const x of [min.x, max.x])
+          for (const y of [min.y, max.y])
+            for (const z of [min.z, max.z]) {
+              point.set(x, y, z).applyMatrix4(mesh.matrixWorld).project(camera);
+              const py = ((1 - point.y) * size.height) / 2;
+              top = Math.min(top, py);
+              bottom = Math.max(bottom, py);
+            }
+      }
+      return { top, bottom };
+    }
+    const layout = layoutRef.current;
+    if (pose.heading > 0 && layout.heading) {
+      const space = sceneSpace(layout, pose);
+      // Perspective changes the apparent bounds of each tray. Resolve against
+      // their projected corners, so copy and controls never share their space.
+      for (let pass = 0; pass < 3; pass++) {
+        const fit = fitSceneBounds(bounds(), space);
+        root.current.scale.multiplyScalar(1 + (fit.scale - 1) * pose.heading);
+        root.current.updateWorldMatrix(true, true);
+        const shifted = fitSceneBounds(bounds(), space);
+        root.current.position.y -=
+          (shifted.shift * pose.heading * view.height) / size.height;
+        root.current.updateWorldMatrix(true, true);
+      }
+      layout.heading.style.transform = `translate3d(0,${Math.max(12, bounds().top - layout.headingHeight - 24)}px,0)`;
+    }
+    // A single projective transform keeps normal HTML, its painted pixels and
+    // browser hit targets together. Nested CSS perspective contexts can disagree
+    // about hit geometry (especially under browser zoom).
+    [
+      ["source", "PhotoTray", 298],
+      ["reading", "ReadingTray", 286],
+      ["rules", "RulesTray", 310],
+    ].forEach(([kind, name, width]) => {
+      const element = panelRefs.current[kind];
+      if (!element) return;
+      local.set(
+        0.01,
+        0,
+        0,
+        -width / 200,
+        0,
+        -0.01,
+        0,
+        2.19,
+        0,
+        0,
+        1,
+        0.055,
+        0,
+        0,
+        0,
+        1,
+      );
+      projection
+        .copy(camera.projectionMatrix)
+        .multiply(camera.matrixWorldInverse)
+        .multiply(model.getObjectByName(name).matrixWorld)
+        .multiply(local);
+      const matrix = cssPlaneMatrix(projection, size);
+      element.style.transform = `matrix3d(${matrix.join(",")})`;
+    });
   }, -1);
   return (
     <group ref={root}>
       <primitive object={model} dispose={null} />
-      {["source", "reading", "rules"].map((kind) => (
-        <group
-          ref={(el) => {
-            htmlGroups.current[kind] = el;
-          }}
-          key={kind}
-        >
-          <Html
-            transform
-            distanceFactor={4}
-            zIndexRange={[20, 5]}
-            wrapperClass="sc-html-host"
-          >
-            <EvidencePlane
-              kind={kind}
-              selectedField={selectedField}
-              onSelect={onSelect}
-              inCanvas
-            />
-          </Html>
-        </group>
-      ))}
     </group>
   );
 }
 export default function SceneCanvas(props) {
+  const panelRefs = useRef({});
   return (
-    <Canvas
-      frameloop="demand"
-      dpr={[1, 1.5]}
-      shadows={{ type: PCFShadowMap }}
-      camera={{ position: [0, 0, 12], fov: 35, near: 0.1, far: 60 }}
-      gl={{ alpha: true, antialias: true, powerPreference: "low-power" }}
-      onCreated={({ gl }) => {
-        gl.setClearAlpha(0);
-        props.onStarted?.();
-      }}
-    >
-      <ambientLight intensity={1.8} />
-      <directionalLight
-        position={[-4, 6, 9]}
-        intensity={2.8}
-        castShadow
-        shadow-mapSize={[1024, 1024]}
-        shadow-bias={-0.0003}
-      />
-      <directionalLight position={[5, -2, 5]} intensity={0.6} />
-      <mesh position={[0, -0.05, -0.6]} receiveShadow>
-        <planeGeometry args={[25, 15]} />
-        <shadowMaterial transparent opacity={0.13} />
-      </mesh>
-      <Suspense fallback={null}>
-        <ConsoleModel {...props} />
-      </Suspense>
-    </Canvas>
+    <>
+      <Canvas
+        frameloop="demand"
+        dpr={[1, 1.5]}
+        shadows={{ type: PCFShadowMap }}
+        camera={{ position: [0, 0, 12], fov: 35, near: 0.1, far: 60 }}
+        gl={{ alpha: true, antialias: true, powerPreference: "low-power" }}
+        onCreated={({ gl }) => {
+          gl.setClearAlpha(0);
+          props.onStarted?.();
+        }}
+      >
+        <ambientLight intensity={1.8} />
+        <directionalLight
+          position={[-4, 6, 9]}
+          intensity={2.8}
+          castShadow
+          shadow-mapSize={[1024, 1024]}
+          shadow-bias={-0.0003}
+        />
+        <directionalLight position={[5, -2, 5]} intensity={0.6} />
+        <mesh position={[0, -0.05, -0.6]} receiveShadow>
+          <planeGeometry args={[25, 15]} />
+          <shadowMaterial transparent opacity={0.13} />
+        </mesh>
+        <Suspense fallback={null}>
+          <ConsoleModel {...props} panelRefs={panelRefs} />
+        </Suspense>
+      </Canvas>
+      <div className="sc-panel-layer">
+        {["source", "reading", "rules"].map((kind) => (
+          <div
+            key={kind}
+            className="sc-html-host sc-projected-plane"
+            ref={(el) => {
+              panelRefs.current[kind] = el;
+            }}
+          >
+            <EvidencePlane
+              kind={kind}
+              selectedField={props.selectedField}
+              onSelect={props.onSelect}
+              selectedRule={props.selectedRule}
+              onSelectRule={props.onSelectRule}
+              inCanvas
+            />
+          </div>
+        ))}
+      </div>
+    </>
   );
 }
