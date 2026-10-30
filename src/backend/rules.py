@@ -1,4 +1,5 @@
 import json
+import re
 from collections.abc import Mapping
 from datetime import date, datetime
 from typing import TypedDict
@@ -18,6 +19,7 @@ RECOGNISED_ISSUERS = {"sample food certification council"}
 
 MATCH_THRESHOLD = 90
 EXPIRY_WARNING_DAYS = 60
+PACK_SIZE = re.compile(r"\s+\d+(?:[.,]\d+)?\s*(?:kg|mg|g|ml|l)$")
 
 
 class RuleCheck(TypedDict):
@@ -36,6 +38,11 @@ def normalize(value: object) -> str:
     if not isinstance(value, str):
         return ""
     return " ".join(value.casefold().split())
+
+
+def product_key(value: object) -> str:
+    """Normalize a product name and drop a trailing pack size."""
+    return PACK_SIZE.sub("", normalize(value))
 
 
 def parse_date(value: object) -> date | None:
@@ -91,7 +98,7 @@ def _approved_item_check(
     )
 
     failures: list[str] = []
-    if normalize(product) != normalize(approved_name):
+    if product_key(product) != product_key(approved_name):
         failures.append(
             f'Product mismatch: label says "{product}", '
             f'approved material is "{approved_name}".'
@@ -193,10 +200,10 @@ def evaluate(
     scope = parse_scope(certificate.get("scope"))
 
     if r1:
-        product = normalize(label_fields["product_name"])
+        product = product_key(label_fields["product_name"])
         brand = normalize(label_fields["brand"])
         r3 = any(
-            normalize(item.product_name) == product
+            product_key(item.product_name) == product
             and (item.brand is None or normalize(item.brand) == brand)
             for item in scope
         )
