@@ -281,7 +281,8 @@ Proof of use: [`submission/SDC2026_READMElater_Runpod_POU.pdf`](submission/SDC20
 ## Future improvements
 
 - Pre-fill the renewal form from a certificate photo. The route
-  `POST /api/certificates/extract` is defined but returns 501.
+  `POST /api/certificates/extract` reads the photo, but the form doesn't
+  call it yet.
 - Take certificates from suppliers and label photos from staff through
   WhatsApp with the Meta Cloud API.
 - Check each certificate against Verify Halal or MYeHALAL.

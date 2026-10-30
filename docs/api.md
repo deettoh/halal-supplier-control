@@ -33,7 +33,7 @@ that person's role and tenant don't match the other two headers.
 | GET | `/api/activity` | supervisor | - | 200, the SME's activity log, newest first |
 | GET | `/api/certificates` | supplier | - | 200, the supplier's active, superseded, pending and rejected certificates |
 | POST | `/api/certificates` | supplier | multipart `issuer`, `cert_no`, `holder_name`, `expiry_date`, `scope`, optional `image` | 201, the pending renewal |
-| POST | `/api/certificates/extract` | supplier | multipart `image` | 501, not implemented |
+| POST | `/api/certificates/extract` | supplier | multipart `image` | 200, either the certificate fields from the photo or a null `extracted` with an `error` message |
 | GET | `/api/deliveries/{id}/image` | staff, supervisor | - | 200, JPEG of the SME's delivery photo |
 | GET | `/api/certificates/{id}/image` | staff, supervisor, supplier, reviewer | - | 200, JPEG for the owning supplier, a linked SME or the registry reviewer |
 | GET | `/api/registry/renewals` | reviewer | - | 200, pending renewals, oldest first, each with the current certificate and the supplier name |
@@ -56,7 +56,6 @@ response.
 | 409 | A decision on a delivery already decided or still being checked, a second pending renewal, or a decision on a renewal already reviewed |
 | 413 | Upload larger than 10 MiB |
 | 422 | Missing or invalid headers, fields or image |
-| 501 | `POST /api/certificates/extract` |
 | 503 | Database unavailable |
 
 A request rejected with 403, 404, 413 or 422 writes no records and no activity
@@ -159,9 +158,9 @@ for a decision, and a decision row has the reviewer's note as its `reason`.
 
 ## Photos are stored and served as JPEG
 
-The upload routes accept PNG or JPEG. `backend.images` stores each upload as
-JPEG at quality 85 with full resolution, upright orientation and transparency
-flattened onto white. The model gets the same encoding resized so the longest
-side is at most 1280 pixels. The image routes return `image/jpeg` with
-`no-store` and `nosniff` headers. They need the demo headers, so a browser
-fetches each image and displays it through an object URL.
+The upload routes accept PNG or JPEG. `backend.images` stores each delivery or
+renewal photo as JPEG at quality 85 with full resolution, upright orientation
+and transparency flattened onto white. The model gets the same encoding resized
+so the longest side is at most 1280 pixels. The image routes return
+`image/jpeg` with `no-store` and `nosniff` headers. They need the demo headers,
+so a browser fetches each image and displays it through an object URL.
