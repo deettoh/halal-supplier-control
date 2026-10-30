@@ -17,9 +17,11 @@ from sqlalchemy import (
     CheckConstraint,
     Date,
     DateTime,
+    Float,
     ForeignKey,
     ForeignKeyConstraint,
     Index,
+    Integer,
     LargeBinary,
     String,
     Text,
@@ -45,7 +47,7 @@ BUSINESS_TIMEZONE = ZoneInfo("Asia/Kuala_Lumpur")
 ACTIVITY_ACTION_CHECK = (
     "action IN ('auto_accepted', 'pending_review', 'accepted', "
     "'rejected', 'certificate_renewed', 'certificate_submitted', "
-    "'certificate_rejected')"
+    "'certificate_rejected', 'on_hold')"
 )
 
 
@@ -67,6 +69,26 @@ class Supplier(Base):
 
     id: Mapped[int] = mapped_column(primary_key=True)
     name: Mapped[str] = mapped_column(String(200))
+
+
+class SMESettings(Base):
+    """One persisted rule policy per SME, using its existing tenant name."""
+
+    __tablename__ = "sme_settings"
+    __table_args__ = (
+        CheckConstraint("length(trim(tenant)) > 0", name="ck_settings_tenant"),
+        CheckConstraint(
+            "match_threshold >= 0 AND match_threshold <= 100",
+            name="ck_settings_threshold",
+        ),
+        CheckConstraint("expiry_warning_days >= 0", name="ck_settings_window"),
+    )
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    tenant: Mapped[str] = mapped_column(String(100), unique=True)
+    recognised_issuers: Mapped[list[str]] = mapped_column(JSON)
+    match_threshold: Mapped[float] = mapped_column(Float)
+    expiry_warning_days: Mapped[int] = mapped_column(Integer)
 
 
 class Person(Base):
@@ -170,14 +192,21 @@ class Delivery(Base):
         ),
         CheckConstraint(
             "status IN ('auto_accepted', 'pending_review', "
-            "'accepted', 'rejected')",
+            "'accepted', 'rejected', 'on_hold')",
             name="ck_delivery_status",
         ),
         CheckConstraint(
-            "status NOT IN ('accepted', 'rejected') OR "
+            "status NOT IN ('accepted', 'rejected', 'on_hold') OR "
             "(decided_by IS NOT NULL AND length(trim(decided_by)) > 0 "
             "AND reason IS NOT NULL AND length(trim(reason)) > 0)",
             name="ck_delivery_decision_reason",
+        ),
+        CheckConstraint(
+            "(status = 'on_hold' AND next_step IS NOT NULL AND "
+            "next_step IN ('request_certificate', "
+            "'request_product_details')) OR "
+            "(status <> 'on_hold' AND next_step IS NULL)",
+            name="ck_delivery_next_step",
         ),
         Index("ix_delivery_tenant_status", "tenant", "status"),
     )
@@ -196,6 +225,9 @@ class Delivery(Base):
     verdict: Mapped[str] = mapped_column(String(30))
     status: Mapped[str] = mapped_column(String(30))
     error: Mapped[str | None] = mapped_column(Text)
+    next_step: Mapped[str | None] = mapped_column(String(40))
+    received_by: Mapped[str | None] = mapped_column(String(200))
+    received_title: Mapped[str | None] = mapped_column(String(200))
     decided_by: Mapped[str | None] = mapped_column(String(200))
     reason: Mapped[str | None] = mapped_column(Text)
     created_at: Mapped[datetime] = mapped_column(
@@ -222,6 +254,10 @@ class ActivityLog(Base):
 
     id: Mapped[int] = mapped_column(primary_key=True)
     tenant: Mapped[str] = mapped_column(String(100))
+    actor_title: Mapped[str | None] = mapped_column(String(200))
+    material_name: Mapped[str | None] = mapped_column(String(200))
+    verdict: Mapped[str | None] = mapped_column(String(30))
+    supplier_name: Mapped[str | None] = mapped_column(String(200))
     actor: Mapped[str] = mapped_column(String(200))
     role: Mapped[str] = mapped_column(String(30))
     action: Mapped[str] = mapped_column(String(100))
@@ -422,6 +458,72 @@ def _upgrade_renewal_review(connection: Connection) -> None:
             index.create(connection, checkfirst=True)
 
 
+def _upgrade_identity_hold(connection: Connection) -> None:
+    """Add nullable metadata without fabricating historical identities."""
+    if connection.dialect.name != "postgresql":
+        return
+    schema = database_schema(connection)
+    for table_name, names in {
+        "deliveries": ("next_step", "received_by", "received_title"),
+        "activity_log": (
+            "actor_title",
+            "material_name",
+            "verdict",
+            "supplier_name",
+        ),
+    }.items():
+        present = {
+            c["name"]
+            for c in inspect(connection).get_columns(table_name, schema)
+        }
+        table = qualified_table_name(connection, table_name)
+        for name in names:
+            if name not in present:
+                definition = str(
+                    CreateColumn(
+                        Base.metadata.tables[table_name].c[name]
+                    ).compile(dialect=connection.dialect)
+                )
+                connection.execute(
+                    text(f"ALTER TABLE {table} ADD COLUMN {definition}")
+                )
+    for table_name, constraint in (
+        ("deliveries", "ck_delivery_status"),
+        ("deliveries", "ck_delivery_next_step"),
+        ("deliveries", "ck_delivery_decision_reason"),
+        ("activity_log", "ck_activity_action"),
+    ):
+        table = qualified_table_name(connection, table_name)
+        existing = next(
+            (
+                c
+                for c in inspect(connection).get_check_constraints(
+                    table_name, schema
+                )
+                if c["name"] == constraint
+            ),
+            None,
+        )
+        if existing is not None and "on_hold" in existing["sqltext"]:
+            continue
+        if existing:
+            connection.execute(
+                text(f"ALTER TABLE {table} DROP CONSTRAINT {constraint}")
+            )
+        model_constraint = next(
+            c
+            for c in Base.metadata.tables[table_name].constraints
+            if c.name == constraint
+        )
+        assert isinstance(model_constraint, CheckConstraint)
+        connection.execute(
+            text(
+                f"ALTER TABLE {table} ADD CONSTRAINT {constraint} "
+                f"CHECK ({model_constraint.sqltext})"
+            )
+        )
+
+
 def _initialize_schema(connection: Connection) -> None:
     lock_startup(connection)
     Base.metadata.create_all(connection)
@@ -446,6 +548,7 @@ def _initialize_schema(connection: Connection) -> None:
             )
     _upgrade_activity_actions(connection)
     _upgrade_renewal_review(connection)
+    _upgrade_identity_hold(connection)
 
 
 def init_db(engine: Engine | Connection | None = None) -> None:

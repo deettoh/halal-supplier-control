@@ -4,11 +4,12 @@ The app stores its records and photos in PostgreSQL through SQLAlchemy. The
 models and the session helpers are in `src/backend/db.py`, and the API models
 in `src/backend/schemas.py` are defined separately.
 
-## Six tables hold the data
+## Seven tables hold the data
 
 | Table | Contents | Scope |
 |---|---|---|
 | `people` | Fictional name, title, role and tenant | Demo identities |
+| `sme_settings` | Recognised issuers, matching threshold and expiry warning days | One unique policy per SME tenant |
 | `suppliers` | Supplier IDs and names | Shared by every SME |
 | `certificates` | Issuer, number, holder, expiry, scope, photo and version status | Shared, one active row per supplier |
 | `materials` | Approved product, supplier, brand and manufacturer | One SME (`tenant`) |
@@ -67,6 +68,8 @@ With `DATABASE_URL` set, the app does this before serving requests:
    or data.
 2. Loads `src/seed/seed.json` into tables that are still empty. The format is
    in [the seed README](../src/seed/README.md).
+   For `sme_settings`, it inserts only missing tenant policies, even if the
+   table already has other SMEs. Existing policy values are never overwritten.
 3. Fills missing certificate photos from the seed PNGs and converts any
    stored PNG photos to JPEG.
 
@@ -80,7 +83,7 @@ startup fails.
 
 ## Reset the demo data
 
-The reset replaces the data in all six tables with `src/seed/seed.json`,
+The reset replaces the data in all seven tables with `src/seed/seed.json`,
 for both SMEs and every supplier. Uploads, decisions, renewals and the
 activity log are removed. Stop the app first, then run from the repo root:
 

@@ -40,6 +40,7 @@ PNG = (Path(__file__).parent / "fixtures/synthetic_label.png").read_bytes()
         "certificate_renewed",
         "certificate_submitted",
         "certificate_rejected",
+        "on_hold",
         "cert_renewed",
         "delivery_checked",
         "invented",
@@ -63,6 +64,7 @@ def test_activity_action_contract_and_seed(action: str) -> None:
         "certificate_renewed",
         "certificate_submitted",
         "certificate_rejected",
+        "on_hold",
     }
     for model, values in (
         (ActivityResponse, payload),
@@ -88,6 +90,7 @@ def test_openapi_lists_supported_activity_actions() -> None:
         "certificate_renewed",
         "certificate_submitted",
         "certificate_rejected",
+        "on_hold",
     }
 
 
@@ -100,6 +103,26 @@ def contract_database() -> Generator[None, None, None]:
         poolclass=StaticPool,
     )
     db.init_db(engine)
+    with Session(engine) as people:
+        people.add_all(
+            [
+                db.Person(
+                    id=1,
+                    name="Aina",
+                    title="Receiving staff",
+                    role="staff",
+                    tenant="bakery",
+                ),
+                db.Person(
+                    id=2,
+                    name="Farid",
+                    title="Halal supervisor",
+                    role="supervisor",
+                    tenant="bakery",
+                ),
+            ]
+        )
+        people.commit()
     with Session(engine) as seeded:
         seeded.add(
             db.Person(
@@ -127,7 +150,11 @@ def contract_database() -> Generator[None, None, None]:
 def headers(role: str = "supervisor") -> dict[str, str]:
     return {
         "X-Demo-Role": role,
-        "X-Demo-Person": "5",
+        "X-Demo-Person": {
+            "supplier": "5",
+            "staff": "1",
+            "supervisor": "2",
+        }.get(role, "7"),
         "X-Demo-Tenant": "1" if role == "supplier" else "bakery",
     }
 
@@ -432,7 +459,8 @@ def test_openapi_documents_business_and_registry_routes() -> None:
         (path, method)
         for path, methods in spec["paths"].items()
         for method in methods
-        if path != "/api/health" and not path.endswith("/image")
+        if path not in {"/api/health", "/api/people"}
+        and not path.endswith("/image")
     }
     assert actual == expected
     for path, method in expected:
@@ -440,7 +468,7 @@ def test_openapi_documents_business_and_registry_routes() -> None:
         header_names = {
             p["name"] for p in operation["parameters"] if p["in"] == "header"
         }
-        expected_headers = {"X-Demo-Role", "X-Demo-Tenant"}
+        expected_headers = {"X-Demo-Role", "X-Demo-Tenant", "X-Demo-Person"}
         if path.startswith(("/api/certificates", "/api/registry")):
             expected_headers.add("X-Demo-Person")
         assert header_names == expected_headers

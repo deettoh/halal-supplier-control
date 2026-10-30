@@ -24,6 +24,7 @@ from backend.schemas import (
     RuleResult,
     Verdict,
 )
+from backend.settings import RuleSettings
 
 DEFAULT_SEED_PATH = Path(__file__).resolve().parents[1] / "seed" / "seed.json"
 
@@ -70,6 +71,11 @@ class PersonSeed(APIModel):
     tenant: NonEmptyText
 
 
+class SMESettingsSeed(RuleSettings):
+    id: RecordId
+    tenant: NonEmptyText
+
+
 class MaterialSeed(APIModel):
     id: RecordId
     tenant: NonEmptyText
@@ -90,6 +96,7 @@ class DeliverySeed(SeedImage):
     verdict: Verdict
     status: DeliveryStatus
     error: str | None = None
+    next_step: str | None = None
     decided_by: str | None = None
     reason: str | None = None
     created_at: AwareDatetime = Field(default_factory=db.utc_now)
@@ -98,10 +105,26 @@ class DeliverySeed(SeedImage):
     def check_checklist(self) -> "DeliverySeed":
         if tuple(item.rule for item in self.rule_results) != RULE_ORDER:
             raise ValueError(RULE_ORDER_ERROR)
+        allowed = {"request_certificate", "request_product_details"}
+        if self.status == "on_hold":
+            if (
+                self.next_step not in allowed
+                or not self.decided_by
+                or not self.reason
+            ):
+                raise ValueError(
+                    "Held delivery needs actor, reason and next_step"
+                )
+        elif self.next_step is not None:
+            raise ValueError("next_step is only valid for on_hold")
         return self
 
 
 class ActivitySeed(APIModel):
+    actor_title: str | None = None
+    material_name: str | None = None
+    verdict: Verdict | None = None
+    supplier_name: str | None = None
     id: RecordId
     tenant: NonEmptyText
     actor: NonEmptyText
@@ -113,6 +136,7 @@ class ActivitySeed(APIModel):
 
 
 class SeedData(APIModel):
+    sme_settings: list[SMESettingsSeed] = Field(default_factory=list)
     people: list[PersonSeed] = Field(default_factory=list)
     suppliers: list[SupplierSeed] = Field(default_factory=list)
     certificates: list[CertificateSeed] = Field(default_factory=list)
@@ -126,6 +150,9 @@ class SeedData(APIModel):
             ids = [row.id for row in getattr(self, name)]
             if len(ids) != len(set(ids)):
                 raise ValueError(f"Duplicate IDs in seed table {name}")
+        tenants = [row.tenant for row in self.sme_settings]
+        if len(tenants) != len(set(tenants)):
+            raise ValueError("Duplicate SME settings tenants")
         return self
 
 
@@ -254,6 +281,22 @@ def seed_empty_tables(
     Startup tolerates missing files; a reset requires referenced images.
     """
     counts: dict[str, int] = {}
+    # Existing policies are retained; newly seeded SMEs are backfilled even
+    # when another SME already has a policy in this database.
+    counts["sme_settings"] = 0
+    for policy in seed.sme_settings:
+        if (
+            session.scalar(
+                select(db.SMESettings.id).where(
+                    db.SMESettings.tenant == policy.tenant
+                )
+            )
+            is None
+        ):
+            session.add(db.SMESettings(**policy.model_dump()))
+            counts["sme_settings"] += 1
+    session.flush()
+    _advance_sequence(session, db.Base.metadata.tables["sme_settings"])
     models: list[type[db.Base]] = [
         db.Person,
         db.Supplier,

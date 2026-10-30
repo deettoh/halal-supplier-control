@@ -806,6 +806,7 @@ def test_merged_seed_matches_loader_api_and_rules(engine: Engine) -> None:
                 "halal_mark_present": True,
             },
             {
+                "tenant": material.tenant,
                 "name": material.name,
                 "approved_brand": material.approved_brand,
                 "approved_manufacturer": material.approved_manufacturer,
@@ -851,11 +852,12 @@ def test_demo_reset_restores_seed_photos_and_removes_workflows(
     for _ in range(2):
         counts = reset_demo_database(engine)
         assert counts == {
+            "sme_settings": 2,
             "suppliers": 2,
             "certificates": 4,
             "materials": 16,
             "deliveries": 0,
-            "activity_log": 0,
+            "activity_log": 1,
             "people": 7,
         }
         with Session(engine) as session:

@@ -13,12 +13,8 @@ from backend.schemas import (
     RuleName,
     Verdict,
 )
+from backend.settings import RuleSettings, seed_rule_settings
 
-# Fictional issuer used only for the hackathon demo.
-RECOGNISED_ISSUERS = {"sample food certification council"}
-
-MATCH_THRESHOLD = 90
-EXPIRY_WARNING_DAYS = 60
 PACK_SIZE = re.compile(r"\s+\d+(?:[.,]\d+)?\s*(?:kg|mg|g|ml|l)$")
 
 
@@ -84,7 +80,9 @@ def parse_scope(value: object) -> list[CertificateScopeItem]:
 
 
 def _approved_item_check(
-    label: Mapping[str, object], material: Mapping[str, object]
+    label: Mapping[str, object],
+    material: Mapping[str, object],
+    threshold: float,
 ) -> tuple[bool, str]:
     """Return R2's result and detail for the label vs the material."""
     product = label["product_name"]
@@ -107,9 +105,9 @@ def _approved_item_check(
         ("Brand", brand_score),
         ("Manufacturer", manufacturer_score),
     ):
-        if score < MATCH_THRESHOLD:
+        if score < threshold:
             failures.append(
-                f"{part} score {score:.1f} is below {MATCH_THRESHOLD}."
+                f"{part} score {score:.1f} is below {threshold:g}."
             )
 
     if failures:
@@ -117,7 +115,7 @@ def _approved_item_check(
     return True, (
         f"Product matches. Brand score: {brand_score:.1f}; "
         f"manufacturer score: {manufacturer_score:.1f}. "
-        f"Both must be >= {MATCH_THRESHOLD}."
+        f"Both must be >= {threshold:g}."
     )
 
 
@@ -126,6 +124,8 @@ def evaluate(
     material: Mapping[str, object] | None,
     certificate: Mapping[str, object] | None,
     today: str | date,
+    *,
+    settings: RuleSettings | None = None,
 ) -> Evaluation:
     """
     Evaluate document coverage for one delivery.
@@ -156,6 +156,13 @@ def evaluate(
 
     material = material or {}
     certificate = certificate or {}
+    if settings is None:
+        tenant = material.get("tenant")
+        if not isinstance(tenant, str) or not tenant.strip():
+            raise ValueError(
+                "SME settings or a material tenant must be supplied"
+            )
+        settings = seed_rule_settings(tenant)
 
     checks: list[RuleCheck] = []
 
@@ -190,7 +197,9 @@ def evaluate(
 
     # R2 - Product, brand and manufacturer match the chosen material
     if r1:
-        r2, r2_detail = _approved_item_check(label_fields, material)
+        r2, r2_detail = _approved_item_check(
+            label_fields, material, settings.match_threshold
+        )
         add("R2", r2, r2_detail)
     else:
         r2 = None
@@ -233,7 +242,7 @@ def evaluate(
 
     # R5 - Recognised certification issuer
     issuer = normalize(certificate.get("issuer"))
-    r5 = issuer in RECOGNISED_ISSUERS
+    r5 = issuer in {normalize(name) for name in settings.recognised_issuers}
 
     add(
         "R5",
@@ -274,7 +283,9 @@ def evaluate(
     else:
         days_remaining = (expiry_date - evaluation_date).days
         verdict = (
-            "expiring" if days_remaining <= EXPIRY_WARNING_DAYS else "covered"
+            "expiring"
+            if days_remaining <= settings.expiry_warning_days
+            else "covered"
         )
 
     return {"verdict": verdict, "rule_results": checks}

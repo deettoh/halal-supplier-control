@@ -7,7 +7,7 @@ from uuid import uuid4
 
 import pytest
 from fastapi.testclient import TestClient
-from sqlalchemy import Engine, create_engine, event
+from sqlalchemy import Engine, create_engine, delete, event
 from sqlalchemy.orm import Session
 from sqlalchemy.pool import StaticPool
 from sqlalchemy.schema import CreateSchema, DropSchema
@@ -67,6 +67,10 @@ def api_engine(
             connection.execute("PRAGMA foreign_keys=ON")
 
         bootstrap_database(engine)
+        with Session(engine) as session:
+            session.execute(delete(db.ActivityLog))
+            session.execute(delete(db.Delivery))
+            session.commit()
         try:
             yield engine
         finally:
@@ -82,6 +86,10 @@ def api_engine(
     isolated = admin.execution_options(schema_translate_map={None: schema})
     try:
         bootstrap_database(isolated)
+        with Session(isolated) as session:
+            session.execute(delete(db.ActivityLog))
+            session.execute(delete(db.Delivery))
+            session.commit()
         yield isolated
     finally:
         with admin.begin() as connection:

@@ -16,10 +16,11 @@ all tables (see [the database guide](../../docs/database.md)). When the file
 is missing, startup skips seeding, and it stops when the file fails
 validation.
 
-## The file has six arrays
+## The file has seven arrays
 
 The top-level object has `suppliers`, `certificates`, `materials`,
-`deliveries`, `activity_log` and `people`. An omitted array counts as empty.
+`deliveries`, `activity_log`, `people` and `sme_settings`.
+An omitted array counts as empty.
 Every row needs a positive integer `id`, unique within its array, and unknown
 fields are rejected. Dates use `YYYY-MM-DD`, and timestamps need a timezone.
 
@@ -52,6 +53,11 @@ fields are rejected. Dates use `YYYY-MM-DD`, and timestamps need a timezone.
   `staff`, `supervisor`, `supplier` or `reviewer`. The reviewer's tenant is
   `registry`, and a supplier contact's tenant is the supplier ID as a string.
   The `X-Demo-Person` header names one of these people.
+- `sme_settings` holds one row per SME, with `id`, `tenant`,
+  `recognised_issuers`, `match_threshold` and `expiry_warning_days`.
+  Tenant names match the material and people records exactly. Issuer names
+  must be nonblank, the threshold is from 0 to 100, and the warning window
+  is a nonnegative whole number of days. Duplicate tenants are rejected.
 - `scope` is a list of `{product_name, brand}` objects. A `null` brand means
   no brand restriction for that product. A plain product-name string is also
   accepted and becomes an object with a `null` brand.
@@ -71,9 +77,38 @@ fields are rejected. Dates use `YYYY-MM-DD`, and timestamps need a timezone.
 - Startup fills only empty tables and loads them in dependency order within
   one transaction. IDs must match existing parent rows, and the loader
   doesn't remap them.
+- Settings are an exception to the empty-table rule: startup inserts missing
+  SME policies by tenant, retaining existing policies and database edits.
 - On every startup, a certificate with no stored photo gets its PNG when the
   seed ID, supplier ID and certificate number all match.
 - Startup advances the PostgreSQL ID sequences past the seeded IDs, so new
   uploads get fresh IDs.
 - Startup rolls back the whole load on a missing parent, an unreadable PNG or
   a failed constraint.
+
+## Per-SME rule settings (Task 5.4)
+
+| SME | Recognised issuers | Match threshold | Expiry warning days |
+| --- | --- | --- | --- |
+| Sunrise Bakery SAMPLE | SAMPLE Food Certification Council | 90 | 60 |
+| Crescent Caterer SAMPLE | SAMPLE Food Certification Council | 90 | 45 |
+
+Live delivery checks and masterlist coverage read the requesting SME's row
+from the `sme_settings` database table. R2 uses its threshold for brand and
+manufacturer, R5 uses its issuer list, and the expiring verdict uses its
+warning window. Product matching, rule priority and R6 are unchanged.
+Masterlist coverage still excludes the delivery-photo mark check.
+
+Changing seed JSON does not overwrite a policy already in the database.
+Startup backfills missing policies; an explicit demo reset restores seed
+policies. Missing or invalid policies return 503 instead of silently using
+another SME's settings. Existing delivery verdicts remain historical results.
+
+Offline callers may pass a validated `RuleSettings` to `rules.evaluate`.
+If omitted, the material must have a known `tenant`; evaluation loads that
+tenant's policy from this seed file. There is no global policy fallback.
+The new policy module and seed are included in future evaluation source
+hashes. Previously recorded evaluation artifacts are not rewritten.
+
+This task adds policy storage and use only: no settings editor, renewal
+request action, expiry job, scheduler or expiry-check route is introduced.

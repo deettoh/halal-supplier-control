@@ -15,6 +15,7 @@ LABEL = {
     "halal_mark_present": True,
 }
 MATERIAL = {
+    "tenant": "Sunrise Bakery SAMPLE",
     "name": "Wheat Flour",
     "approved_brand": "GoldenMill",
     "approved_manufacturer": "Golden Grain Foods",
