@@ -73,8 +73,10 @@ MAX_RETRIES = 0
 MAX_IMAGE_SIDE = 1280
 EXTRACTION_PROMPT = (
     "Read this delivery label. Return the product name, brand, "
-    "manufacturer, and whether a halal mark is printed on it. Use null "
-    "for any field you cannot read."
+    "manufacturer, and whether a halal mark is printed on it. The "
+    "manufacturer is the company that made or packed the product, not "
+    "a customer or a 'Supplied to' name. Use null for any field you "
+    "cannot read."
 )
 
 
