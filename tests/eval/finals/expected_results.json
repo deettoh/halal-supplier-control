@@ -1676,7 +1676,7 @@
         "product_name": "Wheat Flour",
         "brand": "GoldenMill",
         "manufacturer": "Golden Grain Foods",
-        "halal_mark_present": false
+        "halal_mark_present": null
       },
       "proposed_expected_verdict": "needs_human",
       "proposed_expected_initial_status": "pending_review",
@@ -1780,7 +1780,7 @@
         "product_name": "Rice Flour",
         "brand": "GoldenMill",
         "manufacturer": "Golden Grain Foods",
-        "halal_mark_present": false
+        "halal_mark_present": null
       },
       "proposed_expected_verdict": "needs_human",
       "proposed_expected_initial_status": "pending_review",
@@ -1884,7 +1884,7 @@
         "product_name": "Cocoa Powder",
         "brand": "SilverCocoa",
         "manufacturer": "Silver Valley Foods",
-        "halal_mark_present": false
+        "halal_mark_present": null
       },
       "proposed_expected_verdict": "needs_human",
       "proposed_expected_initial_status": "pending_review",
@@ -1980,7 +1980,7 @@
         "product_name": "Cocoa Powder",
         "brand": "SilverCocoa",
         "manufacturer": "Silver Valley Foods",
-        "halal_mark_present": false
+        "halal_mark_present": null
       },
       "proposed_expected_verdict": "needs_human",
       "proposed_expected_initial_status": "pending_review",

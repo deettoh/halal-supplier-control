@@ -100,8 +100,8 @@ because the label couldn't be read. `detail` gives the reason.
 | Rule | Check | Verdict if it fails |
 |---|---|---|
 | R1 | Product, brand and manufacturer read from the label | `needs_human` |
-| R2 | The product matches the material name after case folding and whitespace collapsing, and the brand and the manufacturer each match the masterlist (rapidfuzz score of 90 or more) | `substitution` |
-| R3 | The certificate scope covers the product and brand | `not_covered` |
+| R2 | The product matches the material name after case folding, whitespace collapsing and dropping a trailing pack size such as `200 G`. The brand and the manufacturer each match the masterlist (rapidfuzz score of 90 or more) | `substitution` |
+| R3 | The certificate scope covers the product and brand, with the product matched the same way as in R2 | `not_covered` |
 | R4 | The certificate hasn't expired | `not_covered` |
 | R5 | The issuer is on the recognised list | `not_covered` |
 | R6 | The label shows a halal mark | `needs_human` |
