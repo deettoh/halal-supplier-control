@@ -1,3 +1,4 @@
+import { AppLink } from "../lib/navigation.jsx";
 import React, {
   useCallback,
   useEffect,
@@ -82,6 +83,9 @@ export function OpeningIntro({ children }) {
       </div>
       {playing && (
         <div className="opening-intro">
+          <AppLink className="opening-enter" href="/demo" onClick={finish}>
+            Enter demo
+          </AppLink>
           <div className="opening-panels" aria-hidden="true">
             {[0, 1, 2, 3, 4].map((index) => (
               <span key={index} style={{ "--panel": index }} />

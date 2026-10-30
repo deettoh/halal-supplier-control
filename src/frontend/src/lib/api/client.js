@@ -13,11 +13,17 @@ export class UnsupportedCapabilityError extends Error {
   }
 }
 export function capturedHeaders(context, roles) {
-  if (!roles.includes(context?.role) || !context?.tenant?.trim())
+  if (
+    !roles?.includes(context?.role) ||
+    !context?.tenant?.trim() ||
+    !Number.isInteger(context?.person_id) ||
+    context.person_id <= 0
+  )
     throw new ApiError(403, "This workspace can't open that view.");
   return new Headers({
     "X-Demo-Role": context.role,
     "X-Demo-Tenant": context.tenant,
+    "X-Demo-Person": String(context.person_id),
   });
 }
 export function createTransport({
@@ -30,9 +36,24 @@ export function createTransport({
   );
   async function request(
     path,
-    { context, roles, body, signal, method = "GET", image = false } = {},
+    {
+      context,
+      roles,
+      body,
+      signal,
+      method = "GET",
+      image = false,
+      publicRequest = false,
+    } = {},
   ) {
-    const headers = capturedHeaders({ ...context }, roles);
+    if (
+      publicRequest &&
+      (method !== "GET" || !["/api/people", "/api/health"].includes(path))
+    )
+      throw new UnsupportedCapabilityError("This is not a public API route.");
+    const headers = publicRequest
+      ? new Headers()
+      : capturedHeaders({ ...context }, roles);
     const url = new URL(path, base);
     if (
       url.origin !== base.origin ||
@@ -84,5 +105,9 @@ export function createTransport({
     }
     return image ? response.blob() : response.json();
   }
-  return { request };
+  return {
+    request,
+    requestPublic: (path, { signal } = {}) =>
+      request(path, { signal, publicRequest: true }),
+  };
 }

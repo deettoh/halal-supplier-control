@@ -38,27 +38,40 @@ export function createPreviewGateway() {
   let store = createPreviewStore();
   function identity(context, roles) {
     const ctx = { ...context };
-    if (
-      !roles.includes(ctx.role) ||
-      !(ctx.role === "supplier"
-        ? data.certificates[ctx.tenant]
-        : data.deliveries[ctx.tenant])
-    )
-      throw new ApiError(403, "This workspace can't open that view.");
+    const person = data.people.find(
+      (p) =>
+        p.id === ctx.person_id &&
+        p.role === ctx.role &&
+        p.tenant === ctx.tenant,
+    );
+    if (!roles.includes(ctx.role) || !person)
+      throw new ApiError(403, "This person can't open that view.");
+    Object.assign(ctx, { name: person.name, title: person.title });
     return ctx;
   }
   function timestamp() {
     return new Date(Date.UTC(2026, 9, 22, 2, 40, store.tick++)).toISOString();
   }
-  function event(tenant, ctx, action, delivery_id, reason) {
+  function linkedTenants(supplierId) {
+    return Object.keys(store.activity).filter((tenant) =>
+      data.materials["00"][tenant].some(
+        (m) => m.supplier_id === Number(supplierId),
+      ),
+    );
+  }
+  function event(tenant, ctx, action, delivery_id, reason, supplierId = null) {
+    const delivery = store.deliveries[tenant].find((d) => d.id === delivery_id);
+    const material =
+      delivery && data.source_materials[String(delivery.material_id)];
     store.activity[tenant].unshift({
       id: store.nextId++,
-      actor:
-        ctx.role === "supplier"
-          ? data.certificates[ctx.tenant][0].holder_name
-          : ctx.role === "staff"
-            ? "Receiving staff SAMPLE"
-            : "Halal supervisor SAMPLE",
+      actor: ctx.name,
+      actor_title: ctx.title,
+      material_name: material?.name || null,
+      verdict: delivery?.verdict || null,
+      supplier_name: supplierId
+        ? data.suppliers.find((s) => s.id === Number(supplierId))?.name || null
+        : null,
       role: ctx.role,
       action,
       delivery_id,
@@ -68,6 +81,14 @@ export function createPreviewGateway() {
   }
   return {
     mode: "preview",
+    capabilities: { hold: true, expiry: true, certificateExtract: false },
+    async listPeople({ signal } = {}) {
+      signal?.throwIfAborted();
+      return copy(data.people);
+    },
+    async readHealth() {
+      return { status: "ok", contract_version: "prepared-preview" };
+    },
     async listMaterials(context, { signal } = {}) {
       const ctx = identity(context, ["staff", "supervisor"]);
       signal?.throwIfAborted();
@@ -89,7 +110,7 @@ export function createPreviewGateway() {
       signal?.throwIfAborted();
       return copy(
         store.deliveries[ctx.tenant].filter(
-          (d) => d.status !== "pending_review",
+          (d) => !["pending_review", "on_hold"].includes(d.status),
         ),
       );
     },
@@ -138,24 +159,37 @@ export function createPreviewGateway() {
       event(ctx.tenant, ctx, saved.status, saved.id, null);
       return copy(saved);
     },
-    async decide(context, id, { decision, reason }) {
+    async decide(context, id, { decision, reason, next_step }) {
       const ctx = identity(context, ["supervisor"]);
       const record = store.deliveries[ctx.tenant].find((d) => d.id === id);
       if (!record)
         throw new ApiError(404, "Delivery not found in this workspace.");
-      if (record.status !== "pending_review")
+      if (
+        !["pending_review", "on_hold"].includes(record.status) ||
+        (record.status === "on_hold" && decision === "hold")
+      )
         throw new ApiError(409, "This delivery was already decided.");
-      if (!["accept", "reject"].includes(decision) || !reason?.trim())
+      if (
+        !["accept", "reject", "hold"].includes(decision) ||
+        !reason?.trim() ||
+        (decision === "hold" &&
+          !["request_certificate", "request_product_details"].includes(
+            next_step,
+          ))
+      )
         throw new ApiError(422, "Enter a decision and a reason.", {
           reason: "Enter a reason for this decision.",
         });
       Object.assign(record, {
-        status: decision === "accept" ? "accepted" : "rejected",
+        status:
+          decision === "hold"
+            ? "on_hold"
+            : decision === "accept"
+              ? "accepted"
+              : "rejected",
+        next_step: decision === "hold" ? next_step : null,
         reason: reason.trim(),
-        decided_by:
-          ctx.role === "staff"
-            ? "Receiving staff SAMPLE"
-            : "Halal supervisor SAMPLE",
+        decided_by: ctx.name,
       });
       event(ctx.tenant, ctx, record.status, id, record.reason);
       return copy(record);
@@ -177,32 +211,113 @@ export function createPreviewGateway() {
         )
       )
         throw new UnsupportedCapabilityError(
-          "This preview can publish only the prepared renewal. Other certificate changes require the backend.",
-        );
-      if (store.renewed[Number(ctx.tenant) - 1])
-        throw new ApiError(
-          409,
-          "This prepared renewal has already been published. Reset the preview to repeat it.",
+          "This preview can submit only the prepared renewal. Other certificate changes require the backend.",
         );
       const records = store.certificates[ctx.tenant];
-      records.forEach((c) => {
-        if (c.status === "active") c.status = "superseded";
-      });
+      if (records.some((c) => c.status === "pending"))
+        throw new ApiError(409, "A renewal is already waiting for review");
       const saved = {
         ...copy(prepared),
         id: store.nextId++,
         supplier_id: Number(ctx.tenant),
         image: null,
-        status: "active",
+        status: "pending",
+        review_note: null,
+        reviewed_by: null,
       };
       records.unshift(saved);
-      store.renewed[Number(ctx.tenant) - 1] = true;
-      for (const tenant of Object.keys(store.activity))
-        event(tenant, ctx, "certificate_renewed", null, null);
+      for (const tenant of linkedTenants(ctx.tenant))
+        event(tenant, ctx, "certificate_submitted", null, null, ctx.tenant);
       return copy(saved);
     },
+    async listOnHold(context, { signal } = {}) {
+      const ctx = identity(context, ["supervisor"]);
+      signal?.throwIfAborted();
+      return copy(
+        store.deliveries[ctx.tenant].filter((d) => d.status === "on_hold"),
+      );
+    },
+    async listRenewals(context, { signal } = {}) {
+      identity(context, ["reviewer"]);
+      signal?.throwIfAborted();
+      return Object.entries(store.certificates)
+        .flatMap(([id, records]) =>
+          records
+            .filter((c) => c.status === "pending")
+            .map((renewal) => ({
+              renewal: copy(renewal),
+              current: copy(records.find((c) => c.status === "active") || null),
+              supplier_name: data.certificates[id][0].holder_name,
+            })),
+        )
+        .sort((a, b) => a.renewal.id - b.renewal.id);
+    },
+    async decideRenewal(context, id, { decision, note }) {
+      const ctx = identity(context, ["reviewer"]);
+      if (!["verify", "reject"].includes(decision) || !note?.trim())
+        throw new ApiError(422, "Add a review note.");
+      const records = Object.values(store.certificates).find((rows) =>
+        rows.some((c) => c.id === id),
+      );
+      const row = records?.find((c) => c.id === id);
+      if (!row) throw new ApiError(404, "Renewal not found");
+      if (row.status !== "pending")
+        throw new ApiError(409, "Renewal already reviewed");
+      if (decision === "verify") {
+        records.forEach((c) => {
+          if (c.status === "active") c.status = "superseded";
+        });
+        store.renewed[row.supplier_id - 1] = true;
+      }
+      Object.assign(row, {
+        status: decision === "verify" ? "active" : "rejected",
+        review_note: note.trim(),
+        reviewed_by: ctx.name,
+      });
+      for (const tenant of linkedTenants(row.supplier_id))
+        event(
+          tenant,
+          ctx,
+          decision === "verify"
+            ? "certificate_renewed"
+            : "certificate_rejected",
+          null,
+          note.trim(),
+          row.supplier_id,
+        );
+      return copy(row);
+    },
+    async runExpiryCheck(context) {
+      const ctx = identity(context, ["reviewer"]);
+      let requests_created = 0,
+        certificates_checked = 0;
+      const expiring = new Set(
+        Object.values(data.materials[store.renewed.map(Number).join("")])
+          .flat()
+          .filter((m) => m.coverage_status === "expiring")
+          .map((m) => m.supplier_id),
+      );
+      for (const records of Object.values(store.certificates))
+        for (const c of records.filter((c) => c.status === "active")) {
+          certificates_checked++;
+          if (expiring.has(c.supplier_id) && !c.renewal_requested_on) {
+            c.renewal_requested_on = data.date;
+            requests_created++;
+            for (const tenant of linkedTenants(c.supplier_id))
+              event(
+                tenant,
+                ctx,
+                "renewal_requested",
+                null,
+                "Renewal requested in prepared preview",
+                c.supplier_id,
+              );
+          }
+        }
+      return { certificates_checked, requests_created };
+    },
     async readImage(context, reference, { signal } = {}) {
-      identity(context, ["staff", "supervisor", "supplier"]);
+      identity(context, ["staff", "supervisor", "supplier", "reviewer"]);
       if (!data.cases.some((c) => c.image === reference))
         throw new UnsupportedCapabilityError(
           "This image is not a prepared preview asset.",

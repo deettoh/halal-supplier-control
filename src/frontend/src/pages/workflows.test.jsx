@@ -1,3 +1,4 @@
+import { person } from "../test/people.js";
 import React from "react";
 import { it, expect, vi, beforeEach } from "vitest";
 import { render, screen, within, waitFor } from "@testing-library/react";
@@ -10,8 +11,8 @@ import App from "../App.jsx";
 import CheckDelivery from "./check.jsx";
 import Masterlist from "./masterlist.jsx";
 import Activity from "./activity.jsx";
-const staff = { role: "staff", tenant: "Sunrise Bakery SAMPLE" };
-const supervisor = { ...staff, role: "supervisor" };
+const staff = person(1);
+const supervisor = person(2);
 beforeEach(() => {
   window.history.replaceState(null, "", "/");
   URL.createObjectURL = vi.fn(() => "blob:photo-test");
@@ -100,11 +101,11 @@ it("introduces the product and opens the role picker with Enter demo", async () 
   const user = userEvent.setup();
   wrap(<App />, createPreviewGateway(), null);
   expect(
-    screen.getByRole("heading", { name: "Know what your documents cover." }),
+    screen.getByRole("heading", { name: /Every delivery.*A clear.*next step/ }),
   ).toBeInTheDocument();
   await user.click(screen.getAllByRole("link", { name: "Enter demo" })[0]);
   expect(
-    screen.getByRole("group", { name: "Choose your role" }),
+    await screen.findByRole("group", { name: "Choose a demo person" }),
   ).toBeInTheDocument();
 });
 it("submits the original photo and treats saved extraction failure as a saved review", async () => {
@@ -188,6 +189,6 @@ it("renders canonical activity actor, action and reason after a decision", async
   });
   wrap(<Activity />, g, supervisor);
   await screen.findByText("Return the changed brand.");
-  expect(screen.getByText("Halal supervisor SAMPLE")).toBeInTheDocument();
+  expect(screen.getByText("Farid")).toBeInTheDocument();
   expect(screen.getByRole("heading", { name: "Rejected" })).toBeInTheDocument();
 });

@@ -6,6 +6,7 @@ import {
   History,
   PackageCheck,
   FileText,
+  ShieldCheck,
 } from "lucide-react";
 import { useLocation } from "wouter";
 import { useSession, organisationName } from "../lib/session.jsx";
@@ -16,20 +17,22 @@ export function Shell({ children }) {
   const [path] = useLocation();
   const role = session.identity.role;
   const links =
-    role === "supplier"
-      ? [["/certificates", "Certificates", FileText]]
-      : role === "staff"
-        ? [
-            ["/check", "Check delivery", PackageCheck],
-            ["/masterlist", "Masterlist", ClipboardList],
-          ]
-        : [
-            ["/review", "Review deliveries", FileText],
-            ["/masterlist", "Masterlist", ClipboardList],
-            ["/activity", "Activity", History],
-          ];
+    role === "reviewer"
+      ? [["/registry", "Registry renewals", ShieldCheck]]
+      : role === "supplier"
+        ? [["/certificates", "Certificates", FileText]]
+        : role === "staff"
+          ? [
+              ["/check", "Check delivery", PackageCheck],
+              ["/masterlist", "Masterlist", ClipboardList],
+            ]
+          : [
+              ["/review", "Review deliveries", FileText],
+              ["/masterlist", "Masterlist", ClipboardList],
+              ["/activity", "Activity", History],
+            ];
   return (
-    <div className="app-shell">
+    <div className="app-shell signal-shell">
       <a className="skip-link" href="#main">
         Skip to content
       </a>
@@ -39,9 +42,7 @@ export function Shell({ children }) {
           className="wordmark"
           aria-label="Halal Supplier Control home"
         >
-          Halal
-          <br />
-          Supplier Control
+          Halal Supplier Control
         </AppLink>
         <nav aria-label="Workspace">
           {links.map(([href, text, Icon]) => (
@@ -74,7 +75,10 @@ export function Shell({ children }) {
         <header className="workspace-header">
           <div>
             <strong>{organisationName(session.identity)}</strong>
-            <p>{label(role)}</p>
+            <p>
+              <span className="person-name">{session.identity.name}</span> ·{" "}
+              {session.identity.title || label(role)}
+            </p>
           </div>
           <AppLink href="/demo" className="button workspace-switch">
             <ArrowLeftRight size={22} aria-hidden="true" />

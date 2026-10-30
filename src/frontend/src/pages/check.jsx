@@ -6,7 +6,10 @@ import { previewCases } from "../lib/preview/gateway.js";
 import { MaterialPicker } from "../components/material-picker.jsx";
 import { RequestState, ErrorMessage } from "../components/request-state.jsx";
 import { PhotoViewer } from "../components/photo-viewer.jsx";
-import { DeliveryEvidence } from "../components/delivery-evidence.jsx";
+import {
+  DeliveryEvidence,
+  firstReviewIssue,
+} from "../components/delivery-evidence.jsx";
 import { Status } from "../components/status.jsx";
 export default function CheckDelivery() {
   const session = useSession();
@@ -113,6 +116,11 @@ export default function CheckDelivery() {
               </dd>
             </div>
           </dl>
+          {["substitution", "not_covered", "needs_human"].includes(
+            result.verdict,
+          ) && (
+            <p className="review-result-detail">{firstReviewIssue(result)}</p>
+          )}
           {result.error && (
             <p className="request-error">
               Saved for supervisor review. {result.error}

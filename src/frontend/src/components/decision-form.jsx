@@ -8,13 +8,20 @@ export function DecisionForm({
   pending = false,
   error,
   blocked = false,
+  canHold = false,
 }) {
   const [decision, setDecision] = useState("");
   const [reason, setReason] = useState("");
+  const [nextStep, setNextStep] = useState("");
   const id = useId();
-  const resolved = delivery.status !== "pending_review";
+  const resolved = !["pending_review", "on_hold"].includes(delivery.status);
   useDraft(!resolved && (!!decision || !!reason));
-  const disabled = pending || blocked || !decision || !reason.trim();
+  const disabled =
+    pending ||
+    blocked ||
+    !decision ||
+    !reason.trim() ||
+    (decision === "hold" && !nextStep);
   if (delivery.status === "auto_accepted")
     return (
       <section className="decision-panel">
@@ -27,7 +34,12 @@ export function DecisionForm({
     );
   function submit(event) {
     event.preventDefault();
-    if (!disabled) onDecision({ decision, reason: reason.trim() });
+    if (!disabled)
+      onDecision({
+        decision,
+        reason: reason.trim(),
+        ...(decision === "hold" ? { next_step: nextStep } : {}),
+      });
   }
   return (
     <section className="decision-panel" aria-labelledby={id + "heading"}>
@@ -45,12 +57,22 @@ export function DecisionForm({
         <form onSubmit={submit}>
           <fieldset disabled={pending || blocked}>
             <legend className="sr-only">Decision</legend>
-            {["accept", "reject"].map((value) => (
+            {[
+              "accept",
+              "reject",
+              ...(canHold && delivery.status === "pending_review"
+                ? ["hold"]
+                : []),
+            ].map((value) => (
               <label className="decision-option" key={value}>
                 <input
                   type="radio"
                   aria-label={
-                    value === "accept" ? "Accept delivery" : "Reject delivery"
+                    value === "hold"
+                      ? "Hold delivery"
+                      : value === "accept"
+                        ? "Accept delivery"
+                        : "Reject delivery"
                   }
                   name={id + "decision"}
                   value={value}
@@ -59,16 +81,51 @@ export function DecisionForm({
                 />
                 <span>
                   <strong>
-                    {value === "accept" ? "Accept delivery" : "Reject delivery"}
+                    {value === "hold"
+                      ? "Hold delivery"
+                      : value === "accept"
+                        ? "Accept delivery"
+                        : "Reject delivery"}
                   </strong>
                   <small>
-                    Record {value === "accept" ? "acceptance" : "rejection"}{" "}
-                    with a reason.
+                    {value === "hold"
+                      ? "Record a reason and the next step."
+                      : "Record " +
+                        (value === "accept" ? "acceptance" : "rejection") +
+                        " with a reason."}
                   </small>
                 </span>
               </label>
             ))}
           </fieldset>
+          {delivery.status === "on_hold" && (
+            <p className="hold-context" role="status">
+              On hold:{" "}
+              {delivery.next_step === "request_certificate"
+                ? "Request current certificate"
+                : "Request product details"}
+              . Previous reason: {delivery.reason}
+            </p>
+          )}
+          {decision === "hold" && (
+            <div className="field hold-next">
+              <label htmlFor={id + "next"}>Next step (required)</label>
+              <select
+                id={id + "next"}
+                value={nextStep}
+                onChange={(e) => setNextStep(e.target.value)}
+                disabled={pending || blocked}
+              >
+                <option value="">Choose a next step</option>
+                <option value="request_certificate">
+                  Request current certificate
+                </option>
+                <option value="request_product_details">
+                  Request product details
+                </option>
+              </select>
+            </div>
+          )}
           <div className="decision-reason">
             <label htmlFor={id + "reason"}>Reason (required)</label>
             <textarea

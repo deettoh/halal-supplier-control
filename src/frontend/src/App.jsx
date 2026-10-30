@@ -1,6 +1,6 @@
 import React, { lazy, Suspense, useEffect } from "react";
 import { useLocation } from "wouter";
-import { useSession, homeForRole } from "./lib/session.jsx";
+import { useSession, homeForRole, routesForRole } from "./lib/session.jsx";
 import { AppLink } from "./lib/navigation.jsx";
 import { Shell } from "./components/shell.jsx";
 const Review = lazy(() => import("./pages/review.jsx"));
@@ -11,11 +11,8 @@ const Masterlist = lazy(() => import("./pages/masterlist.jsx"));
 const Activity = lazy(() => import("./pages/activity.jsx"));
 import NotFound from "./pages/not-found.jsx";
 const Certificates = lazy(() => import("./pages/certificates.jsx"));
-export const roleRoutes = {
-  staff: ["/check", "/masterlist"],
-  supervisor: ["/review", "/masterlist", "/activity"],
-  supplier: ["/certificates"],
-};
+const Registry = lazy(() => import("./pages/registry.jsx"));
+export const roleRoutes = routesForRole;
 export default function App() {
   const session = useSession();
   const [path] = useLocation();
@@ -36,6 +33,7 @@ export default function App() {
     "/masterlist": Masterlist,
     "/activity": Activity,
     "/certificates": Certificates,
+    "/registry": Registry,
   };
   const Page = pages[path];
   if (Page && !roleRoutes[session.identity.role].includes(path))

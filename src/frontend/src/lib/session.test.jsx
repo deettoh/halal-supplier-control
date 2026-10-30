@@ -1,3 +1,4 @@
+import { person, people } from "../test/people.js";
 import React from "react";
 import { it, expect, vi } from "vitest";
 import { render, screen, act } from "@testing-library/react";
@@ -10,14 +11,14 @@ import {
   workspaceKey,
 } from "./session.jsx";
 import { useScopedMutation } from "./api/hooks.js";
-const first = { role: "supervisor", tenant: "Sunrise Bakery SAMPLE" };
-const second = { role: "supervisor", tenant: "Crescent Caterer SAMPLE" };
+const first = person(2);
+const second = person(4);
 it("rejects malformed or incompatible stored identities", () => {
   expect(
     validateIdentity({ role: "supplier", tenant: "Sunrise Bakery SAMPLE" }),
   ).toBe(null);
   expect(validateIdentity({ role: "admin", tenant: "1" })).toBe(null);
-  expect(validateIdentity(first)).toEqual(first);
+  expect(validateIdentity(first, people)).toEqual(first);
 });
 it("uses role-specific homes and mode/role/tenant query identity", () => {
   expect(homeForRole("staff")).toBe("/check");
@@ -52,7 +53,10 @@ it("does not expose a late mutation result after switching workspace", async () 
   );
   const user = userEvent.setup();
   render(
-    <SessionProvider gateway={{ mode: "live" }} initialIdentity={first}>
+    <SessionProvider
+      gateway={{ mode: "live", listPeople: async () => people }}
+      initialIdentity={first}
+    >
       <Probe request={request} />
     </SessionProvider>,
   );

@@ -48,7 +48,7 @@ it("reveals the landing after a bounded intro and does not replay in this tab se
   openLanding();
   expect(screen.queryByRole("button", { name: "Skip intro" })).toBeNull();
   expect(
-    screen.getByRole("heading", { name: "Know what your documents cover." }),
+    screen.getByRole("heading", { name: /Every delivery.*A clear.*next step/ }),
   ).toBeVisible();
 });
 
@@ -88,10 +88,14 @@ it("dismisses if reduced motion is enabled while the intro is playing", () => {
 });
 
 it("keeps a direct section link available without an opening overlay", () => {
-  window.history.replaceState(null, "", "/#how-it-works");
+  window.history.replaceState(null, "", "/#walkthrough");
   openLanding();
   expect(screen.queryByRole("button", { name: "Skip intro" })).toBeNull();
-  expect(screen.getByRole("heading", { name: "How it works" })).toBeVisible();
+  expect(
+    screen.getByRole("region", {
+      name: "Interactive SAMPLE delivery walkthrough",
+    }),
+  ).toBeVisible();
   expect(document.body.style.overflow).toBe("auto");
 });
 

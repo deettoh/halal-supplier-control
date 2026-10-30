@@ -4,15 +4,16 @@ import { RuleStatus } from "./status.jsx";
 import { ChevronDown } from "lucide-react";
 export const ruleLabels = {
   R1: "Readable label",
-  R2: "Brand and manufacturer",
+  R2: "Product, brand and manufacturer",
   R3: "Certificate scope (covers this product and brand)",
   R4: "Certificate expiry (is current)",
   R5: "Recognised issuer (on demo recognised list)",
+  R6: "Halal mark on label (visible, not authenticated)",
 };
 export function RuleChecklist({ rules = [] }) {
   return (
     <section className="rule-checklist" aria-label="Coverage checks">
-      <h2>Five checks for certificate coverage</h2>
+      <h2>Six checks for this delivery</h2>
       <p className="check-instruction">
         Open a check to read its recorded reason.
       </p>
@@ -49,7 +50,7 @@ export function Comparison({ material, delivery }) {
   ];
   return (
     <section className="comparison">
-      <h2>Approved material vs read from label</h2>
+      <h2>Current approved material vs read from label</h2>
       <p className="comparison-hint">Hover, focus or tap a field to compare.</p>
       <table>
         <thead>
@@ -76,7 +77,9 @@ export function Comparison({ material, delivery }) {
               <td
                 className={
                   r2?.passed === false &&
-                  key !== "product_name" &&
+                  r2.detail
+                    .toLowerCase()
+                    .includes(key === "product_name" ? "product" : key) &&
                   extraction?.[key] &&
                   extraction[key] !== approved
                     ? "mismatch"
@@ -85,7 +88,9 @@ export function Comparison({ material, delivery }) {
               >
                 {extraction?.[key] || <span className="muted">Not read</span>}
                 {r2?.passed === false &&
-                  key !== "product_name" &&
+                  r2.detail
+                    .toLowerCase()
+                    .includes(key === "product_name" ? "product" : key) &&
                   extraction?.[key] &&
                   extraction[key] !== approved && <small>Does not match</small>}
               </td>
@@ -97,9 +102,9 @@ export function Comparison({ material, delivery }) {
         <dt>Halal mark</dt>
         <dd>
           {extraction?.halal_mark_present === true
-            ? "Detected"
+            ? "Visible"
             : extraction?.halal_mark_present === false
-              ? "Not detected"
+              ? "Not visible"
               : "Not read"}
         </dd>
       </dl>
@@ -115,5 +120,13 @@ export function DeliveryEvidence({ material, delivery, file }) {
         <RuleChecklist rules={delivery.rule_results} />
       </div>
     </div>
+  );
+}
+
+export function firstReviewIssue(delivery) {
+  return (
+    delivery.rule_results?.find((r) => r.passed !== true)?.detail ||
+    delivery.error ||
+    "Review the recorded checks before deciding."
   );
 }

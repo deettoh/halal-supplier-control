@@ -5,17 +5,41 @@ import {
 } from "./client.js";
 export { ApiError, UnsupportedCapabilityError } from "./client.js";
 export function createLiveGateway(options) {
-  const { request } = createTransport(options);
+  const { request, requestPublic } = createTransport(options);
   const read =
     (path, roles) =>
     (context, { signal } = {}) =>
       request(path, { context, roles, signal });
   return {
     mode: "live",
+    capabilities: { hold: false, expiry: false, certificateExtract: false },
+    listPeople: (options) => requestPublic("/api/people", options),
+    readHealth: (options) => requestPublic("/api/health", options),
     listMaterials: read("/api/materials", ["staff", "supervisor"]),
     listPending: read("/api/deliveries?status=pending_review", ["supervisor"]),
     listActivity: read("/api/activity", ["supervisor"]),
     listCertificates: read("/api/certificates", ["supplier"]),
+    listRenewals: read("/api/registry/renewals", ["reviewer"]),
+    async listOnHold() {
+      throw new UnsupportedCapabilityError(
+        "Held deliveries are not available from the connected backend yet.",
+      );
+    },
+    async runExpiryCheck() {
+      throw new UnsupportedCapabilityError(
+        "Expiry checks are not available from the connected backend yet.",
+      );
+    },
+    decideRenewal(context, id, input) {
+      if (!Number.isInteger(id) || id <= 0)
+        return Promise.reject(new ApiError(404, "Renewal not found."));
+      return request(`/api/registry/renewals/${id}/decision`, {
+        context,
+        roles: ["reviewer"],
+        method: "POST",
+        body: input,
+      });
+    },
     createDelivery(context, { material_id, image }) {
       if (
         !Number.isInteger(Number(material_id)) ||
@@ -36,6 +60,12 @@ export function createLiveGateway(options) {
       });
     },
     decide(context, id, input) {
+      if (input.decision === "hold")
+        return Promise.reject(
+          new UnsupportedCapabilityError(
+            "Hold is not available from the connected backend yet.",
+          ),
+        );
       if (!Number.isInteger(id) || id <= 0)
         return Promise.reject(new ApiError(404, "Delivery not found."));
       return request("/api/deliveries/" + id + "/decision", {
@@ -58,13 +88,24 @@ export function createLiveGateway(options) {
         body,
       });
     },
-    readImage: (context, reference, { signal } = {}) =>
-      request(reference, {
+    readImage: (context, reference, { signal } = {}) => {
+      if (
+        context?.role === "reviewer" &&
+        !/^\/api\/certificates\/[1-9]\d*\/image$/.test(reference)
+      )
+        return Promise.reject(
+          new ApiError(
+            403,
+            "Registry reviewers can open certificate images only.",
+          ),
+        );
+      return request(reference, {
         context,
-        roles: ["staff", "supervisor", "supplier"],
+        roles: ["staff", "supervisor", "supplier", "reviewer"],
         signal,
         image: true,
-      }),
+      });
+    },
     listHistory: async () => {
       throw new UnsupportedCapabilityError(
         "Delivery history is not available from the backend yet.",

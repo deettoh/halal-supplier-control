@@ -1,3 +1,4 @@
+import { person } from "../../test/people.js";
 import { describe, it, expect, vi } from "vitest";
 import {
   createLiveGateway,
@@ -5,9 +6,9 @@ import {
   UnsupportedCapabilityError,
 } from "./gateway.js";
 import { formatDate } from "../format.js";
-const staff = { role: "staff", tenant: "Sunrise Bakery SAMPLE" };
-const supervisor = { ...staff, role: "supervisor" };
-const supplier = { role: "supplier", tenant: "2" };
+const staff = person(1);
+const supervisor = person(2);
+const supplier = person(6);
 function transport(body, status = 200) {
   return vi.fn(
     async () =>
@@ -19,7 +20,29 @@ function transport(body, status = 200) {
 }
 
 describe("canonical live transport", () => {
-  it('attaches demo headers to both teammate-confirmed image endpoints',async()=>{const fetchImpl=vi.fn(async()=>new Response('jpeg',{headers:{'Content-Type':'image/jpeg'}}));const gateway=createLiveGateway({fetchImpl,baseUrl:'https://api.example.test'});await gateway.readImage(supplier,'/api/certificates/3/image',{});await gateway.readImage(supervisor,'/api/deliveries/102/image',{});const calls=fetchImpl.mock.calls;expect(calls.map(([url])=>url)).toEqual(['https://api.example.test/api/certificates/3/image','https://api.example.test/api/deliveries/102/image']);expect(calls[0][1].headers.get('X-Demo-Role')).toBe('supplier');expect(calls[0][1].headers.get('X-Demo-Tenant')).toBe('2');expect(calls[1][1].headers.get('X-Demo-Role')).toBe('supervisor');expect(calls[1][1].headers.get('X-Demo-Tenant')).toBe('Sunrise Bakery SAMPLE');});
+  it("attaches demo headers to both teammate-confirmed image endpoints", async () => {
+    const fetchImpl = vi.fn(
+      async () =>
+        new Response("jpeg", { headers: { "Content-Type": "image/jpeg" } }),
+    );
+    const gateway = createLiveGateway({
+      fetchImpl,
+      baseUrl: "https://api.example.test",
+    });
+    await gateway.readImage(supplier, "/api/certificates/3/image", {});
+    await gateway.readImage(supervisor, "/api/deliveries/102/image", {});
+    const calls = fetchImpl.mock.calls;
+    expect(calls.map(([url]) => url)).toEqual([
+      "https://api.example.test/api/certificates/3/image",
+      "https://api.example.test/api/deliveries/102/image",
+    ]);
+    expect(calls[0][1].headers.get("X-Demo-Role")).toBe("supplier");
+    expect(calls[0][1].headers.get("X-Demo-Tenant")).toBe("2");
+    expect(calls[1][1].headers.get("X-Demo-Role")).toBe("supervisor");
+    expect(calls[1][1].headers.get("X-Demo-Tenant")).toBe(
+      "Sunrise Bakery SAMPLE",
+    );
+  });
   it("captures identity headers before a delayed request", async () => {
     const fetchImpl = transport([]);
     const g = createLiveGateway({ fetchImpl, baseUrl: "http://localhost" });

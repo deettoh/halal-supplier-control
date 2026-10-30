@@ -13,9 +13,7 @@ function CertificateRecord({ record }) {
     <article className="certificate-record">
       <div className="certificate-record-top">
         <h2>{record.cert_no}</h2>
-        <Status value={record.status}>
-          {record.status === "active" ? "Active" : "Superseded"}
-        </Status>
+        <Status value={record.status} />
       </div>
       <p>{record.issuer}</p>
       <dl className="certificate-details">
@@ -44,6 +42,17 @@ function CertificateRecord({ record }) {
           ))}
         </tbody>
       </table>
+      {record.review_note && (
+        <div className="review-note">
+          <strong>{record.reviewed_by || "Registry reviewer"}</strong>
+          <p>{record.review_note}</p>
+        </div>
+      )}
+      {record.renewal_requested_on && (
+        <p className="capability-note">
+          Renewal requested on {formatDate(record.renewal_requested_on)}.
+        </p>
+      )}
       {record.image && (
         <PhotoViewer
           reference={record.image}
@@ -67,7 +76,13 @@ function draftOf(current, holder = "") {
     })),
   };
 }
-function RenewalForm({ current, onSaved }) {
+function RenewalForm({
+  current,
+  onSaved,
+  onChanged,
+  onConflict,
+  pendingReview = false,
+}) {
   const session = useSession();
   const [draft, setDraft] = useState(() =>
     draftOf(current, organisationName(session.identity)),
@@ -80,7 +95,12 @@ function RenewalForm({ current, onSaved }) {
   const summary = useRef(null);
   const mutation = useScopedMutation(
     (ctx, input) => session.gateway.renewCertificate(ctx, input),
-    { onSuccess: onSaved },
+    {
+      onSuccess: onSaved,
+      onError: (error) => {
+        if (error.status === 409) onConflict?.();
+      },
+    },
   );
   useDraft(dirty || mutation.isPending);
   useEffect(() => {
@@ -89,6 +109,7 @@ function RenewalForm({ current, onSaved }) {
   function update(key, value) {
     setDraft((previous) => ({ ...previous, [key]: value }));
     setDirty(true);
+    onChanged?.();
     setValidation(null);
   }
   function usePrepared() {
@@ -98,6 +119,7 @@ function RenewalForm({ current, onSaved }) {
     setImageError(null);
     if (imageInput.current) imageInput.current.value = "";
     setDirty(true);
+    onChanged?.();
     setValidation(null);
     mutation.reset();
   }
@@ -119,6 +141,7 @@ function RenewalForm({ current, onSaved }) {
     setImage(file);
     setImageError(null);
     setDirty(true);
+    onChanged?.();
     setValidation(null);
   }
   function submit(event) {
@@ -157,7 +180,7 @@ function RenewalForm({ current, onSaved }) {
       {session.gateway.mode === "preview" && (
         <div className="prepared-renewal">
           <p>
-            This preview can publish its prepared renewal. Other changes require
+            This preview can submit its prepared renewal. Other changes require
             the backend.
           </p>
           <button
@@ -224,6 +247,7 @@ function RenewalForm({ current, onSaved }) {
                 setImageError(null);
                 setValidation(null);
                 setDirty(true);
+                onChanged?.();
                 if (imageInput.current) imageInput.current.value = "";
               }}
             >
@@ -242,101 +266,181 @@ function RenewalForm({ current, onSaved }) {
           )}
         </div>
         <p className="renewal-submit-note">
-          The new record replaces the active version. Linked masterlists use it
-          when coverage is recalculated.
+          Your current certificate stays active while this renewal is reviewed.
         </p>
-        <button className="button primary" disabled={mutation.isPending}>
-          {mutation.isPending ? "Publishing renewal…" : "Publish renewal"}
+        <button
+          className="button primary"
+          disabled={mutation.isPending || pendingReview}
+        >
+          {mutation.isPending
+            ? "Submitting renewal…"
+            : "Submit renewal for review"}
         </button>
         {mutation.isPending && (
-          <p role="status">Publishing the new certificate record…</p>
+          <p role="status">Submitting for registry review…</p>
         )}
       </form>
     </section>
   );
 }
 export default function Certificates() {
-  const query = useRecord("listCertificates");
-  const [saved, setSaved] = useState(null);
-  const success = useRef(null);
-  const records = query.data || [];
-  const current = records.find((c) => c.status === "active");
-  const previous = records.filter((c) => c.status === "superseded");
+  const session = useSession(),
+    query = useRecord("listCertificates");
+  const [saved, setSaved] = useState(null),
+    [draftBase, setDraftBase] = useState(null),
+    [hasDraft, setHasDraft] = useState(false);
+  const receipt = useRef(null),
+    records = query.data || [],
+    current = records.find((c) => c.status === "active"),
+    pending = records.find((c) => c.status === "pending");
+  const receiptRecord = records.find((c) => c.id === saved?.id) || saved;
   useEffect(() => {
-    if (saved) success.current?.focus();
+    if (saved) receipt.current?.focus();
   }, [saved]);
+  function changed() {
+    setHasDraft(true);
+    setDraftBase((base) => base || current);
+  }
+  function refresh() {
+    if (session.confirmDiscard()) query.refetch();
+  }
   return (
     <div className="page certificates-page">
       <div className="page-intro">
         <h1>Your certificate records</h1>
-        <p>Renew once. Linked buyers use the current shared record.</p>
+        <p>
+          One shared record. Renewals become active after a registry review.
+        </p>
+        <button
+          type="button"
+          className="button quiet refresh-records"
+          onClick={refresh}
+        >
+          Refresh records
+        </button>
       </div>
       <RequestState query={query} noun="certificates">
         <div className="registry-layout">
-          <section
-            className="certificate-versions"
-            aria-label="Current certificate"
-          >
+          <section aria-label="Certificate records">
+            <h2>Current certificate</h2>
             {current ? (
-              <div className="certificate-current" key={current.id}>
-                <CertificateRecord record={current} />
-              </div>
+              <CertificateRecord record={current} />
             ) : (
-              <div className="empty-state">
-                <h2>No certificate on record yet.</h2>
-                <p>Add the supplier document and the products it covers.</p>
-              </div>
+              <p className="muted">No active certificate is on file.</p>
             )}
-            {previous.length > 0 && (
-              <details className="previous-certificates">
-                <summary>Previous versions ({previous.length})</summary>
-                {previous.map((c) => (
+            {records
+              .filter((c) => c.status === "pending")
+              .map((c) => (
+                <section key={c.id} className="certificate-state-group">
+                  <h2>Waiting for review</h2>
+                  <CertificateRecord record={c} />
+                </section>
+              ))}
+            {records
+              .filter((c) => c.status === "rejected")
+              .map((c) => (
+                <section key={c.id} className="certificate-state-group">
+                  <h2>Reviewed and rejected</h2>
+                  <CertificateRecord record={c} />
+                  {!pending && (
+                    <button
+                      type="button"
+                      className="button quiet"
+                      onClick={() => {
+                        if (session.confirmDiscard()) {
+                          setDraftBase(c);
+                          setHasDraft(true);
+                          setSaved(null);
+                        }
+                      }}
+                    >
+                      Prepare corrected renewal
+                    </button>
+                  )}
+                </section>
+              ))}
+            <details className="certificate-history">
+              <summary>
+                Previous certificates (
+                {records.filter((c) => c.status === "superseded").length})
+              </summary>
+              {records
+                .filter((c) => c.status === "superseded")
+                .map((c) => (
                   <CertificateRecord key={c.id} record={c} />
                 ))}
-              </details>
-            )}
+            </details>
           </section>
-          {saved ? (
-            <section
-              className="renewal-receipt confirmed-receipt"
-              aria-label="Saved renewal"
-            >
-              <h2 ref={success} tabIndex={-1}>
-                Renewal saved.
-              </h2>
-              <dl className="renewal-change">
-                {saved.previous && (
-                  <div className="renewal-previous">
-                    <dt>
-                      Previous record{" "}
-                      <Status value="superseded">Superseded</Status>
-                    </dt>
-                    <dd>{saved.previous.cert_no}</dd>
-                  </div>
+          <section aria-label="Renewal submission">
+            <div className="supplier-review-process">
+              <span>Submit</span>
+              <span>Registry review</span>
+              <span>Active record</span>
+            </div>
+            {receiptRecord && (
+              <section className="renewal-receipt" role="status">
+                <h2 ref={receipt} tabIndex={-1}>
+                  {receiptRecord.status === "pending"
+                    ? "Renewal submitted."
+                    : receiptRecord.status === "active"
+                      ? "Renewal verified."
+                      : "Renewal reviewed."}
+                </h2>
+                <p>{receiptRecord.cert_no}</p>
+                <Status value={receiptRecord.status} />
+                <p>
+                  {receiptRecord.status === "pending"
+                    ? "Your current certificate stays active while this renewal is reviewed."
+                    : receiptRecord.review_note ||
+                      "The latest registry state is shown in your records."}
+                </p>
+              </section>
+            )}
+            {pending && (
+              <div className="pending-notice">
+                <h2>A renewal is waiting for review.</h2>
+                <p>
+                  The active record stays in place until a reviewer verifies
+                  this submission.
+                </p>
+                {hasDraft && (
+                  <>
+                    <p>
+                      Your unsent draft is kept below. It cannot be submitted
+                      while another renewal is pending.
+                    </p>
+                    <button
+                      type="button"
+                      className="button quiet"
+                      onClick={() => {
+                        if (session.confirmDiscard()) {
+                          setHasDraft(false);
+                          setDraftBase(null);
+                        }
+                      }}
+                    >
+                      Discard unsent draft
+                    </button>
+                  </>
                 )}
-                <div className="renewal-current">
-                  <dt>
-                    Renewed record <Status value="active">Active</Status>
-                  </dt>
-                  <dd>{saved.cert_no}</dd>
-                </div>
-              </dl>
-              <p>
-                The new record is active. Linked masterlists use it when they
-                refresh; coverage still depends on the delivered product and
-                brand.
-              </p>
-              <button className="button quiet" onClick={() => setSaved(null)}>
-                Prepare another renewal
-              </button>
-            </section>
-          ) : (
-            <RenewalForm
-              key={current?.id || "new"}
-              current={current}
-              onSaved={(record) => setSaved({ ...record, previous: current })}
-            />
-          )}
+              </div>
+            )}
+            {(!pending || hasDraft) &&
+              !(saved && receiptRecord?.status === "pending") && (
+                <RenewalForm
+                  key={draftBase?.id || current?.id || "new"}
+                  current={draftBase || current}
+                  onChanged={changed}
+                  pendingReview={!!pending}
+                  onConflict={() => query.refetch()}
+                  onSaved={(record) => {
+                    setSaved(record);
+                    setHasDraft(false);
+                    setDraftBase(null);
+                  }}
+                />
+              )}
+          </section>
         </div>
       </RequestState>
     </div>

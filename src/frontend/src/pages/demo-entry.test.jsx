@@ -1,3 +1,4 @@
+import { person } from "../test/people.js";
 import React from "react";
 import { it, expect } from "vitest";
 import { render, screen } from "@testing-library/react";
@@ -8,7 +9,7 @@ import { createPreviewGateway } from "../lib/preview/gateway.js";
 it("resets prepared decisions only through the explicit preview control", async () => {
   const user = userEvent.setup();
   const gateway = createPreviewGateway();
-  const context = { role: "supervisor", tenant: "Sunrise Bakery SAMPLE" };
+  const context = person(2);
   await gateway.decide(context, 102, {
     decision: "reject",
     reason: "Inspect this example.",
@@ -26,27 +27,18 @@ it("resets prepared decisions only through the explicit preview control", async 
   ).toBeInTheDocument();
   expect(await gateway.listPending(context, {})).toHaveLength(2);
 });
-it("requires an explicit compatible role and organisation", async () => {
+it("requires an explicit named person whose role and organisation stay together", async () => {
   const user = userEvent.setup();
   render(
-    <SessionProvider gateway={{ mode: "preview" }} initialIdentity={null}>
+    <SessionProvider gateway={createPreviewGateway()} initialIdentity={null}>
       <DemoEntry />
     </SessionProvider>,
   );
   expect(
     screen.getByRole("button", { name: "Enter workspace" }),
   ).toBeDisabled();
-  await user.click(screen.getByRole("radio", { name: /Halal supervisor/ }));
-  await user.selectOptions(
-    screen.getByLabelText("Organisation"),
-    "Sunrise Bakery SAMPLE",
-  );
+  await user.click(await screen.findByRole("radio", { name: /Farid/ }));
   expect(screen.getByRole("button", { name: "Enter workspace" })).toBeEnabled();
-  await user.click(screen.getByRole("radio", { name: /Supplier/ }));
-  expect(
-    screen.getByRole("button", { name: "Enter workspace" }),
-  ).toBeDisabled();
-  expect(
-    screen.queryByRole("option", { name: "Sunrise Bakery SAMPLE" }),
-  ).not.toBeInTheDocument();
+  expect(screen.getAllByRole("radio")).toHaveLength(7);
+  expect(screen.queryByLabelText("Organisation")).not.toBeInTheDocument();
 });

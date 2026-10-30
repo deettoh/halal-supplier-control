@@ -1,3 +1,4 @@
+import { person } from "../test/people.js";
 import React from "react";
 import { it, expect, vi, beforeEach } from "vitest";
 import { render, screen, waitFor, within, act } from "@testing-library/react";
@@ -7,7 +8,7 @@ import { createPreviewGateway } from "../lib/preview/gateway.js";
 import { createLiveGateway, ApiError } from "../lib/api/gateway.js";
 import data from "../lib/preview/data.json";
 import Certificates from "./certificates.jsx";
-const identity = { role: "supplier", tenant: "2" };
+const identity = person(6);
 beforeEach(() => {
   URL.createObjectURL = vi.fn(() => "blob:certificate-test");
   URL.revokeObjectURL = vi.fn();
@@ -18,7 +19,7 @@ const wrap = (gateway = createPreviewGateway(), who = identity) =>
       <Certificates />
     </SessionProvider>,
   );
-it("shows the actual previous and renewed record only after the service confirms", async () => {
+it("shows a pending receipt only after the service confirms, keeping the active record", async () => {
   const user = userEvent.setup();
   const base = createPreviewGateway();
   let release;
@@ -31,25 +32,33 @@ it("shows the actual previous and renewed record only after the service confirms
             resolve(await base.renewCertificate(ctx, input));
         }),
     },
-    { role: "supplier", tenant: "1" },
+    person(5),
   );
   await screen.findByRole("button", { name: "Use prepared renewal" });
   await user.click(
     screen.getByRole("button", { name: "Use prepared renewal" }),
   );
-  await user.click(screen.getByRole("button", { name: "Publish renewal" }));
+  await user.click(
+    screen.getByRole("button", { name: "Submit renewal for review" }),
+  );
   expect(
-    screen.queryByRole("region", { name: "Saved renewal" }),
+    screen.queryByRole("heading", { name: "Renewal submitted." }),
   ).not.toBeInTheDocument();
   expect(
-    screen.getByRole("button", { name: "Publishing renewal…" }),
+    screen.getByRole("button", { name: "Submitting renewal…" }),
   ).toBeDisabled();
   await act(async () => release());
-  const receipt = await screen.findByRole("region", { name: "Saved renewal" });
-  expect(within(receipt).getByText("SAMPLE-GGS-2026-001")).toBeVisible();
-  expect(within(receipt).getByText("Superseded")).toBeVisible();
+  const receipt = (
+    await screen.findByRole("heading", { name: "Renewal submitted." })
+  ).closest("section");
+  expect(screen.getByText("SAMPLE-GGS-2026-001")).toBeVisible();
+  expect(
+    within(
+      screen.getByText("SAMPLE-GGS-2026-001").closest("article"),
+    ).getByText("Active"),
+  ).toBeVisible();
   expect(within(receipt).getByText("SAMPLE-GGS-2027-PREVIEW")).toBeVisible();
-  expect(within(receipt).getByText("Active")).toBeVisible();
+  expect(within(receipt).getByText("Waiting for review")).toBeVisible();
 });
 it("submits a JPEG certificate accepted by the current backend", async () => {
   const user = userEvent.setup({ applyAccept: false });
@@ -64,7 +73,9 @@ it("submits a JPEG certificate accepted by the current backend", async () => {
     screen.getByLabelText("Certificate image (optional)"),
     image,
   );
-  await user.click(screen.getByRole("button", { name: "Publish renewal" }));
+  await user.click(
+    screen.getByRole("button", { name: "Submit renewal for review" }),
+  );
   await waitFor(() => expect(renewCertificate).toHaveBeenCalled());
   expect(renewCertificate.mock.calls[0][1].image).toBe(image);
 });
@@ -103,7 +114,9 @@ it("sends null for an empty brand and preserves failed-save fields and image", a
     screen.getByLabelText("Certificate image (optional)"),
     file,
   );
-  await user.click(screen.getByRole("button", { name: "Publish renewal" }));
+  await user.click(
+    screen.getByRole("button", { name: "Submit renewal for review" }),
+  );
   await screen.findByRole("alert");
   expect(JSON.parse(payload.get("scope"))[0]).toEqual({
     product_name: "Cocoa Powder",
@@ -128,40 +141,46 @@ it("does not publish an empty product scope", async () => {
     await user.click(
       screen.getAllByRole("button", { name: /Remove product/ })[0],
     );
-  await user.click(screen.getByRole("button", { name: "Publish renewal" }));
+  await user.click(
+    screen.getByRole("button", { name: "Submit renewal for review" }),
+  );
   expect(await screen.findByRole("alert")).toHaveTextContent(
     "Add at least one product",
   );
   expect(renewCertificate).not.toHaveBeenCalled();
 });
-it("publishes the prepared renewal and refreshes linked buyers", async () => {
-  const user = userEvent.setup();
-  const g = createPreviewGateway();
-  wrap(g, { role: "supplier", tenant: "1" });
-  await screen.findByRole("button", { name: "Use prepared renewal" });
+it("submits the prepared renewal and updates both buyers only after reviewer verification", async () => {
+  const user = userEvent.setup(),
+    g = createPreviewGateway();
+  wrap(g, person(5));
   await user.click(
-    screen.getByRole("button", { name: "Use prepared renewal" }),
+    await screen.findByRole("button", { name: "Use prepared renewal" }),
   );
-  await user.click(screen.getByRole("button", { name: "Publish renewal" }));
-  await screen.findByText("Renewal saved.");
-  for (const tenant of ["Sunrise Bakery SAMPLE", "Crescent Caterer SAMPLE"])
+  await user.click(
+    screen.getByRole("button", { name: "Submit renewal for review" }),
+  );
+  await screen.findByText("Renewal submitted.");
+  const pending = (await g.listCertificates(person(5))).find(
+    (c) => c.status === "pending",
+  );
+  expect(
+    (await g.listMaterials(person(1))).find((m) => m.id === 1).coverage_status,
+  ).toBe("expiring");
+  await g.decideRenewal(person(7), pending.id, {
+    decision: "verify",
+    note: "Reviewed SAMPLE renewal.",
+  });
+  for (const id of [1, 3])
     expect(
-      (await g.listMaterials({ role: "staff", tenant }, {})).every(
+      (await g.listMaterials(person(id))).every(
         (m) => m.coverage_status === "covered",
       ),
     ).toBe(true);
-  expect(
-    await within(
-      screen.getByRole("region", { name: "Current certificate" }),
-    ).findByText("SAMPLE-GGS-2027-PREVIEW"),
-  ).toBeInTheDocument();
 });
 function SwitchSupplier() {
   const session = useSession();
   return (
-    <button
-      onClick={() => session.selectIdentity({ role: "supplier", tenant: "1" })}
-    >
+    <button onClick={() => session.selectIdentity(person(5))}>
       Switch supplier test
     </button>
   );
@@ -185,12 +204,14 @@ it("ignores an old supplier save after switching identities", async () => {
     </SessionProvider>,
   );
   await screen.findByLabelText("Issuer");
-  await user.click(screen.getByRole("button", { name: "Publish renewal" }));
+  await user.click(
+    screen.getByRole("button", { name: "Submit renewal for review" }),
+  );
   await user.click(
     screen.getByRole("button", { name: "Switch supplier test" }),
   );
   await act(async () => resolve({ ...data.certificates["2"][0], id: 999 }));
-  expect(screen.queryByText("Renewal saved.")).not.toBeInTheDocument();
+  expect(screen.queryByText("Renewal submitted.")).not.toBeInTheDocument();
   expect(
     await screen.findByRole("textbox", { name: "Product 10" }),
   ).toHaveValue("Potato Starch");
@@ -210,7 +231,9 @@ it("blocks publication after replacing a valid image with an unsupported file", 
     picker,
     new File(["bad"], "wrong.pdf", { type: "application/pdf" }),
   );
-  await user.click(screen.getByRole("button", { name: "Publish renewal" }));
+  await user.click(
+    screen.getByRole("button", { name: "Submit renewal for review" }),
+  );
   expect(renewCertificate).not.toHaveBeenCalled();
   expect(screen.getByRole("alert")).toHaveTextContent("PNG");
 });
@@ -229,6 +252,8 @@ it("retains an editable issuer rather than adding a frontend whitelist", async (
   await screen.findByLabelText("Issuer");
   await user.clear(screen.getByLabelText("Issuer"));
   await user.type(screen.getByLabelText("Issuer"), "Another SAMPLE issuer");
-  await user.click(screen.getByRole("button", { name: "Publish renewal" }));
+  await user.click(
+    screen.getByRole("button", { name: "Submit renewal for review" }),
+  );
   await waitFor(() => expect(submitted.issuer).toBe("Another SAMPLE issuer"));
 });
