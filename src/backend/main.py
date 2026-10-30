@@ -19,6 +19,7 @@ from fastapi import (
 )
 from fastapi.responses import JSONResponse, Response
 from fastapi.staticfiles import StaticFiles
+from sqlalchemy import select
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import Session
 from starlette import status
@@ -26,7 +27,7 @@ from starlette.concurrency import run_in_threadpool
 from starlette.exceptions import HTTPException as StarletteHTTPException
 from starlette.types import Scope
 
-from backend import services
+from backend import db, services
 from backend.db import dispose_db, get_session_factory
 from backend.schemas import (
     ActivityResponse,
@@ -45,6 +46,7 @@ from backend.schemas import (
     MaterialResponse,
     NamedDemoContext,
     NonEmptyText,
+    PersonResponse,
     RenewalDecisionRequest,
     RenewalResponse,
     ValidationErrorResponse,
@@ -129,10 +131,6 @@ def require_roles(*roles: DemoRole) -> Callable[..., DemoContext]:
     return check_headers
 
 
-Staff = Annotated[DemoContext, Depends(require_roles("staff"))]
-Supervisor = Annotated[DemoContext, Depends(require_roles("supervisor"))]
-
-
 def require_named_roles(*roles: DemoRole) -> Callable[..., NamedDemoContext]:
     role_check = require_roles(*roles)
 
@@ -152,21 +150,23 @@ Supplier = Annotated[
 Reviewer = Annotated[
     NamedDemoContext, Depends(require_named_roles("reviewer"))
 ]
-Reader = Annotated[DemoContext, Depends(require_roles("staff", "supervisor"))]
+Staff = Annotated[NamedDemoContext, Depends(require_named_roles("staff"))]
+Supervisor = Annotated[
+    NamedDemoContext, Depends(require_named_roles("supervisor"))
+]
+Reader = Annotated[
+    NamedDemoContext, Depends(require_named_roles("staff", "supervisor"))
+]
 
 
 def certificate_reader(
     context: Annotated[
-        DemoContext,
-        Depends(require_roles("staff", "supervisor", "supplier", "reviewer")),
+        NamedDemoContext,
+        Depends(
+            require_named_roles("staff", "supervisor", "supplier", "reviewer")
+        ),
     ],
-    session: Database,
-    person: Annotated[int | None, Header(alias="X-Demo-Person")] = None,
-) -> DemoContext:
-    if context.role in {"supplier", "reviewer"}:
-        if person is None:
-            raise HTTPException(422, "X-Demo-Person is required")
-        return services.named_context(session, context, person)
+) -> NamedDemoContext:
     return context
 
 
@@ -178,6 +178,14 @@ CertificateId = Annotated[int, Path(gt=0)]
 @app.get("/api/health", response_model=HealthResponse, tags=["Health"])
 def health() -> HealthResponse:
     return HealthResponse()
+
+
+@app.get("/api/people", response_model=list[PersonResponse], tags=["People"])
+def list_people(session: Database) -> list[PersonResponse]:
+    return [
+        PersonResponse.model_validate(row, from_attributes=True)
+        for row in session.scalars(select(db.Person).order_by(db.Person.id))
+    ]
 
 
 @app.get(
@@ -231,8 +239,8 @@ def list_deliveries(
     query: Annotated[DeliveryListQuery, Query()],
     session: Database,
 ) -> list[DeliveryResponse]:
-    """Pending review queue for the chosen SME."""
-    return services.delivery_queue(session, context)
+    """Pending-review or on-hold queue for the chosen SME."""
+    return services.delivery_queue(session, context, query.status)
 
 
 @app.post(
@@ -251,7 +259,7 @@ def decide_delivery(
     context: Supervisor,
     session: Database,
 ) -> DeliveryResponse:
-    """Accept/reject a pending delivery with a nonblank reason."""
+    """Accept, reject or hold a reviewable delivery with a reason."""
     return services.decide_delivery(session, context, id, request)
 
 
