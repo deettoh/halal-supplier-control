@@ -219,14 +219,20 @@ class CertificateExtractRequest(APIModel):
     image: UploadFile
 
 
+class ExtractedScopeItem(CertificateScopeItem):
+    """Extracted scope row with the brand key always present."""
+
+    brand: NonEmptyText | None
+
+
 class CertificateExtraction(APIModel):
-    """Stretch model output; supplier checks/corrects before submitting."""
+    """Certificate fields from a photo, null where unreadable."""
 
     issuer: str | None
     cert_no: str | None
     holder_name: str | None
     expiry_date: date | None
-    scope: list[CertificateScopeItem] | None
+    scope: list[ExtractedScopeItem] | None
 
 
 class CertificateExtractResponse(APIModel):

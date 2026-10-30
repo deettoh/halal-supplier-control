@@ -5,7 +5,7 @@ import os
 import pathlib
 from collections.abc import AsyncIterator, Callable, Generator
 from contextlib import asynccontextmanager
-from typing import Annotated, Any, NoReturn
+from typing import Annotated, Any
 
 from fastapi import (
     Depends,
@@ -173,10 +173,6 @@ def certificate_reader(
 PhotoReader = Annotated[DemoContext, Depends(certificate_reader)]
 DeliveryId = Annotated[int, Path(gt=0)]
 CertificateId = Annotated[int, Path(gt=0)]
-
-
-def not_implemented() -> NoReturn:
-    raise HTTPException(501, "Contract only: business logic not implemented")
 
 
 @app.get("/api/health", response_model=HealthResponse, tags=["Health"])
@@ -348,7 +344,10 @@ def decide_renewal(
 @app.post(
     "/api/certificates/extract",
     response_model=CertificateExtractResponse,
-    responses={**ERRORS, 501: {"model": ErrorResponse}},
+    responses={
+        **ERRORS,
+        413: {"model": ErrorResponse, "description": "Photo exceeds 10 MiB"},
+    },
     tags=["Certificates (stretch)"],
 )
 def extract_certificate(
@@ -357,8 +356,8 @@ def extract_certificate(
         CertificateExtractRequest, Form(media_type="multipart/form-data")
     ],
 ) -> CertificateExtractResponse:
-    """Stretch: pre-fill only; extraction does not submit a renewal."""
-    not_implemented()
+    """Extract certificate fields without submitting a renewal."""
+    return services.extract_certificate(services.read_photo(request.image))
 
 
 def jpeg_response(payload: bytes) -> Response:

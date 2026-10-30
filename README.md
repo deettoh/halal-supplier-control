@@ -211,7 +211,7 @@ pnpm --dir src/frontend test --run && pnpm --dir src/frontend lint
 ```
 
 CI runs the backend and frontend checks on every pull request and on `main`.
-At this commit, `uv run pytest -q` reports 267 passed and 114 skipped, where
+At this commit, `uv run pytest -q` reports 328 passed and 141 skipped, where
 the skipped tests need PostgreSQL (`--run-db`) or the live endpoint
 (`--run-live`). `pnpm --dir src/frontend test --run` reports 81 passed.
 
@@ -274,14 +274,17 @@ Proof of use: [`submission/SDC2026_READMElater_Runpod_POU.pdf`](submission/SDC20
   the certifi bundle.
 - **Prompt changes.** Two rounds of prompt rewording made the live results
   worse, because one left a visible halal mark unread and the other read a
-  SAMPLE sticker as the product. The first prompt stayed.
+  SAMPLE sticker as the product. The team kept the first prompt and later
+  added one sentence that keeps a "Supplied to" name out of the manufacturer
+  field.
 - **Lesson.** Scoring every prompt change against the same eight cases caught
   both regressions before deployment.
 
 ## Future improvements
 
 - Pre-fill the renewal form from a certificate photo. The route
-  `POST /api/certificates/extract` is defined but returns 501.
+  `POST /api/certificates/extract` reads the photo, but the form doesn't
+  call it yet.
 - Take certificates from suppliers and label photos from staff through
   WhatsApp with the Meta Cloud API.
 - Check each certificate against Verify Halal or MYeHALAL.
