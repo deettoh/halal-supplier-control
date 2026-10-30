@@ -1,6 +1,7 @@
 """Tenant-scoped reads, delivery checks and atomic workflow writes."""
 
 import hashlib
+import logging
 from datetime import UTC, datetime, timedelta
 
 from fastapi import HTTPException, UploadFile
@@ -13,6 +14,7 @@ from backend.schemas import (
     RULE_ORDER,
     ActivityResponse,
     CertificateCreateRequest,
+    CertificateExtractResponse,
     CertificateResponse,
     Coverage,
     DeliveryDecisionRequest,
@@ -25,6 +27,8 @@ from backend.schemas import (
     RenewalResponse,
     RuleResult,
 )
+
+logger = logging.getLogger(__name__)
 
 MAX_IMAGE_BYTES = 10 * 1024 * 1024
 # Internal marker while the durable evidence is being extracted. The row is
@@ -256,6 +260,35 @@ def _extract_label(
         )
     except TimeoutError:
         return None, "Label extraction timed out; human review required."
+
+
+def extract_certificate(payload: bytes) -> CertificateExtractResponse:
+    """Return certificate fields from a photo or the failure message.
+
+    Args:
+        payload: Uploaded certificate photo.
+
+    Returns:
+        Either the extracted fields or null fields with the message.
+
+    Raises:
+        HTTPException: 422 if payload is not a readable image.
+    """
+    try:
+        extracted = extract.extract_certificate(payload)
+    except extract.ExtractionError as error:
+        # extractor messages hold no secrets or input values
+        logger.warning("Certificate extraction failed: %s", error)
+        return CertificateExtractResponse(extracted=None, error=str(error))
+    except ValidationError:
+        # config validation errors can include secret input values
+        logger.warning("Certificate extraction configuration is invalid")
+        return CertificateExtractResponse(
+            extracted=None, error="Invalid extraction configuration."
+        )
+    except ValueError as error:
+        raise HTTPException(422, str(error)) from None
+    return CertificateExtractResponse(extracted=extracted, error=None)
 
 
 def _matches_demo_cache(payload: bytes, label: LabelExtraction) -> bool:
