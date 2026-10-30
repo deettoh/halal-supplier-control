@@ -290,7 +290,22 @@
     }
   ],
   "deliveries": [],
-  "activity_log": [],
+  "activity_log": [
+    {
+      "id": 1,
+      "tenant": "Sunrise Bakery SAMPLE",
+      "actor": "Aina",
+      "actor_title": "Receiving staff",
+      "role": "staff",
+      "action": "auto_accepted",
+      "material_name": "Cocoa Powder",
+      "verdict": "covered",
+      "supplier_name": null,
+      "delivery_id": null,
+      "reason": "Seed-only activity example; no persisted delivery is attached. Requires the v0.2 activity-field backend update before loading.",
+      "created_at": "2026-10-21T01:00:00Z"
+    }
+  ],
   "people": [
     {
       "id": 1,
