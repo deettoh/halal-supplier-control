@@ -29,6 +29,7 @@ export default function Review() {
   const [showDetail, setShowDetail] = useState(false);
   const queue = activeQuery.data || [];
   const id = selectedId ?? queue[0]?.id;
+  const emptyQueue = activeQuery.isSuccess && queue.length === 0 && !id;
   const selected =
     blockedSnapshot?.id === id
       ? blockedSnapshot
@@ -259,13 +260,30 @@ export default function Review() {
           </>
         ) : (
           <div className="empty-workbench">
-            <h1>Review deliveries</h1>
+            <h1>
+              {emptyQueue
+                ? queueMode === "hold"
+                  ? "No held deliveries"
+                  : "Nothing waiting for review"
+                : "Review deliveries"}
+            </h1>
             <ErrorMessage error={mutation.error} />
             <p>
-              {id
-                ? "This delivery is no longer in the pending queue."
-                : "Select a delivery to inspect its photo and document checks."}
+              {emptyQueue
+                ? queueMode === "hold"
+                  ? "Deliveries appear here when a supervisor places them on hold."
+                  : `New flagged deliveries for ${session.identity?.tenant || "this organisation"} will appear here after receiving staff submit a check.`
+                : id
+                  ? "This delivery is no longer in the pending queue."
+                  : "Select a delivery to inspect its photo and document checks."}
             </p>
+            {emptyQueue && session.gateway.mode === "preview" && (
+              <p className="queue-preview-note">
+                Prepared preview: each organisation has its own queue. Covered
+                checks, including those with an expiry warning, appear in
+                Decided deliveries.
+              </p>
+            )}
             <button
               className="button quiet"
               onClick={() => {

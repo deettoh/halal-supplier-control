@@ -10,6 +10,38 @@ import { Comparison, RuleChecklist } from "./delivery-evidence.jsx";
 import Review from "../pages/review.jsx";
 import data from "../lib/preview/data.json";
 const identity = person(2);
+it("explains an actually empty organisation queue without asking for a nonexistent delivery", async () => {
+  render(
+    <SessionProvider
+      gateway={createPreviewGateway()}
+      initialIdentity={person(4)}
+    >
+      <Review />
+    </SessionProvider>,
+  );
+  expect(
+    await screen.findByRole("heading", { name: "Nothing waiting for review" }),
+  ).toBeVisible();
+  expect(
+    screen.getByText(/New flagged deliveries for Crescent Caterer SAMPLE/),
+  ).toBeVisible();
+  expect(
+    screen.queryByText(
+      "Select a delivery to inspect its photo and document checks.",
+    ),
+  ).not.toBeInTheDocument();
+  await userEvent
+    .setup()
+    .click(screen.getByRole("button", { name: "On hold", exact: true }));
+  expect(
+    await screen.findByRole("heading", { name: "No held deliveries" }),
+  ).toBeVisible();
+  expect(
+    screen.getByText(
+      "Deliveries appear here when a supervisor places them on hold.",
+    ),
+  ).toBeVisible();
+});
 it("links the selected comparison field using touch-equivalent clicks and keyboard activation", async () => {
   const user = userEvent.setup();
   const delivery = data.deliveries[identity.tenant][0];

@@ -27,11 +27,15 @@ export function createSceneController({
   if (!reducedMotion) progressRef.current.value = 0;
   let w = stage.clientWidth,
     h = stage.clientHeight,
-    mobile = w <= 760;
+    mobile = w <= 760,
+    navHeight = 76;
   function measure() {
     w = stage.clientWidth;
     h = stage.clientHeight;
     mobile = w <= 760;
+    navHeight =
+      root.closest(".signal-landing")?.querySelector(".site-header")
+        ?.offsetHeight || (mobile ? 64 : 76);
     const heading = root.querySelector(".scene-heading");
     layoutRef.current = {
       heading,
@@ -104,7 +108,9 @@ export function createSceneController({
     if (mobile)
       scale =
         Math.min((w * 0.77) / 300, (h * 0.43) / 438) *
-        (1 - pose.decision * 0.12);
+        (1 - pose.decision * 0.12) *
+        // Reserve the hero actions above the compact photo on shorter phones.
+        (h < 650 ? 0.65 + 0.35 * pose.copyAway : 1);
     const x = mobile ? 0 : w * 0.202 * (1 - pose.expand);
     let y = mobile
       ? h * 0.04 +
@@ -168,7 +174,7 @@ export function createSceneController({
       .timeline({
         scrollTrigger: {
           trigger: root,
-          start: () => `top ${mobile ? 64 : 76}px`,
+          start: () => `top ${navHeight}px`,
           end: "bottom bottom",
           scrub: 0.15,
           onRefresh: measure,
@@ -210,6 +216,33 @@ export function createSceneController({
   }
   const topFor = (p) =>
     trigger ? trigger.start + (trigger.end - trigger.start) * p : 0;
+  function seek(top) {
+    window.scrollTo({ top, behavior: "instant" });
+    if (!trigger) return;
+    // Finish an outstanding scrub before seeking; otherwise a hash jump briefly
+    // plays all the intervening poses after the destination is already visible.
+    trigger.getTween?.()?.progress(1);
+    const p = Math.max(
+      0,
+      Math.min(
+        1,
+        (top - trigger.start) / Math.max(1, trigger.end - trigger.start),
+      ),
+    );
+    timeline.progress?.(p, true);
+    progressRef.current.value = p;
+    render();
+  }
+  function jumpToSection(target) {
+    pause();
+    move?.kill();
+    if (destroyed || !target) return;
+    const top = Math.max(
+      0,
+      target.getBoundingClientRect().top + window.scrollY - navHeight - 16,
+    );
+    seek(top);
+  }
   function goToStage(index) {
     pause();
     move?.kill();
@@ -237,7 +270,7 @@ export function createSceneController({
     pause();
     if (!canScroll) return;
     move?.kill();
-    window.scrollTo({ top: topFor(0), behavior: "instant" });
+    seek(topFor(0));
     onPlaybackChange(true);
     tour = gsap.timeline({
       onComplete: () => {
@@ -246,7 +279,6 @@ export function createSceneController({
       },
     });
     tour
-      .to({}, { duration: 2.2 })
       .to(window, {
         scrollTo: { y: topFor(0.29), autoKill: false },
         duration: 4.3,
@@ -299,6 +331,7 @@ export function createSceneController({
   render();
   return {
     goToStage,
+    jumpToSection,
     play,
     pause,
     destroy() {

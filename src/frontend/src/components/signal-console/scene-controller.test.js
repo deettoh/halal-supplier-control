@@ -101,3 +101,28 @@ it("clears the scan in the static alternative", () => {
   mount(0.22, { reducedMotion: true });
   expect(root.style.getPropertyValue("--scan-opacity")).toBe("0");
 });
+it("starts the tour with movement rather than an unexplained opening wait", () => {
+  const playback = mount();
+  controller.play();
+  const tour = mocks.timelines.at(-1);
+  expect(tour.to.mock.calls[0][0]).toBe(window);
+  expect(tour.to.mock.calls[0][1].scrollTo.y).toBeGreaterThan(0);
+  expect(playback).toHaveBeenLastCalledWith(true);
+});
+it("seeks directly to a section instead of replaying intermediate scroll poses", () => {
+  mount();
+  const scroll = vi.spyOn(window, "scrollTo");
+  const target = document.createElement("section");
+  target.getBoundingClientRect = () => ({ top: 2800 });
+  const line = mocks.timelines.findLast((t) => t.scrollTrigger);
+  const [progress] = line.to.mock.calls[0];
+  controller.jumpToSection(target);
+  expect(scroll).toHaveBeenLastCalledWith(
+    expect.objectContaining({ behavior: "instant" }),
+  );
+  expect(progress.value).toBe(1);
+  target.getBoundingClientRect = () => ({ top: 0 });
+  controller.jumpToSection(target);
+  expect(progress.value).toBe(0);
+  expect(root.querySelector(".hero-copy").style.opacity).toBe("1");
+});

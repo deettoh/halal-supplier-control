@@ -25,6 +25,20 @@ const photo = (name) =>
     { type: "image/jpeg" },
   );
 describe("isolated prepared-example gateway", () => {
+  it("starts Ravi empty and keeps Mei Ling's prepared flour check in his organisation's history", async () => {
+    expect(await g.listPending(person(4), {})).toEqual([]);
+    expect(await g.listPending(supervisor, {})).toHaveLength(2);
+    const c = previewCases.find((c) => c.id === "expiring");
+    await g.createDelivery(person(3), {
+      material_id: 9,
+      image: photo(c.image),
+    });
+    expect(await g.listPending(person(4), {})).toEqual([]);
+    expect(await g.listHistory(person(4), {})).toEqual([
+      expect.objectContaining({ status: "auto_accepted", verdict: "expiring" }),
+    ]);
+    expect(await g.listPending(supervisor, {})).toHaveLength(2);
+  });
   it("uses the renewed certificate for the next prepared delivery without rewriting earlier checks", async () => {
     const sample = photo(previewCases.find((c) => c.id === "expiring").image);
     const before = await g.createDelivery(staff, {

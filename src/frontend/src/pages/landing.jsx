@@ -1,25 +1,23 @@
-import React, { useState } from "react";
+import React, { useRef, useState } from "react";
 import { ArrowRight, ArrowUp, FileCheck2, Building2 } from "lucide-react";
 import { AppLink } from "../lib/navigation.jsx";
 import { OpeningIntro } from "../components/opening-intro.jsx";
 import LandingScene from "../components/signal-console/index.jsx";
-function jump(event, id) {
-  const target = document.getElementById(id);
-  if (!target) return;
-  event.preventDefault();
-  target.scrollIntoView({
-    behavior:
-      document.documentElement.dataset.motion === "reduced"
-        ? "instant"
-        : "smooth",
-    block: "start",
-  });
-  target.setAttribute("tabindex", "-1");
-  target.focus({ preventScroll: true });
-  history.replaceState(null, "", "#" + id);
-}
+import { transitionUpdate } from "../lib/motion.js";
 export default function Landing() {
   const [approved, setApproved] = useState(false);
+  const scene = useRef();
+  function jump(event, id) {
+    const target = document.getElementById(id);
+    if (!target) return;
+    event.preventDefault();
+    transitionUpdate(() => {
+      scene.current?.jumpToSection(target);
+      target.setAttribute("tabindex", "-1");
+      target.focus({ preventScroll: true });
+      history.replaceState(null, "", "#" + id);
+    });
+  }
   return (
     <OpeningIntro>
       <div className="signal-landing">
@@ -64,7 +62,7 @@ export default function Landing() {
           </AppLink>
         </header>
         <main>
-          <LandingScene />
+          <LandingScene apiRef={scene} />
           <section
             className="registry-section"
             id="registry"

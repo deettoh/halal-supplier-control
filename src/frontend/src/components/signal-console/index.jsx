@@ -4,6 +4,7 @@ import React, {
   useCallback,
   useEffect,
   useLayoutEffect,
+  useImperativeHandle,
   useRef,
   useState,
 } from "react";
@@ -36,7 +37,7 @@ function storedReduced() {
     return false;
   }
 }
-export default function LandingScene() {
+export default function LandingScene({ apiRef }) {
   const root = useRef(),
     progressRef = useRef({ value: 0 }),
     invalidateRef = useRef(() => {}),
@@ -99,6 +100,13 @@ export default function LandingScene() {
     setFailed(true);
     setReady(false);
   }, []);
+  useImperativeHandle(
+    apiRef,
+    () => ({
+      jumpToSection: (target) => controller.current?.jumpToSection(target),
+    }),
+    [],
+  );
   function selectField(value) {
     engaged.current = true;
     controller.current?.pause();
@@ -158,15 +166,34 @@ export default function LandingScene() {
             <button
               className="text-action"
               type="button"
-              onClick={() => controller.current?.play()}
+              onClick={() =>
+                playing
+                  ? controller.current?.pause()
+                  : controller.current?.play()
+              }
               disabled={staticMode}
+              aria-pressed={playing}
+              aria-describedby={
+                staticMode ? "walkthrough-motion-note" : undefined
+              }
             >
-              Watch the idea <Play aria-hidden="true" />
+              {playing ? "Pause walkthrough" : "Watch the idea"}{" "}
+              {playing ? (
+                <Pause aria-hidden="true" />
+              ) : (
+                <Play aria-hidden="true" />
+              )}
             </button>
           </div>
           <p className="quiet-note">
             For food businesses. Built around the evidence.
           </p>
+          {staticMode && (
+            <p className="motion-explanation" id="walkthrough-motion-note">
+              Motion is off. Use Photo, Read, Rules and Human review to explore
+              the evidence.
+            </p>
+          )}
         </div>
         <div className="scene-heading">
           <h2>{title}</h2>
@@ -231,7 +258,6 @@ export default function LandingScene() {
           <button
             type="button"
             className="hold-button"
-            onMouseEnter={() => controller.current?.pause()}
             onFocus={() => controller.current?.pause()}
             onClick={() => setHeld((v) => !v)}
           >
@@ -256,7 +282,6 @@ export default function LandingScene() {
                   key={label}
                   type="button"
                   aria-pressed={stage === i}
-                  onMouseEnter={() => controller.current?.pause()}
                   onClick={() => controller.current?.goToStage(i)}
                 >
                   <Icon aria-hidden="true" />
@@ -289,6 +314,9 @@ export default function LandingScene() {
               playing ? controller.current?.pause() : controller.current?.play()
             }
             disabled={staticMode}
+            aria-describedby={
+              staticMode ? "walkthrough-motion-note" : undefined
+            }
           >
             {playing ? (
               <Pause aria-hidden="true" />

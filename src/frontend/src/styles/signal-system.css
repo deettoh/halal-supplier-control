@@ -8,6 +8,9 @@
   --danger: #a23320;
   --success: #2c634f;
   --radius: 8px;
+  --action-fill: #c4480c;
+  --action-hover: #ac3609;
+  --action-edge: #ff9a62;
 }
 .signal-landing {
   background: var(--canvas);
@@ -15,10 +18,22 @@
 .signal-landing .site-header {
   position: sticky;
   z-index: 45;
+  justify-content: flex-start;
+  gap: 40px;
+  background: var(--paper);
+  color: var(--ink);
+  border-bottom: 1px solid var(--line);
 }
 .signal-landing .site-header .brand {
   font-family: "Barlow Semi Condensed", sans-serif;
   font-weight: 700;
+  color: var(--accent);
+}
+.signal-landing .site-header nav {
+  margin-left: 8px;
+}
+.signal-landing .header-cta {
+  margin-left: auto;
 }
 .signal-landing .hero-copy {
   font-size: 16px;
@@ -28,9 +43,6 @@
 }
 .signal-landing .hero-copy h1 span {
   display: inline;
-}
-.signal-landing .primary {
-  color: #321608;
 }
 .signal-landing .scene-heading {
   pointer-events: none;
@@ -248,6 +260,21 @@ html[data-motion="reduced"] * {
   scroll-behavior: auto !important;
   transition-duration: 0.08s !important;
   animation-duration: 0.01ms !important;
+}
+@media (min-width: 761px) and (max-width: 1050px) {
+  .signal-landing .site-header {
+    gap: 24px;
+  }
+  .signal-landing .site-header .brand {
+    font-size: 24px;
+  }
+  .signal-landing .site-header nav {
+    gap: 20px;
+  }
+  .signal-landing .header-cta {
+    gap: 18px;
+    padding-inline: 15px;
+  }
 }
 @media (max-width: 760px) {
   .signal-landing .hero-copy h1 {
@@ -795,19 +822,68 @@ small {
   gap: 12px;
 }
 .button.primary {
-  background: var(--orange);
-  border-color: transparent;
-  color: #321608;
+  color: #fff;
 }
-.button.primary:hover:not(:disabled) {
-  background: #fc793c;
-  color: #321608;
+.primary,
+.button.primary,
+.signal-landing .header-cta,
+.signal-landing .hold-button {
+  background: var(--action-fill);
+  color: #fff;
+  border: 1px solid var(--action-edge);
+  box-shadow:
+    inset 0 1px 0 #ffd5b8,
+    0 5px 18px #f064233b;
+  transition:
+    background 180ms var(--ease),
+    box-shadow 220ms var(--ease),
+    transform 180ms var(--ease);
+}
+.primary:hover:not(:disabled),
+.button.primary:hover:not(:disabled),
+.signal-landing .header-cta:hover,
+.signal-landing .hold-button:hover {
+  background: var(--action-hover);
+  color: #fff;
+  box-shadow:
+    inset 0 1px 0 #ffe4d2,
+    0 7px 24px #f0642359;
+}
+.primary:focus-visible,
+.signal-landing .header-cta:focus-visible,
+.signal-landing .hold-button:focus-visible {
+  outline: 3px solid var(--accent-deep);
+  outline-offset: 4px;
+  box-shadow:
+    inset 0 1px 0 #ffe4d2,
+    0 7px 24px #f0642359;
+}
+.primary:active:not(:disabled),
+.signal-landing .header-cta:active,
+.signal-landing .hold-button:active {
+  transform: translateY(1px);
+  box-shadow:
+    inset 0 1px 0 #ffd5b8,
+    0 2px 8px #f064232e;
 }
 .button:disabled {
   background: #e5e9e5;
   border-color: transparent;
   color: #56625b;
   opacity: 1;
+  box-shadow: none;
+}
+.motion-explanation {
+  font-size: 13px;
+  line-height: 1.5;
+  max-width: 44ch;
+  color: var(--muted);
+}
+.empty-workbench .queue-preview-note {
+  max-width: 55ch;
+  font-size: 13px;
+  line-height: 1.65;
+  color: var(--muted);
 }
 .request-error {
   border: 0;
@@ -1197,6 +1273,19 @@ small {
 .scope-editor {
   font-size: 14px;
 }
+.scope-headings,
+.scope-editor li {
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) 112px;
+}
+.scope-remove.button {
+  gap: 6px;
+  padding: 10px;
+  white-space: nowrap;
+}
+.scope-remove.button svg {
+  width: 16px;
+  height: 16px;
+}
 .prepared-renewal {
   font-size: 12px;
   border-radius: 7px;
@@ -1537,5 +1626,83 @@ small {
     margin-top: 30px;
     padding-top: 25px;
     border-top: 1px solid var(--line);
+  }
+}
+
+@media (max-width: 760px) {
+  .signal-landing {
+    --nav-height: 112px;
+  }
+  .signal-landing .site-header {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    grid-template-rows: 44px 30px;
+    align-content: center;
+    gap: 4px 12px;
+    padding: 10px 5vw;
+  }
+  .signal-landing .scene-stage {
+    min-height: 0;
+  }
+  .signal-landing .site-header .brand {
+    min-width: 0;
+    max-width: none;
+    font-size: 20px;
+    gap: 7px;
+    white-space: normal;
+  }
+  .signal-landing .site-header nav {
+    display: flex;
+    grid-row: 2;
+    grid-column: 1 / -1;
+    gap: 24px;
+    margin: 0;
+    padding-top: 6px;
+    border-top: 1px solid var(--line);
+    font-size: 12px;
+  }
+  .signal-landing .site-header nav a {
+    padding: 2px 0;
+  }
+  .signal-landing .header-cta {
+    font-size: 12px;
+  }
+  .scope-editor {
+    overflow-x: visible;
+  }
+  .scope-headings {
+    display: none;
+  }
+  .scope-editor li {
+    grid-template-columns: minmax(0, 1fr) 44px;
+    gap: 8px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid var(--line);
+  }
+  .scope-editor li .field {
+    grid-column: 1;
+  }
+  .scope-editor label.sr-only {
+    position: static;
+    display: block;
+    width: auto;
+    height: auto;
+    padding: 0;
+    clip: auto;
+    clip-path: none;
+    white-space: normal;
+    font-size: 12px;
+    color: var(--muted);
+  }
+  .scope-remove.button {
+    grid-column: 2;
+    grid-row: 1 / 3;
+    align-self: center;
+    width: 44px;
+    height: 44px;
+    padding: 0;
+  }
+  .scope-remove span {
+    display: none;
   }
 }
