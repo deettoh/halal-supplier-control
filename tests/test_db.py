@@ -855,6 +855,7 @@ def test_demo_reset_restores_seed_photos_and_removes_workflows(
         assert counts == {
             name: len(getattr(seed, name))
             for name in (
+                "sme_settings",
                 "suppliers",
                 "certificates",
                 "materials",
@@ -866,6 +867,7 @@ def test_demo_reset_restores_seed_photos_and_removes_workflows(
         with Session(engine) as session:
             seed = SeedData.model_validate_json(DEFAULT_SEED_PATH.read_text())
             for model in (
+                db.SMESettings,
                 Supplier,
                 Certificate,
                 Material,
