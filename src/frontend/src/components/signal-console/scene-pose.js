@@ -12,11 +12,21 @@ export function scenePose(progress, { mode = "desktop" } = {}) {
       ? 0
       : windowed(p, 0.2, 0.36) * (1 - windowed(p, 0.58, 0.74));
   const decision = mode === "static" ? 1 : windowed(p, 0.73, 0.83);
+  // Narrow layouts finish the pass while the photo is still the focused plane.
+  const [scanStart, scanEnd] = mode === "stacked" ? [0.035, 0.18] : [0.14, 0.3];
+  const scanProgress = clamp((p - scanStart) / (scanEnd - scanStart));
+  const scanOpacity =
+    mode === "static"
+      ? 0
+      : windowed(p, scanStart, scanStart + 0.01) *
+        (1 - windowed(p, scanEnd - 0.01, scanEnd));
   return {
     progress: p,
     expand,
     open,
     decision,
+    scanProgress,
+    scanOpacity,
     stage: p < 0.19 ? 0 : p < 0.43 ? 1 : p < 0.72 ? 2 : 3,
     photo: [-3.13 - open * 0.58, -0.04 - open * 0.24, 0.19 + open * 0.72],
     reading: [-0.06 + open * 0.11, -0.04 + open * 0.31, 0.19 + open * 1.55],

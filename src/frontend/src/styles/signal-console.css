@@ -436,12 +436,36 @@ button:disabled {
 }
 .scan-strip {
   position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: var(--scan-opacity, 0);
+  transform: translate3d(0, calc(var(--scan-progress, 0) * 100%), 0);
+}
+.scan-strip::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 100%;
+  height: 48px;
+  background: linear-gradient(to bottom, transparent, #f0642333);
+}
+.scan-strip::after {
+  content: "";
+  position: absolute;
   top: 0;
   left: 0;
   right: 0;
   height: 2px;
-  background: var(--accent);
-  opacity: 0;
+  background: linear-gradient(
+    90deg,
+    #f0642366,
+    #ffb76b 20%,
+    #fff2d4 50%,
+    #ffb76b 80%,
+    #f0642366
+  );
+  box-shadow: 0 2px 8px #f0642399;
 }
 .photo-caption {
   display: flex;

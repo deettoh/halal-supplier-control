@@ -22,3 +22,20 @@ it("clamps direct links and keeps the static alternative fully readable", () => 
     decision: 1,
   });
 });
+
+it("scrubs the photo scan through one bounded pass and reverses with scroll", () => {
+  expect(scenePose(0.14)).toMatchObject({ scanProgress: 0, scanOpacity: 0 });
+  expect(scenePose(0.22).scanProgress).toBeCloseTo(0.5);
+  expect(scenePose(0.22).scanOpacity).toBe(1);
+  expect(scenePose(0.3)).toMatchObject({ scanProgress: 1, scanOpacity: 0 });
+  expect(scenePose(0.18).scanProgress).toBeLessThan(
+    scenePose(0.26).scanProgress,
+  );
+});
+it("finishes the phone scan before the reading plane takes over and hides it in static mode", () => {
+  const phone = scenePose(0.18, { mode: "stacked" });
+  expect(phone.scanProgress).toBe(1);
+  expect(phone.stage).toBe(0);
+  expect(scenePose(0.1075, { mode: "stacked" }).scanProgress).toBeCloseTo(0.5);
+  expect(scenePose(0.22, { mode: "static" }).scanOpacity).toBe(0);
+});

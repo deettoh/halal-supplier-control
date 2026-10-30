@@ -28,7 +28,7 @@ afterEach(() => {
   root?.remove();
   vi.restoreAllMocks();
 });
-function mount(initialProgress = 0) {
+function mount(initialProgress = 0, { reducedMotion = false } = {}) {
   root = document.createElement("section");
   root.innerHTML =
     '<div class="scene-stage"></div><div class="hero-copy"><a href="/demo">Enter demo</a></div><div class="scene-heading"></div><div class="decision-drawer"></div><a href="#registry">Skip walkthrough</a>';
@@ -47,7 +47,7 @@ function mount(initialProgress = 0) {
     invalidate: vi.fn(),
     onStageChange: vi.fn(),
     onPlaybackChange: playback,
-    reducedMotion: false,
+    reducedMotion,
   });
   return playback;
 }
@@ -77,4 +77,27 @@ it("gives keyboard, wheel and hidden-page navigation control back to the visitor
 it("restores the opening composition after leaving a selected static stage", () => {
   mount(0.53);
   expect(root.querySelector(".hero-copy").style.opacity).toBe("1");
+});
+
+it("updates the shared scan even when the CSS fallback has been removed for the 3D renderer", () => {
+  mount();
+  const line = mocks.timelines.findLast((t) => t.scrollTrigger);
+  const [progress, options] = line.to.mock.calls[0];
+  progress.value = 0.22;
+  options.onUpdate();
+  expect(Number(root.style.getPropertyValue("--scan-progress"))).toBeCloseTo(
+    0.5,
+  );
+  expect(root.style.getPropertyValue("--scan-opacity")).toBe("1");
+  progress.value = 0.18;
+  options.onUpdate();
+  expect(Number(root.style.getPropertyValue("--scan-progress"))).toBeCloseTo(
+    0.25,
+  );
+  controller.destroy();
+  expect(root.style.getPropertyValue("--scan-opacity")).toBe("");
+});
+it("clears the scan in the static alternative", () => {
+  mount(0.22, { reducedMotion: true });
+  expect(root.style.getPropertyValue("--scan-opacity")).toBe("0");
 });

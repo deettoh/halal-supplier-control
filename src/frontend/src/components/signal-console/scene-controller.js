@@ -30,7 +30,12 @@ export function createSceneController({
   function render() {
     if (destroyed) return;
     const p = progressRef.current.value,
-      pose = scenePose(p, { mode: reducedMotion ? "static" : "desktop" });
+      pose = scenePose(p, {
+        mode: reducedMotion ? "static" : mobile ? "stacked" : "desktop",
+      });
+    // Inherited variables also reach late-mounted HTML panels inside the Canvas.
+    root.style.setProperty("--scan-progress", String(pose.scanProgress));
+    root.style.setProperty("--scan-opacity", String(pose.scanOpacity));
     if (pose.stage !== lastStage) {
       lastStage = pose.stage;
       onStageChange(pose.stage);
@@ -250,6 +255,8 @@ export function createSceneController({
     pause,
     destroy() {
       destroyed = true;
+      root.style.removeProperty("--scan-progress");
+      root.style.removeProperty("--scan-opacity");
       if (canScroll)
         document.documentElement.style.scrollBehavior = oldScrollBehavior;
       pause();
