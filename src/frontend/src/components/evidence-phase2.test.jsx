@@ -85,3 +85,31 @@ it("requires the agreed next step for Hold and sends the exact payload", async (
     next_step: "request_product_details",
   });
 });
+
+it("keeps the backend pack-size match instead of reclassifying raw product text", () => {
+  render(
+    <Comparison
+      material={{
+        name: "Wheat Flour",
+        approved_brand: "GoldenMill",
+        approved_manufacturer: "Golden Grain Foods",
+      }}
+      delivery={{
+        id: 1,
+        extracted: {
+          product_name: "Wheat Flour 25 kg",
+          brand: "GoldenMill",
+          manufacturer: "Golden Grain Foods",
+          halal_mark_present: true,
+        },
+        rule_results: [
+          { rule: "R2", passed: true, detail: "Approved item matches." },
+        ],
+      }}
+    />,
+  );
+  expect(screen.getByText("Wheat Flour 25 kg").closest("td")).not.toHaveClass(
+    "mismatch",
+  );
+  expect(screen.queryByText("Does not match")).not.toBeInTheDocument();
+});

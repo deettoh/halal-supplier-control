@@ -3,6 +3,7 @@ import React, {
   Suspense,
   useCallback,
   useEffect,
+  useLayoutEffect,
   useRef,
   useState,
 } from "react";
@@ -47,6 +48,7 @@ export default function LandingScene() {
     [held, setHeld] = useState(false);
   const [less, setLess] = useState(() => mediaReduced() || storedReduced());
   const [wide, setWide] = useState(() => window.innerWidth >= 900);
+  const [started, setStarted] = useState(false);
   const [ready, setReady] = useState(false),
     [failed, setFailed] = useState(false);
   const forcedStatic =
@@ -66,7 +68,7 @@ export default function LandingScene() {
       mq?.removeEventListener?.("change", change);
     };
   }, []);
-  useEffect(() => {
+  useLayoutEffect(() => {
     document.body.classList.toggle("less-motion", staticMode);
     document.documentElement.dataset.motion = less ? "reduced" : "full";
     return () => document.body.classList.remove("less-motion");
@@ -85,6 +87,7 @@ export default function LandingScene() {
     },
     { scope: root, dependencies: [staticMode, wide], revertOnUpdate: true },
   );
+  const onStarted = useCallback(() => setStarted(true), []);
   const onReady = useCallback(() => {
     if (engaged.current) setFailed(true);
     else setReady(true);
@@ -131,8 +134,7 @@ export default function LandingScene() {
         </div>
         <div className="hero-copy">
           <h1>
-            Every delivery.
-            <br />A clear
+            Every delivery. <br />A clear
             <br />
             <span> next step.</span>
           </h1>
@@ -168,8 +170,12 @@ export default function LandingScene() {
                 : "A reason recorded. A next step agreed."}
           </p>
         </div>
-        {can3D && (
-          <div className={"sc-canvas " + (ready ? "sc-ready" : "")}>
+        {(can3D || started) && !failed && (
+          <div
+            className={"sc-canvas " + (ready ? "sc-ready" : "")}
+            hidden={!can3D}
+            inert={!can3D}
+          >
             <SceneBoundary onFailure={onFailure}>
               <Suspense fallback={null}>
                 <SceneCanvas
@@ -177,6 +183,7 @@ export default function LandingScene() {
                   invalidateRef={invalidateRef}
                   selectedField={field}
                   onSelect={selectField}
+                  onStarted={onStarted}
                   onReady={onReady}
                   onFailure={onFailure}
                 />

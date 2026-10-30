@@ -17,6 +17,8 @@ export function createSceneController({
     timeline,
     trigger;
   const stage = root.querySelector(".scene-stage");
+  // A static stage selection must not become the start value of a new scroll timeline.
+  if (!reducedMotion) progressRef.current.value = 0;
   let w = stage.clientWidth,
     h = stage.clientHeight,
     mobile = w <= 760;

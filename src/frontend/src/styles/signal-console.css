@@ -1690,9 +1690,6 @@ body.less-motion .scene-controls {
   body.less-motion .hero-copy h1 {
     font-size: 43px;
   }
-  body.less-motion .hero-copy h1 br:nth-of-type(1) {
-    display: none;
-  }
 }
 @media (prefers-reduced-motion: reduce) {
   html {

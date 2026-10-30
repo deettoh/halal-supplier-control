@@ -28,7 +28,7 @@ afterEach(() => {
   root?.remove();
   vi.restoreAllMocks();
 });
-function mount() {
+function mount(initialProgress = 0) {
   root = document.createElement("section");
   root.innerHTML =
     '<div class="scene-stage"></div><div class="hero-copy"><a href="/demo">Enter demo</a></div><div class="scene-heading"></div><div class="decision-drawer"></div><a href="#registry">Skip walkthrough</a>';
@@ -43,7 +43,7 @@ function mount() {
   const playback = vi.fn();
   controller = createSceneController({
     root,
-    progressRef: { current: { value: 0 } },
+    progressRef: { current: { value: initialProgress } },
     invalidate: vi.fn(),
     onStageChange: vi.fn(),
     onPlaybackChange: playback,
@@ -72,4 +72,9 @@ it("gives keyboard, wheel and hidden-page navigation control back to the visitor
   vi.spyOn(document, "hidden", "get").mockReturnValue(true);
   document.dispatchEvent(new Event("visibilitychange"));
   expect(playback).toHaveBeenLastCalledWith(false);
+});
+
+it("restores the opening composition after leaving a selected static stage", () => {
+  mount(0.53);
+  expect(root.querySelector(".hero-copy").style.opacity).toBe("1");
 });

@@ -49,7 +49,7 @@ function ConsoleModel({
     };
   }, [model, invalidate, invalidateRef, gl, onReady, onFailure]);
   useFrame(() => {
-    if (!root.current) return;
+    if (!root.current || size.width <= 0 || size.height <= 0) return;
     const pose = scenePose(progressRef.current.value);
     const view = viewport.getCurrentViewport(camera, [0, 0, 0]);
     const compact = Math.min(
@@ -131,7 +131,10 @@ export default function SceneCanvas(props) {
       shadows={{ type: PCFShadowMap }}
       camera={{ position: [0, 0, 12], fov: 35, near: 0.1, far: 60 }}
       gl={{ alpha: true, antialias: true, powerPreference: "low-power" }}
-      onCreated={({ gl }) => gl.setClearAlpha(0)}
+      onCreated={({ gl }) => {
+        gl.setClearAlpha(0);
+        props.onStarted?.();
+      }}
     >
       <ambientLight intensity={1.8} />
       <directionalLight
