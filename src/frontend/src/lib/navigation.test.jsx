@@ -118,9 +118,7 @@ it("keeps Home when it is clicked after a pending Enter demo transition", async 
       </SessionProvider>,
     );
     await user.click(screen.getAllByRole("link", { name: "Enter demo" })[0]);
-    await user.click(
-      screen.getByRole("link", { name: "Halal Supplier Control", exact: true }),
-    );
+    await user.click(screen.getByRole("link", { name: "Loupe", exact: true }));
     await act(async () => {
       for (const commit of commits) commit();
     });

@@ -5,6 +5,7 @@ import { useLocation } from "wouter";
 import { AppLink } from "../lib/navigation.jsx";
 
 import { transitionUpdate } from "../lib/motion.js";
+import { LoupeBrand } from "../components/loupe-brand.jsx";
 
 import { ArrowRight, RefreshCw } from "lucide-react";
 
@@ -57,7 +58,7 @@ export default function DemoEntry({ requestedPath }) {
     <>
       <header className="public-header">
         <AppLink className="wordmark" href="/">
-          Halal Supplier Control
+          <LoupeBrand />
         </AppLink>
         <AppLink href="/">Back to introduction</AppLink>
       </header>

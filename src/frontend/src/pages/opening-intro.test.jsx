@@ -4,8 +4,9 @@ import { act, fireEvent, render, screen } from "@testing-library/react";
 import Landing from "./landing.jsx";
 import { SessionProvider } from "../lib/session.jsx";
 import { createPreviewGateway } from "../lib/preview/gateway.js";
+import gsap from "gsap";
 
-const seenKey = "hsc-opening-seen:v1";
+const seenKey = "loupe-opening-seen:v1";
 let preference;
 
 function openLanding({ strict = false } = {}) {
@@ -39,7 +40,7 @@ it("reveals the landing after a bounded intro and does not replay in this tab se
   expect(screen.getByRole("button", { name: "Skip intro" })).toHaveFocus();
   expect(document.querySelector("main").closest("[inert]")).not.toBeNull();
   expect(document.body.style.overflow).toBe("hidden");
-  act(() => vi.advanceTimersByTime(2500));
+  act(() => vi.advanceTimersByTime(4100));
   expect(screen.queryByRole("button", { name: "Skip intro" })).toBeNull();
   expect(document.querySelector("main").closest("[inert]")).toBeNull();
   expect(screen.getByRole("main")).toHaveFocus();
@@ -104,14 +105,14 @@ it("cleans up the scroll lock if the landing unmounts before the reveal", () => 
   expect(document.body.style.overflow).toBe("hidden");
   page.unmount();
   expect(document.body.style.overflow).toBe("auto");
-  act(() => vi.advanceTimersByTime(3000));
+  act(() => vi.advanceTimersByTime(5000));
   expect(document.body.style.overflow).toBe("auto");
 });
 
 it("still shows a first visit under StrictMode and releases it normally", () => {
   openLanding({ strict: true });
   expect(screen.getByRole("button", { name: "Skip intro" })).toBeVisible();
-  act(() => vi.advanceTimersByTime(2500));
+  act(() => vi.advanceTimersByTime(4100));
   expect(screen.queryByRole("button", { name: "Skip intro" })).toBeNull();
   expect(document.body.style.overflow).toBe("auto");
 });
@@ -143,4 +144,50 @@ it("bypasses the intro when session storage can be read but cannot be written", 
   });
   expect(screen.queryByRole("button", { name: "Skip intro" })).toBeNull();
   expect(screen.getByRole("link", { name: "How it works" })).toBeVisible();
+});
+
+it("offers an explicit replay after the once-per-session opening", () => {
+  openLanding();
+  expect(
+    screen.getByRole("region", { name: "Loupe introduction" }),
+  ).toBeVisible();
+  act(() => vi.advanceTimersByTime(4100));
+  fireEvent.click(screen.getByRole("button", { name: "Replay intro" }));
+  expect(screen.getByRole("button", { name: "Skip intro" })).toHaveFocus();
+  expect(document.body.style.overflow).toBe("hidden");
+  fireEvent.keyDown(window, { key: "Escape" });
+  expect(screen.queryByRole("button", { name: "Skip intro" })).toBeNull();
+  expect(screen.getByRole("main")).toHaveFocus();
+});
+
+it("honors the app's manual motion setting on first visit and replay", () => {
+  sessionStorage.setItem("hsc-less-motion", "1");
+  try {
+    openLanding();
+    expect(screen.queryByRole("button", { name: "Skip intro" })).toBeNull();
+    fireEvent.click(screen.getByRole("button", { name: "Replay intro" }));
+    expect(screen.queryByRole("button", { name: "Skip intro" })).toBeNull();
+    expect(document.body.style.overflow).toBe("auto");
+  } finally {
+    sessionStorage.removeItem("hsc-less-motion");
+  }
+});
+
+it("releases the landing even if the animation never completes", () => {
+  const timeline = gsap.timeline;
+  const stopped = vi
+    .spyOn(gsap, "timeline")
+    .mockImplementation((options) => timeline({ ...options, paused: true }));
+  try {
+    openLanding();
+    expect(document.body.style.overflow).toBe("hidden");
+    act(() => vi.advanceTimersByTime(4100));
+    expect(
+      screen.queryByRole("region", { name: "Loupe introduction" }),
+    ).toBeNull();
+    expect(document.body.style.overflow).toBe("auto");
+    expect(screen.getByRole("main")).toHaveFocus();
+  } finally {
+    stopped.mockRestore();
+  }
 });

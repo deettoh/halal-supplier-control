@@ -12,6 +12,7 @@ import { useLocation } from "wouter";
 import { useSession, organisationName } from "../lib/session.jsx";
 import { AppLink } from "../lib/navigation.jsx";
 import { label } from "../lib/format.js";
+import { LoupeBrand } from "./loupe-brand.jsx";
 export function Shell({ children }) {
   const session = useSession();
   const [path] = useLocation();
@@ -37,12 +38,8 @@ export function Shell({ children }) {
         Skip to content
       </a>
       <aside className="navigation-rail">
-        <AppLink
-          href="/"
-          className="wordmark"
-          aria-label="Halal Supplier Control home"
-        >
-          Halal Supplier Control
+        <AppLink href="/" className="wordmark" aria-label="Loupe home">
+          <LoupeBrand monochrome />
         </AppLink>
         <nav aria-label="Workspace">
           {links.map(([href, text, Icon]) => (

@@ -4,9 +4,11 @@ import { AppLink } from "../lib/navigation.jsx";
 import { OpeningIntro } from "../components/opening-intro.jsx";
 import LandingScene from "../components/signal-console/index.jsx";
 import { transitionUpdate } from "../lib/motion.js";
+import { LoupeBrand } from "../components/loupe-brand.jsx";
 export default function Landing() {
   const [approved, setApproved] = useState(false);
   const scene = useRef();
+  const intro = useRef();
   function jump(event, id) {
     const target = document.getElementById(id);
     if (!target) return;
@@ -19,7 +21,7 @@ export default function Landing() {
     });
   }
   return (
-    <OpeningIntro>
+    <OpeningIntro apiRef={intro}>
       <div className="signal-landing">
         <a
           className="skip-link"
@@ -29,25 +31,8 @@ export default function Landing() {
           Skip the animated walkthrough
         </a>
         <header className="site-header">
-          <AppLink
-            className="brand"
-            href="/"
-            aria-label="Halal Supplier Control"
-          >
-            <svg
-              className="brand-mark"
-              viewBox="0 0 36 36"
-              fill="none"
-              aria-hidden="true"
-            >
-              <path
-                d="M8 8h12a8 8 0 0 1 0 16h-4a8 8 0 0 1 0-16h12M8 28V8m20 0v20M14 18h8"
-                stroke="currentColor"
-                strokeWidth="2.5"
-                strokeLinecap="round"
-              />
-            </svg>
-            <span>Halal Supplier Control</span>
+          <AppLink className="brand" href="/" aria-label="Loupe">
+            <LoupeBrand />
           </AppLink>
           <nav aria-label="Main navigation">
             <a href="#walkthrough" onClick={(e) => jump(e, "walkthrough")}>
@@ -183,16 +168,30 @@ export default function Landing() {
           </section>
         </main>
         <footer className="site-footer">
-          <span>Halal Supplier Control</span>
+          <span>Loupe</span>
           <p>
             SAMPLE demonstration. Document coverage only.
             <br />
             Not a religious ruling or independent certificate-authenticity
             decision.
           </p>
-          <a href="#walkthrough" onClick={(e) => jump(e, "walkthrough")}>
-            Back to the evidence <ArrowUp aria-hidden="true" />
-          </a>
+          <div className="footer-actions">
+            <button
+              className="intro-replay"
+              type="button"
+              onClick={() => {
+                if (intro.current?.replay())
+                  scene.current?.jumpToSection(
+                    document.getElementById("walkthrough"),
+                  );
+              }}
+            >
+              Replay intro
+            </button>
+            <a href="#walkthrough" onClick={(e) => jump(e, "walkthrough")}>
+              Back to the evidence <ArrowUp aria-hidden="true" />
+            </a>
+          </div>
         </footer>
       </div>
     </OpeningIntro>

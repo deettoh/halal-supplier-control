@@ -3,16 +3,30 @@ import React, {
   useCallback,
   useEffect,
   useLayoutEffect,
+  useImperativeHandle,
   useRef,
   useState,
 } from "react";
+import gsap from "gsap";
+import { useGSAP } from "@gsap/react";
+import { LoupeWordmark, UnfoldingRibbon } from "./loupe-brand.jsx";
+import { createLoupeIntro } from "./loupe-intro-motion.js";
 
-const seenKey = "hsc-opening-seen:v1";
+gsap.registerPlugin(useGSAP);
+const seenKey = "loupe-opening-seen:v1";
 const motionQuery = "(prefers-reduced-motion: reduce)";
 
-function shouldPlay() {
+function motionAllowed() {
   const preference = window.matchMedia?.(motionQuery);
-  if (!preference || preference.matches || window.location.hash) return false;
+  if (!preference || preference.matches) return false;
+  try {
+    return sessionStorage.getItem("hsc-less-motion") !== "1";
+  } catch {
+    return true;
+  }
+}
+function shouldPlay() {
+  if (!motionAllowed() || window.location.hash) return false;
   try {
     return sessionStorage.getItem(seenKey) !== "1";
   } catch {
@@ -20,15 +34,38 @@ function shouldPlay() {
   }
 }
 
-export function OpeningIntro({ children }) {
+export function OpeningIntro({ children, apiRef }) {
   const [playing, setPlaying] = useState(shouldPlay);
   const content = useRef(null);
   const skip = useRef(null);
+  const overlay = useRef(null);
+  const manualReplay = useRef(false);
   const focusLanding = useRef(false);
   const finish = useCallback(() => {
-    focusLanding.current = document.activeElement === skip.current;
+    focusLanding.current =
+      overlay.current?.contains(document.activeElement) ||
+      document.activeElement === document.body;
+    manualReplay.current = false;
     setPlaying(false);
   }, []);
+  useImperativeHandle(
+    apiRef,
+    () => ({
+      replay() {
+        if (!motionAllowed()) return false;
+        manualReplay.current = true;
+        setPlaying(true);
+        return true;
+      },
+    }),
+    [],
+  );
+  useGSAP(
+    () => {
+      if (playing) createLoupeIntro(overlay.current, { onComplete: finish });
+    },
+    { scope: overlay, dependencies: [playing], revertOnUpdate: true },
+  );
 
   useLayoutEffect(() => {
     if (!playing && focusLanding.current) {
@@ -42,7 +79,7 @@ export function OpeningIntro({ children }) {
   useEffect(() => {
     if (!playing) return;
     try {
-      sessionStorage.setItem(seenKey, "1");
+      if (!manualReplay.current) sessionStorage.setItem(seenKey, "1");
     } catch {
       // If the visit cannot be remembered, avoid replaying an unwanted intro.
       // Resolve the browser failure before taking over scrolling or focus.
@@ -58,7 +95,7 @@ export function OpeningIntro({ children }) {
     document.body.style.overflow = "hidden";
     skip.current?.focus({ preventScroll: true });
     // Independent of CSS events, image downloads, fonts and network requests.
-    const timeout = window.setTimeout(finish, 2200);
+    const timeout = window.setTimeout(finish, 3850);
     const preference = window.matchMedia(motionQuery);
     function onPreferenceChange() {
       if (preference.matches) finish();
@@ -82,22 +119,32 @@ export function OpeningIntro({ children }) {
         {children}
       </div>
       {playing && (
-        <div className="opening-intro">
-          <AppLink className="opening-enter" href="/demo" onClick={finish}>
+        <div
+          className="opening-intro"
+          ref={overlay}
+          role="region"
+          aria-label="Loupe introduction"
+          data-intro-phase="unfold"
+        >
+          <AppLink
+            className="opening-enter primary"
+            href="/demo"
+            onClick={finish}
+          >
             Enter demo
           </AppLink>
-          <div className="opening-panels" aria-hidden="true">
-            {[0, 1, 2, 3, 4].map((index) => (
-              <span key={index} style={{ "--panel": index }} />
-            ))}
+          <div className="opening-lockup" aria-hidden="true">
+            <div className="opening-mark-position">
+              <div className="opening-mark-motion">
+                <UnfoldingRibbon />
+              </div>
+            </div>
+            <div className="opening-name-position">
+              <div className="opening-name">
+                <LoupeWordmark />
+              </div>
+            </div>
           </div>
-          <p className="opening-title" aria-hidden="true">
-            {["Halal", "Supplier", "Control"].map((word, index) => (
-              <span className="opening-word" key={word}>
-                <span style={{ "--word": index }}>{word}</span>
-              </span>
-            ))}
-          </p>
           <button
             className="opening-skip"
             type="button"
