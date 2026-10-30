@@ -129,6 +129,33 @@ def test_other_product_from_approved_supplier_is_substitution() -> None:
     }
 
 
+@pytest.mark.parametrize(
+    "product_name",
+    ["Wheat Flour 1 KG", "Wheat Flour 500g", "Wheat Flour 2.5 kg"],
+)
+def test_trailing_pack_size_is_ignored(product_name: str) -> None:
+    result = evaluate(
+        {**LABEL, "product_name": product_name},
+        MATERIAL,
+        CERTIFICATE,
+        TODAY,
+    )
+    assert result["verdict"] == "covered"
+
+
+@pytest.mark.parametrize(
+    "product_name", ["Wheat Flour Substitute", "Wheat Flour 1 kg Blend"]
+)
+def test_extra_product_words_still_substitution(product_name: str) -> None:
+    result = evaluate(
+        {**LABEL, "product_name": product_name},
+        MATERIAL,
+        CERTIFICATE,
+        TODAY,
+    )
+    assert result["verdict"] == "substitution"
+
+
 def test_brand_failure_reports_its_score() -> None:
     result = evaluate(
         {**LABEL, "brand": "ALT SAMPLE BRAND"},
