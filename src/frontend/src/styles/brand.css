@@ -60,17 +60,20 @@ html[data-motion="reduced"] .intro-replay {
 .opening-intro {
   --intro-mark-width: clamp(112px, 11vw, 164px);
   --intro-mark-height: clamp(134px, 13.2vw, 196px);
+  --intro-name-width: clamp(190px, 24vw, 320px);
+  --intro-gap: clamp(16px, 2.4vw, 36px);
   background: var(--paper, #fff);
 }
 .opening-lockup {
   position: absolute;
   inset: 0;
+  column-gap: var(--intro-gap);
   pointer-events: none;
 }
 .opening-mark-position {
   position: absolute;
   left: 50%;
-  top: 43%;
+  top: 50%;
   width: var(--intro-mark-width);
   height: var(--intro-mark-height);
   transform: translate(-50%, -50%);
@@ -107,15 +110,15 @@ html[data-motion="reduced"] .intro-replay {
 }
 .opening-name-position {
   position: absolute;
-  left: 50%;
-  top: calc(43% + var(--intro-mark-height) * 0.5 + 24px);
-  width: clamp(190px, 24vw, 320px);
-  transform: translateX(-50%);
+  left: calc(50% + (var(--intro-mark-width) + var(--intro-gap)) * 0.5);
+  top: 50%;
+  width: var(--intro-name-width);
+  transform: translate(-50%, -50%);
 }
 .opening-name {
   opacity: 0;
   color: var(--ink);
-  transform-origin: 50% 50%;
+  transform-origin: 0% 50%;
 }
 .opening-name .loupe-wordmark {
   width: 100%;
@@ -131,6 +134,9 @@ html[data-motion="reduced"] .intro-replay {
 }
 
 @media (max-width: 760px) {
+  .opening-intro {
+    --intro-name-width: clamp(128px, 45vw, 190px);
+  }
   .loupe-brand {
     gap: 8px;
   }

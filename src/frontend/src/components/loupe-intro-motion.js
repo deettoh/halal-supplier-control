@@ -3,6 +3,7 @@ import gsap from "gsap";
 export function createLoupeIntro(root, { paused = false, onComplete } = {}) {
   const mark = root.querySelector(".opening-mark-motion");
   const name = root.querySelector(".opening-name");
+  const lockup = root.querySelector(".opening-lockup");
   const fold = (part) => root.querySelector(`[data-ribbon-fold="${part}"]`);
   const phase = (value) => {
     root.dataset.introPhase = value;
@@ -38,7 +39,19 @@ export function createLoupeIntro(root, { paused = false, onComplete } = {}) {
     .to(mark, { scale: 1, duration: 1.1 }, 0.25)
     .addLabel("unfolded", 1.5)
     .call(() => phase("shift"), [], 1.65)
-    .to(mark, { x: 28, duration: 0.42 }, 1.65)
+    .to(
+      mark,
+      {
+        // Leave room for the name, keeping the completed lockup centred.
+        x: () =>
+          -(
+            name.parentElement.getBoundingClientRect().width +
+            (parseFloat(getComputedStyle(lockup).columnGap) || 0)
+          ) / 2,
+        duration: 0.42,
+      },
+      1.65,
+    )
     .addLabel("name", 2.12)
     .call(() => phase("name"), [], "name")
     .to(
