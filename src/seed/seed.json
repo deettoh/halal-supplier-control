@@ -356,5 +356,25 @@
       "role": "reviewer",
       "tenant": "registry"
     }
+  ],
+  "sme_settings": [
+    {
+      "id": 1,
+      "tenant": "Sunrise Bakery SAMPLE",
+      "recognised_issuers": [
+        "SAMPLE Food Certification Council"
+      ],
+      "match_threshold": 90,
+      "expiry_warning_days": 60
+    },
+    {
+      "id": 2,
+      "tenant": "Crescent Caterer SAMPLE",
+      "recognised_issuers": [
+        "SAMPLE Food Certification Council"
+      ],
+      "match_threshold": 90,
+      "expiry_warning_days": 45
+    }
   ]
 }

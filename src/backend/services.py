@@ -27,6 +27,7 @@ from backend.schemas import (
     RenewalResponse,
     RuleResult,
 )
+from backend.settings import RuleSettings
 
 logger = logging.getLogger(__name__)
 
@@ -91,26 +92,49 @@ def _certificate_values(row: db.Certificate | None) -> dict[str, object]:
 
 def _material_values(row: db.Material) -> dict[str, object]:
     return {
+        "tenant": row.tenant,
         "name": row.name,
         "approved_brand": row.approved_brand,
         "approved_manufacturer": row.approved_manufacturer,
     }
 
 
+def rule_settings(session: Session, tenant: str) -> RuleSettings:
+    """Read the requesting SME's persisted policy without a fallback."""
+    row = session.scalar(
+        select(db.SMESettings)
+        .where(db.SMESettings.tenant == tenant)
+        .execution_options(populate_existing=True)
+    )
+    if row is None:
+        raise HTTPException(503, "SME rule settings are not configured")
+    try:
+        return RuleSettings.model_validate(
+            {name: getattr(row, name) for name in RuleSettings.model_fields}
+        )
+    except ValidationError:
+        raise HTTPException(503, "SME rule settings are invalid") from None
+
+
 def materials(
     session: Session, context: DemoContext
 ) -> list[MaterialResponse]:
-    rows = session.execute(
-        select(db.Material, db.Supplier, db.Certificate)
-        .join(db.Supplier, db.Supplier.id == db.Material.supplier_id)
-        .outerjoin(
-            db.Certificate,
-            (db.Certificate.supplier_id == db.Supplier.id)
-            & (db.Certificate.status == "active"),
+    rows = list(
+        session.execute(
+            select(db.Material, db.Supplier, db.Certificate)
+            .join(db.Supplier, db.Supplier.id == db.Material.supplier_id)
+            .outerjoin(
+                db.Certificate,
+                (db.Certificate.supplier_id == db.Supplier.id)
+                & (db.Certificate.status == "active"),
+            )
+            .where(db.Material.tenant == context.tenant)
+            .order_by(db.Material.id)
         )
-        .where(db.Material.tenant == context.tenant)
-        .order_by(db.Material.id)
     )
+    if not rows:
+        return []
+    policy = rule_settings(session, context.tenant)
     result = []
     today = db.business_today()
     for material, supplier, certificate in rows:
@@ -125,6 +149,7 @@ def materials(
             _material_values(material),
             _certificate_values(certificate),
             today,
+            settings=policy,
         )["verdict"]
         coverage: Coverage = "not_covered"
         if verdict == "covered":
@@ -315,6 +340,7 @@ def create_delivery(
     )
     if material is None:
         raise HTTPException(404, "Material not found")
+    rule_settings(session, context.tenant)
     item = db.Delivery(
         tenant=context.tenant,
         material_id=material.id,
@@ -357,6 +383,7 @@ def create_delivery(
         _material_values(material),
         _certificate_values(certificate),
         db.business_today(),
+        settings=rule_settings(session, context.tenant),
     )
     saved = session.get(
         db.Delivery, item_id, populate_existing=True, with_for_update=True

@@ -44,6 +44,7 @@ def reset_demo_database(
             )
             connection.execute(text(f"LOCK TABLE {tables} IN EXCLUSIVE MODE"))
         for model in (
+            db.SMESettings,
             db.ActivityLog,
             db.Delivery,
             db.Material,

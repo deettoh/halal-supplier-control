@@ -24,6 +24,7 @@ from backend.schemas import (
     RuleResult,
     Verdict,
 )
+from backend.settings import RuleSettings
 
 DEFAULT_SEED_PATH = Path(__file__).resolve().parents[1] / "seed" / "seed.json"
 
@@ -67,6 +68,11 @@ class PersonSeed(APIModel):
     name: NonEmptyText
     title: NonEmptyText
     role: DemoRole
+    tenant: NonEmptyText
+
+
+class SMESettingsSeed(RuleSettings):
+    id: RecordId
     tenant: NonEmptyText
 
 
@@ -130,6 +136,7 @@ class ActivitySeed(APIModel):
 
 
 class SeedData(APIModel):
+    sme_settings: list[SMESettingsSeed] = Field(default_factory=list)
     people: list[PersonSeed] = Field(default_factory=list)
     suppliers: list[SupplierSeed] = Field(default_factory=list)
     certificates: list[CertificateSeed] = Field(default_factory=list)
@@ -143,6 +150,9 @@ class SeedData(APIModel):
             ids = [row.id for row in getattr(self, name)]
             if len(ids) != len(set(ids)):
                 raise ValueError(f"Duplicate IDs in seed table {name}")
+        tenants = [row.tenant for row in self.sme_settings]
+        if len(tenants) != len(set(tenants)):
+            raise ValueError("Duplicate SME settings tenants")
         return self
 
 
@@ -271,6 +281,22 @@ def seed_empty_tables(
     Startup tolerates missing files; a reset requires referenced images.
     """
     counts: dict[str, int] = {}
+    # Existing policies are retained; newly seeded SMEs are backfilled even
+    # when another SME already has a policy in this database.
+    counts["sme_settings"] = 0
+    for policy in seed.sme_settings:
+        if (
+            session.scalar(
+                select(db.SMESettings.id).where(
+                    db.SMESettings.tenant == policy.tenant
+                )
+            )
+            is None
+        ):
+            session.add(db.SMESettings(**policy.model_dump()))
+            counts["sme_settings"] += 1
+    session.flush()
+    _advance_sequence(session, db.Base.metadata.tables["sme_settings"])
     models: list[type[db.Base]] = [
         db.Person,
         db.Supplier,

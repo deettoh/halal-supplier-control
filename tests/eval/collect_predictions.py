@@ -138,6 +138,8 @@ def main() -> None:
         "src/backend/extract.py",
         "src/backend/images.py",
         "src/backend/rules.py",
+        "src/backend/settings.py",
+        "src/seed/seed.json",
         "src/backend/schemas.py",
         "tests/eval/collect_predictions.py",
     ]

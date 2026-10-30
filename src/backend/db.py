@@ -17,9 +17,11 @@ from sqlalchemy import (
     CheckConstraint,
     Date,
     DateTime,
+    Float,
     ForeignKey,
     ForeignKeyConstraint,
     Index,
+    Integer,
     LargeBinary,
     String,
     Text,
@@ -67,6 +69,26 @@ class Supplier(Base):
 
     id: Mapped[int] = mapped_column(primary_key=True)
     name: Mapped[str] = mapped_column(String(200))
+
+
+class SMESettings(Base):
+    """One persisted rule policy per SME, using its existing tenant name."""
+
+    __tablename__ = "sme_settings"
+    __table_args__ = (
+        CheckConstraint("length(trim(tenant)) > 0", name="ck_settings_tenant"),
+        CheckConstraint(
+            "match_threshold >= 0 AND match_threshold <= 100",
+            name="ck_settings_threshold",
+        ),
+        CheckConstraint("expiry_warning_days >= 0", name="ck_settings_window"),
+    )
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    tenant: Mapped[str] = mapped_column(String(100), unique=True)
+    recognised_issuers: Mapped[list[str]] = mapped_column(JSON)
+    match_threshold: Mapped[float] = mapped_column(Float)
+    expiry_warning_days: Mapped[int] = mapped_column(Integer)
 
 
 class Person(Base):
