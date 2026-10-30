@@ -7,7 +7,7 @@ from uuid import uuid4
 
 import pytest
 from fastapi.testclient import TestClient
-from sqlalchemy import Engine, create_engine, event
+from sqlalchemy import Engine, create_engine, delete, event
 from sqlalchemy.orm import Session
 from sqlalchemy.pool import StaticPool
 from sqlalchemy.schema import CreateSchema, DropSchema
@@ -43,6 +43,18 @@ def pytest_collection_modifyitems(
             item.add_marker(skip_db)
 
 
+def bootstrap_workflow_database(engine: Engine) -> None:
+    """Seed reference data, then start each workflow scenario with no history.
+
+    Only called for the in-memory database or disposable api test schema below.
+    Production startup/reset seed preservation is tested separately in test_db.
+    """
+    bootstrap_database(engine)
+    with Session(engine) as session, session.begin():
+        session.execute(delete(db.ActivityLog))
+        session.execute(delete(db.Delivery))
+
+
 @pytest.fixture(
     params=[
         pytest.param("sqlite", id="sqlite"),
@@ -66,7 +78,7 @@ def api_engine(
             assert isinstance(connection, Connection)
             connection.execute("PRAGMA foreign_keys=ON")
 
-        bootstrap_database(engine)
+        bootstrap_workflow_database(engine)
         try:
             yield engine
         finally:
@@ -81,7 +93,7 @@ def api_engine(
         connection.execute(CreateSchema(schema))
     isolated = admin.execution_options(schema_translate_map={None: schema})
     try:
-        bootstrap_database(isolated)
+        bootstrap_workflow_database(isolated)
         yield isolated
     finally:
         with admin.begin() as connection:
