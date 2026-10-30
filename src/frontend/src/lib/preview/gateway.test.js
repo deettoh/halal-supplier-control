@@ -1,3 +1,4 @@
+import { person } from "../../test/people.js";
 import { describe, it, expect, beforeEach } from "vitest";
 import { readFileSync } from "node:fs";
 import { File } from "node:buffer";
@@ -7,8 +8,8 @@ import {
   previewCases,
   preparedRenewal,
 } from "./gateway.js";
-const staff = { role: "staff", tenant: "Sunrise Bakery SAMPLE" };
-const supervisor = { ...staff, role: "supervisor" };
+const staff = person(1);
+const supervisor = person(2);
 let g;
 beforeEach(() => {
   Object.defineProperty(globalThis, "crypto", {
@@ -24,15 +25,44 @@ const photo = (name) =>
     { type: "image/jpeg" },
   );
 describe("isolated prepared-example gateway", () => {
+  it("starts Ravi empty and keeps Mei Ling's prepared flour check in his organisation's history", async () => {
+    expect(await g.listPending(person(4), {})).toEqual([]);
+    expect(await g.listPending(supervisor, {})).toHaveLength(2);
+    const c = previewCases.find((c) => c.id === "expiring");
+    await g.createDelivery(person(3), {
+      material_id: 9,
+      image: photo(c.image),
+    });
+    expect(await g.listPending(person(4), {})).toEqual([]);
+    expect(await g.listHistory(person(4), {})).toEqual([
+      expect.objectContaining({ status: "auto_accepted", verdict: "expiring" }),
+    ]);
+    expect(await g.listPending(supervisor, {})).toHaveLength(2);
+  });
   it("uses the renewed certificate for the next prepared delivery without rewriting earlier checks", async () => {
     const sample = photo(previewCases.find((c) => c.id === "expiring").image);
-    const before = await g.createDelivery(staff, { material_id: 1, image: sample });
+    const before = await g.createDelivery(staff, {
+      material_id: 1,
+      image: sample,
+    });
     expect(before.verdict).toBe("expiring");
-    await g.renewCertificate({ role: "supplier", tenant: "1" }, preparedRenewal("1"));
-    const after = await g.createDelivery(staff, { material_id: 1, image: sample });
+    const renewal = await g.renewCertificate(person(5), preparedRenewal("1"));
+    await g.decideRenewal(person(7), renewal.id, {
+      decision: "verify",
+      note: "Reviewed SAMPLE renewal",
+    });
+    const after = await g.createDelivery(staff, {
+      material_id: 1,
+      image: sample,
+    });
     expect(after.verdict).toBe("covered");
-    expect(after.rule_results.find((r) => r.rule === "R4").detail).toContain("2027-11-30");
-    expect((await g.listHistory(supervisor, {})).find((r) => r.id === before.id).verdict).toBe("expiring");
+    expect(after.rule_results.find((r) => r.rule === "R4").detail).toContain(
+      "2027-11-30",
+    );
+    expect(
+      (await g.listHistory(supervisor, {})).find((r) => r.id === before.id)
+        .verdict,
+    ).toBe("expiring");
   });
   it("discards a prepared upload that finishes after preview reset", async () => {
     const c = previewCases.find((c) => c.id === "alt-brand");
@@ -56,14 +86,9 @@ describe("isolated prepared-example gateway", () => {
     expect((await g.listMaterials(staff, {})).map((m) => m.id)).toEqual([
       1, 2, 3, 4, 5, 6, 7, 8,
     ]);
-    expect(
-      (
-        await g.listMaterials(
-          { ...staff, tenant: "Crescent Caterer SAMPLE" },
-          {},
-        )
-      ).map((m) => m.id),
-    ).toEqual([9, 10, 11, 12, 13, 14, 15, 16]);
+    expect((await g.listMaterials(person(3), {})).map((m) => m.id)).toEqual([
+      9, 10, 11, 12, 13, 14, 15, 16,
+    ]);
     await expect(g.listPending(staff, {})).rejects.toMatchObject({
       status: 403,
     });
@@ -92,7 +117,7 @@ describe("isolated prepared-example gateway", () => {
     await g.createDelivery(staff, { material_id: 6, image: photo(c.image) });
     const rows = await g.listActivity(supervisor, {});
     expect(rows.find((r) => r.delivery_id === 500)).toMatchObject({
-      actor: "Receiving staff SAMPLE",
+      actor: "Aina",
       role: "staff",
       action: "auto_accepted",
     });
@@ -132,14 +157,14 @@ describe("isolated prepared-example gateway", () => {
   });
   it("does not expose another SME delivery by id", async () => {
     await expect(
-      g.decide({ ...supervisor, tenant: "Crescent Caterer SAMPLE" }, 102, {
+      g.decide(person(4), 102, {
         decision: "reject",
         reason: "Wrong tenant",
       }),
     ).rejects.toMatchObject({ status: 404 });
   });
   it("accepts only prepared renewal and updates both linked masterlists", async () => {
-    const supplier = { role: "supplier", tenant: "1" };
+    const supplier = person(5);
     const input = preparedRenewal("1");
     await expect(
       g.renewCertificate(supplier, {
@@ -147,10 +172,14 @@ describe("isolated prepared-example gateway", () => {
         scope: [{ product_name: "Another product", brand: null }],
       }),
     ).rejects.toMatchObject({ name: "UnsupportedCapabilityError" });
-    await g.renewCertificate(supplier, input);
-    for (const tenant of ["Sunrise Bakery SAMPLE", "Crescent Caterer SAMPLE"])
+    const renewal = await g.renewCertificate(supplier, input);
+    await g.decideRenewal(person(7), renewal.id, {
+      decision: "verify",
+      note: "Reviewed SAMPLE renewal",
+    });
+    for (const id of [1, 3])
       expect(
-        (await g.listMaterials({ ...staff, tenant }, {})).every(
+        (await g.listMaterials(person(id), {})).every(
           (m) => m.coverage_status === "covered",
         ),
       ).toBe(true);

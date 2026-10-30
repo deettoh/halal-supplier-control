@@ -15,8 +15,13 @@ export function useScopedMutation(operation, { onSuccess, onError } = {}) {
   return useMutation({
     mutationFn: async (input) => {
       const ticket = session.capture();
-      const value = await operation(ticket.context, input);
-      return session.isCurrent(ticket) ? value : undefined;
+      try {
+        const value = await operation(ticket.context, input);
+        return session.isCurrent(ticket) ? value : undefined;
+      } catch (error) {
+        if (!session.isCurrent(ticket)) return undefined;
+        throw error;
+      }
     },
     onSuccess: (value) => {
       if (value === undefined) return;

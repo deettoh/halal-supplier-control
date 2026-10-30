@@ -10,6 +10,7 @@ export function transitionUpdate(update) {
   if (
     typeof document.startViewTransition !== "function" ||
     document.hidden ||
+    document.documentElement.dataset.motion === "reduced" ||
     window.matchMedia?.("(prefers-reduced-motion: reduce)").matches
   ) {
     update();

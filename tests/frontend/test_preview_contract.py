@@ -73,7 +73,24 @@ def test_renewal_snapshots_cover_both_buyers_without_browser_rules() -> None:
             for m in data["materials"]["10"][tenant]
         )
     for activity in data["initial_activity"]["Sunrise Bakery SAMPLE"]:
-        ActivityResponse.model_validate(activity)
+        # Named log enrichment is the explicitly labelled v0.2 preview target;
+        # validate its existing fields against today's strict backend model.
+        target_fields = {
+            "actor_title",
+            "material_name",
+            "verdict",
+            "supplier_name",
+        }
+        assert (
+            set(activity) <= set(ActivityResponse.model_fields) | target_fields
+        )
+        ActivityResponse.model_validate(
+            {
+                k: v
+                for k, v in activity.items()
+                if k in ActivityResponse.model_fields
+            }
+        )
 
 
 def test_every_prepared_delivery_uses_its_registry_snapshot() -> None:
@@ -103,3 +120,13 @@ def test_registry_review_examples_follow_the_backend_contract() -> None:
     RenewalDecisionRequest.model_validate(examples["verify_request"])
     for name in ("verified_certificate", "rejected_certificate"):
         CertificateResponse.model_validate(examples[name])
+
+
+def test_preview_people_and_suppliers_come_from_canonical_seed() -> None:
+    data = json.loads(DATA.read_text())
+    seed = json.loads((ROOT / "src/seed/seed.json").read_text())
+    assert data["people"] == seed["people"]
+    assert data["suppliers"] == seed["suppliers"]
+    assert (
+        data["initial_activity"]["Sunrise Bakery SAMPLE"][0]["actor"] == "Aina"
+    )

@@ -1,144 +1,165 @@
 import React, { useState } from "react";
+
 import { useLocation } from "wouter";
-import { AppLink as Link } from "../lib/navigation.jsx";
+
+import { AppLink } from "../lib/navigation.jsx";
+
 import { transitionUpdate } from "../lib/motion.js";
-import { ArrowRight } from "lucide-react";
+import { LoupeBrand } from "../components/loupe-brand.jsx";
+
+import { ArrowRight, RefreshCw } from "lucide-react";
+
 import { useQueryClient } from "@tanstack/react-query";
+
 import {
   useSession,
-  organisations,
-  validateIdentity,
+  organisationName,
+  routesForRole,
   homeForRole,
 } from "../lib/session.jsx";
 
 export default function DemoEntry({ requestedPath }) {
-  const session = useSession();
-  const client = useQueryClient();
+  const session = useSession(),
+    client = useQueryClient(),
+    [, navigate] = useLocation();
+
+  const [selected, setSelected] = useState(session.identity?.person_id || null);
+
   const [resetMessage, setResetMessage] = useState("");
+
+  const people = session.people.data;
+
+  const person = people.find((p) => p.id === selected);
+
   async function resetPreview() {
     if (!session.confirmDiscard()) return;
+
     await session.gateway.resetPreview();
     await client.invalidateQueries();
+
     setResetMessage("Prepared examples reset.");
   }
-  const [, navigate] = useLocation();
-  const [role, setRole] = useState(session.identity?.role || "");
-  const [tenant, setTenant] = useState(session.identity?.tenant || "");
-  const options = role
-    ? organisations[role === "supplier" ? "supplier" : "sme"]
-    : [];
-  const valid = validateIdentity({ role, tenant });
+
   function submit(event) {
     event.preventDefault();
-    if (valid) {
-      const destinations =
-        role === "supplier"
-          ? ["/certificates"]
-          : role === "staff"
-            ? ["/check", "/masterlist"]
-            : ["/review", "/masterlist", "/activity"];
-      transitionUpdate(() => {
-        session.selectIdentity(valid);
-        navigate(
-          destinations.includes(requestedPath)
-            ? requestedPath
-            : homeForRole(role),
-        );
-      });
-    }
+    if (!person || !session.confirmDiscard()) return;
+
+    transitionUpdate(() => {
+      session.selectIdentity(person);
+      navigate(
+        routesForRole[person.role].includes(requestedPath)
+          ? requestedPath
+          : homeForRole(person.role),
+      );
+    });
   }
+
   return (
     <>
       <header className="public-header">
-        <Link href="/" className="wordmark">
-          Halal
-          <br />
-          Supplier Control
-        </Link>
-        <Link href="/">Back to introduction</Link>
+        <AppLink className="wordmark" href="/">
+          <LoupeBrand />
+        </AppLink>
+        <AppLink href="/">Back to introduction</AppLink>
       </header>
+
       <main className="entry-page route-arrival">
         <div className="entry-intro">
-          <h1>A workspace for your part of the process.</h1>
+          <h1>
+            Choose your
+            <br />
+            workspace.
+          </h1>
           <p>
-            Check a delivery, review an exception, or renew the record buyers
-            rely on.
+            Pick a SAMPLE person. Their role and organisation come with them.
           </p>
           <p className="muted">
-            SAMPLE data. Document coverage only; no independent
-            certificate-authenticity decision or religious ruling.
+            The same evidence. A clear next step for everyone involved.
           </p>
+          <div className="entry-process">
+            <span>Read the label</span>
+            <span>Check the documents</span>
+            <span>Keep the decision traceable</span>
+          </div>
         </div>
-        <form className="entry-form" onSubmit={submit}>
+
+        <form className="entry-form named-entry" onSubmit={submit}>
+          {session.people.status === "loading" && (
+            <p role="status">Loading demo people…</p>
+          )}
+
+          {session.people.status === "error" && (
+            <div className="request-error" role="alert">
+              <h2>Demo people are unavailable.</h2>
+              <p>
+                {session.people.error?.status === 404
+                  ? "The connected backend has not added named demo entry yet. Use the prepared preview to review the design, or retry after the team updates it."
+                  : session.people.error?.message}
+              </p>
+              <button
+                type="button"
+                className="button"
+                onClick={session.people.retry}
+              >
+                Retry
+              </button>
+            </div>
+          )}
+
+          {session.people.status === "success" && !people.length && (
+            <p>No demo people are available. Ask the team to reset the demo.</p>
+          )}
+
           <fieldset>
-            <legend>Choose your role</legend>
-            {[
-              ["staff", "Receiving staff", "Check a delivery label"],
-              ["supervisor", "Halal supervisor", "Review flagged deliveries"],
-              ["supplier", "Supplier", "Renew certificate records"],
-            ].map(([value, title, task]) => (
+            <legend className="sr-only">Choose a demo person</legend>
+            {people.map((p) => (
               <label
-                className="role-option"
-                htmlFor={"role-" + value}
-                key={value}
+                className={
+                  "person-option " + (selected === p.id ? "chosen" : "")
+                }
+                key={p.id}
               >
                 <input
-                  id={"role-" + value}
                   type="radio"
-                  name="role"
-                  value={value}
-                  checked={role === value}
-                  onChange={() => {
-                    setRole(value);
-                    setTenant("");
-                  }}
+                  name="person"
+                  checked={selected === p.id}
+                  onChange={() => setSelected(p.id)}
                 />
-                <span>
-                  <strong>{title}</strong>
-                  <small>{task}</small>
+                <span className="person-avatar" aria-hidden="true">
+                  {p.name[0]}
                 </span>
+                <span>
+                  <strong>{p.name}</strong>
+                  <small>
+                    {p.title} · {organisationName(p)}
+                  </small>
+                </span>
+                <ArrowRight size={18} aria-hidden="true" />
               </label>
             ))}
           </fieldset>
-          <div className="field">
-            <label htmlFor="organisation">Organisation</label>
-            <select
-              id="organisation"
-              value={tenant}
-              onChange={(e) => setTenant(e.target.value)}
-              disabled={!role}
-            >
-              <option value="">Choose an organisation</option>
-              {options.map((o) => (
-                <option key={o.tenant} value={o.tenant}>
-                  {o.name}
-                </option>
-              ))}
-            </select>
-          </div>
-          <button className="button primary" disabled={!valid}>
-            Enter workspace
-            <ArrowRight size={18} aria-hidden="true" />
+
+          <button className="button primary" disabled={!person}>
+            Enter workspace <ArrowRight size={18} aria-hidden="true" />
           </button>
           <p className="entry-note">
-            Sample workspaces. Roles are simulated for this demonstration.
+            Demo identities. SAMPLE data. Document coverage only.
           </p>
+
           {session.gateway.mode === "preview" && (
             <div className="entry-preview">
               <p className="entry-note">
-                Prepared preview: scripted examples in this tab. No model calls
-                or database saves.
+                Prepared preview: examples in this tab. No model calls or
+                database saves.
               </p>
               <button
                 type="button"
                 className="button quiet"
                 onClick={resetPreview}
               >
+                <RefreshCw size={15} aria-hidden="true" />
                 Reset prepared examples
               </button>
-              <p className="entry-note">
-                Resets prepared deliveries, decisions and renewals in this tab.
-              </p>
               {resetMessage && <p role="status">{resetMessage}</p>}
             </div>
           )}

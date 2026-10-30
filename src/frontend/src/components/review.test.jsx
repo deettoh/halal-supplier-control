@@ -1,3 +1,4 @@
+import { person } from "../test/people.js";
 import React from "react";
 import { it, expect, vi } from "vitest";
 import { render, screen, waitFor, within, act } from "@testing-library/react";
@@ -8,7 +9,39 @@ import { DecisionForm } from "./decision-form.jsx";
 import { Comparison, RuleChecklist } from "./delivery-evidence.jsx";
 import Review from "../pages/review.jsx";
 import data from "../lib/preview/data.json";
-const identity = { role: "supervisor", tenant: "Sunrise Bakery SAMPLE" };
+const identity = person(2);
+it("explains an actually empty organisation queue without asking for a nonexistent delivery", async () => {
+  render(
+    <SessionProvider
+      gateway={createPreviewGateway()}
+      initialIdentity={person(4)}
+    >
+      <Review />
+    </SessionProvider>,
+  );
+  expect(
+    await screen.findByRole("heading", { name: "Nothing waiting for review" }),
+  ).toBeVisible();
+  expect(
+    screen.getByText(/New flagged deliveries for Crescent Caterer SAMPLE/),
+  ).toBeVisible();
+  expect(
+    screen.queryByText(
+      "Select a delivery to inspect its photo and document checks.",
+    ),
+  ).not.toBeInTheDocument();
+  await userEvent
+    .setup()
+    .click(screen.getByRole("button", { name: "On hold", exact: true }));
+  expect(
+    await screen.findByRole("heading", { name: "No held deliveries" }),
+  ).toBeVisible();
+  expect(
+    screen.getByText(
+      "Deliveries appear here when a supervisor places them on hold.",
+    ),
+  ).toBeVisible();
+});
 it("links the selected comparison field using touch-equivalent clicks and keyboard activation", async () => {
   const user = userEvent.setup();
   const delivery = data.deliveries[identity.tenant][0];
@@ -67,7 +100,7 @@ it.each(["saved", "conflict"])(
     );
     await user.click(screen.getByRole("button", { name: "Record decision" }));
     const other = screen.getByRole("button", {
-      name: /#104.*Pending review.*Cocoa Powder.*Reading incomplete/,
+      name: /#104.*Pending review.*Cocoa Powder.*Needs review/,
     });
     await user.click(other);
     expect(
@@ -79,7 +112,7 @@ it.each(["saved", "conflict"])(
     else await screen.findByRole("alert");
     await user.click(
       screen.getByRole("button", {
-        name: /#104.*Pending review.*Cocoa Powder.*Reading incomplete/,
+        name: /#104.*Pending review.*Cocoa Powder.*Needs review/,
       }),
     );
     expect(
@@ -119,19 +152,21 @@ it("does not describe a manufacturer mismatch as a changed brand", async () => {
       manufacturer: "Different SAMPLE Foods",
     },
     rule_results: original.rule_results.map((r) =>
-      r.rule === "R3"
-        ? {
-            ...r,
-            passed: true,
-            detail: "Product and brand restriction match certificate scope.",
-          }
-        : r,
+      r.rule === "R2"
+        ? { ...r, detail: "Manufacturer score 42.0 is below 90." }
+        : r.rule === "R3"
+          ? {
+              ...r,
+              passed: true,
+              detail: "Product and brand restriction match certificate scope.",
+            }
+          : r,
     ),
   };
   wrap(<Review />, { ...base, listPending: async () => [row] });
   await screen.findByRole("heading", { name: "Cocoa Powder · Delivery #102" });
   expect(
-    screen.getByText("Brand or manufacturer differs."),
+    screen.getAllByText("Manufacturer score 42.0 is below 90.")[0],
   ).toBeInTheDocument();
   expect(screen.queryByText("Brand differs")).not.toBeInTheDocument();
 });
@@ -241,10 +276,48 @@ it("keeps a conflict visible when the resolved row leaves the queue and clears i
   await user.click(screen.getByLabelText("Accept delivery"));
   await user.type(screen.getByLabelText("Reason (required)"), "Inspected.");
   await user.click(screen.getByRole("button", { name: "Record decision" }));
-  await screen.findByText("This delivery is no longer in the pending queue.");
+  await waitFor(() =>
+    expect(
+      screen.getByRole("heading", { name: "Pending deliveries (0)" }),
+    ).toBeInTheDocument(),
+  );
+  expect(
+    screen.getByRole("heading", { name: "Cocoa Powder · Delivery #102" }),
+  ).toBeInTheDocument();
+  expect(screen.getByLabelText("Reason (required)")).toHaveValue("Inspected.");
+  expect(
+    screen.getByRole("button", { name: "Record decision" }),
+  ).toBeDisabled();
   expect(screen.getByRole("alert")).toHaveTextContent(
     "Another supervisor resolved this delivery.",
   );
+  vi.spyOn(window, "confirm").mockReturnValue(true);
   await user.click(screen.getByRole("button", { name: "Refresh queue" }));
   expect(screen.queryByRole("alert")).not.toBeInTheDocument();
+});
+
+it("connects Hold through the workbench and only offers accept or reject afterwards", async () => {
+  const user = userEvent.setup(),
+    g = createPreviewGateway();
+  wrap(<Review />, g);
+  await user.click(await screen.findByLabelText("Hold delivery"));
+  await user.type(
+    screen.getByLabelText("Reason (required)"),
+    "Request the replacement certificate.",
+  );
+  await user.selectOptions(
+    screen.getByLabelText("Next step (required)"),
+    "request_certificate",
+  );
+  await user.click(screen.getByRole("button", { name: "Record decision" }));
+  await screen.findByText(
+    /Previous reason: Request the replacement certificate/,
+  );
+  expect(screen.queryByLabelText("Hold delivery")).not.toBeInTheDocument();
+  expect(
+    screen.getByRole("button", { name: "Record decision" }),
+  ).toBeDisabled();
+  expect((await g.listOnHold(identity))[0].next_step).toBe(
+    "request_certificate",
+  );
 });

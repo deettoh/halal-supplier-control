@@ -190,15 +190,31 @@ def generate() -> dict[str, Any]:
         initial_activity[tenant].append(
             ActivityResponse(
                 id=d["id"],
-                actor="Receiving staff SAMPLE",
+                actor=next(
+                    p["name"]
+                    for p in seed["people"]
+                    if p["role"] == "staff" and p["tenant"] == tenant
+                ),
                 role="staff",
                 action=d["status"],
                 delivery_id=d["id"],
                 reason=None,
                 created_at=d["created_at"],
             ).model_dump(mode="json")
+            | {
+                "actor_title": next(
+                    p["title"]
+                    for p in seed["people"]
+                    if p["role"] == "staff" and p["tenant"] == tenant
+                ),
+                "material_name": materials[str(d["material_id"])]["name"],
+                "verdict": d["verdict"],
+                "supplier_name": None,
+            }
         )
     return {
+        "people": copy.deepcopy(seed["people"]),
+        "suppliers": copy.deepcopy(seed["suppliers"]),
         "provenance": (
             "Prepared synthetic UI simulation; not inference, "
             "persistence or evaluation measurements."

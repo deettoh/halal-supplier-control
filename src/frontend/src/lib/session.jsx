@@ -21,36 +21,63 @@ export const organisations = {
     { tenant: "2", name: "Silver Valley Ingredients SAMPLE" },
   ],
 };
-export function validateIdentity(value) {
-  if (!value || !["staff", "supervisor", "supplier"].includes(value.role))
+function identityShape(value) {
+  if (
+    !value ||
+    !["staff", "supervisor", "supplier", "reviewer"].includes(value.role) ||
+    !Number.isInteger(value.person_id) ||
+    value.person_id <= 0 ||
+    typeof value.tenant !== "string" ||
+    !value.tenant.trim() ||
+    typeof value.name !== "string" ||
+    !value.name.trim() ||
+    typeof value.title !== "string" ||
+    !value.title.trim()
+  )
     return null;
-  const allowed = organisations[value.role === "supplier" ? "supplier" : "sme"];
-  return allowed.some((o) => o.tenant === value.tenant)
-    ? { role: value.role, tenant: value.tenant }
-    : null;
+  return {
+    person_id: value.person_id,
+    role: value.role,
+    tenant: value.tenant,
+    name: value.name,
+    title: value.title,
+  };
+}
+export function validateIdentity(value, people = []) {
+  const id = value?.person_id ?? value?.id;
+  const person = people.find(
+    (p) => p.id === id && p.role === value.role && p.tenant === value.tenant,
+  );
+  return person ? identityShape({ ...person, person_id: person.id }) : null;
 }
 export function organisationName(identity) {
+  if (identity.role === "reviewer") return "Shared registry";
   return (
     organisations[identity.role === "supplier" ? "supplier" : "sme"].find(
       (o) => o.tenant === identity.tenant,
-    )?.name || ""
+    )?.name || identity.tenant
   );
 }
+export const routesForRole = {
+  staff: ["/check", "/masterlist"],
+  supervisor: ["/review", "/masterlist", "/activity"],
+  supplier: ["/certificates"],
+  reviewer: ["/registry"],
+};
 export function homeForRole(role) {
-  return (
-    { staff: "/check", supervisor: "/review", supplier: "/certificates" }[
-      role
-    ] || "/demo"
-  );
+  return routesForRole[role]?.[0] || "/demo";
 }
 export function workspaceKey(mode, identity) {
-  return [mode, identity?.role || "visitor", identity?.tenant || ""];
+  return [
+    mode,
+    identity?.role || "visitor",
+    identity?.tenant || "",
+    identity?.person_id || "",
+  ];
 }
 function stored(mode) {
   try {
-    return validateIdentity(
-      JSON.parse(sessionStorage.getItem("hsc.identity." + mode)),
-    );
+    return JSON.parse(sessionStorage.getItem("hsc.identity." + mode));
   } catch {
     return null;
   }
@@ -77,17 +104,67 @@ function ScopedQueries({ children }) {
 export function SessionProvider({ children, gateway, initialIdentity }) {
   const [state, setState] = useState(() => ({
     identity:
-      initialIdentity === undefined
-        ? stored(gateway.mode)
-        : validateIdentity(initialIdentity),
+      initialIdentity === undefined ? null : identityShape(initialIdentity),
     epoch: 0,
   }));
+  const [people, setPeople] = useState({
+    status: "loading",
+    data: [],
+    error: null,
+  });
+  const [peopleAttempt, setPeopleAttempt] = useState(0);
   const serial = useRef(0);
   const dirty = useRef(false);
+  useEffect(() => {
+    const controller = new AbortController();
+    Promise.resolve()
+      .then(() => {
+        if (!gateway.listPeople)
+          throw new Error("The connected service cannot list demo people yet.");
+        return gateway.listPeople({ signal: controller.signal });
+      })
+      .then((data) => {
+        if (controller.signal.aborted) return;
+        if (
+          !Array.isArray(data) ||
+          data.some((p) => !identityShape({ ...p, person_id: p.id }))
+        )
+          throw new Error("The service returned an invalid demo people list.");
+        setPeople({ status: "success", data, error: null });
+        setState((current) => {
+          const candidate =
+            current.identity ||
+            (initialIdentity === undefined
+              ? stored(gateway.mode)
+              : initialIdentity);
+          const identity = validateIdentity(candidate, data);
+          if (current.identity && !identity) serial.current += 1;
+          return { identity, epoch: serial.current };
+        });
+      })
+      .catch((error) => {
+        if (!controller.signal.aborted)
+          setPeople({ status: "error", data: [], error });
+      });
+    return () => {
+      controller.abort();
+    };
+  }, [gateway, initialIdentity, peopleAttempt]);
+  useEffect(
+    () => () => {
+      serial.current += 1;
+    },
+    [],
+  );
+  const retryPeople = useCallback(() => {
+    setPeople({ status: "loading", data: [], error: null });
+    setPeopleAttempt((n) => n + 1);
+  }, []);
   const selectIdentity = useCallback(
     (value) => {
-      const identity = validateIdentity(value);
-      if (!identity) throw new Error("Choose a valid role and organisation.");
+      const identity = validateIdentity(value, people.data);
+      if (!identity)
+        throw new Error("Choose a valid person from this service's list.");
       serial.current += 1;
       dirty.current = false;
       setState({ identity, epoch: serial.current });
@@ -97,10 +174,10 @@ export function SessionProvider({ children, gateway, initialIdentity }) {
           JSON.stringify(identity),
         );
       } catch {
-        /* Session remains usable when browser storage is blocked. */
+        /* In-memory selection remains usable. */
       }
     },
-    [gateway.mode],
+    [gateway.mode, people.data],
   );
   const setDraftDirty = useCallback((value) => {
     dirty.current = value;
@@ -135,6 +212,7 @@ export function SessionProvider({ children, gateway, initialIdentity }) {
     () => ({
       ...state,
       gateway,
+      people: { ...people, retry: retryPeople },
       selectIdentity,
       setDraftDirty,
       confirmDiscard,
@@ -142,7 +220,16 @@ export function SessionProvider({ children, gateway, initialIdentity }) {
       key: workspaceKey(gateway.mode, state.identity),
       capture: () => ({ context: { ...state.identity }, epoch: state.epoch }),
     }),
-    [state, gateway, selectIdentity, setDraftDirty, confirmDiscard, isCurrent],
+    [
+      state,
+      gateway,
+      people,
+      retryPeople,
+      selectIdentity,
+      setDraftDirty,
+      confirmDiscard,
+      isCurrent,
+    ],
   );
   return (
     <SessionContext.Provider value={value}>
@@ -153,6 +240,8 @@ export function SessionProvider({ children, gateway, initialIdentity }) {
           state.identity?.role +
           ":" +
           state.identity?.tenant +
+          ":" +
+          state.identity?.person_id +
           ":" +
           state.epoch
         }

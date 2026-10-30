@@ -1,0 +1,355 @@
+import gsap from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
+import { ScrollToPlugin } from "gsap/ScrollToPlugin";
+import { scenePose } from "./scene-pose.js";
+import {
+  fitSceneBounds,
+  fallbackSceneBounds,
+  sceneSpace,
+} from "./scene-layout.js";
+export function createSceneController({
+  root,
+  progressRef,
+  layoutRef = { current: {} },
+  invalidate,
+  onStageChange,
+  onPlaybackChange,
+  reducedMotion,
+}) {
+  let destroyed = false,
+    lastStage = -1,
+    tour,
+    move,
+    timeline,
+    trigger;
+  const stage = root.querySelector(".scene-stage");
+  // A static stage selection must not become the start value of a new scroll timeline.
+  if (!reducedMotion) progressRef.current.value = 0;
+  let w = stage.clientWidth,
+    h = stage.clientHeight,
+    mobile = w <= 760,
+    navHeight = 76;
+  function measure() {
+    w = stage.clientWidth;
+    h = stage.clientHeight;
+    mobile = w <= 760;
+    navHeight =
+      root.closest(".signal-landing")?.querySelector(".site-header")
+        ?.offsetHeight || (mobile ? 64 : 76);
+    const heading = root.querySelector(".scene-heading");
+    layoutRef.current = {
+      heading,
+      headingHeight: heading.offsetHeight || 80,
+      controlsTop: root.querySelector(".scene-controls")?.offsetTop || h * 0.72,
+      drawerHeight: root.querySelector(".decision-drawer")?.offsetHeight || 0,
+    };
+    // Anchor the decision above the complete control group, including its note.
+    // A percentage alone overlaps controls as their copy wraps or viewport shrinks.
+    const drawer = root.querySelector(".decision-drawer");
+    if (drawer)
+      drawer.style.bottom = reducedMotion
+        ? ""
+        : `${h - layoutRef.current.controlsTop + 20}px`;
+  }
+  measure();
+  function render() {
+    if (destroyed) return;
+    const p = progressRef.current.value,
+      pose = scenePose(p, {
+        mode: reducedMotion ? "static" : mobile ? "stacked" : "desktop",
+      });
+    // Inherited variables also reach late-mounted HTML panels inside the Canvas.
+    root.style.setProperty("--scan-progress", String(pose.scanProgress));
+    root.style.setProperty("--scan-opacity", String(pose.scanOpacity));
+    if (pose.stage !== lastStage) {
+      lastStage = pose.stage;
+      onStageChange(pose.stage);
+    }
+    invalidate();
+    const hero = root.querySelector(".hero-copy"),
+      heading = root.querySelector(".scene-heading"),
+      drawer = root.querySelector(".decision-drawer");
+    if (reducedMotion) {
+      hero.inert = false;
+      hero.querySelectorAll("a,button").forEach((el) => {
+        el.inert = false;
+      });
+      hero.style.pointerEvents = "";
+      drawer.inert = false;
+      root.querySelectorAll(".evidence-plane").forEach((el) => {
+        el.inert = false;
+      });
+      return;
+    }
+    hero.style.opacity = 1 - pose.copyAway;
+    hero.style.transform = `translate3d(${-pose.copyAway * (mobile ? 0 : 60)}px,${-pose.copyAway * (mobile ? 25 : 0)}px,0)`;
+    hero.inert = false;
+    hero.style.pointerEvents = pose.copyAway > 0.9 ? "none" : "";
+    hero.querySelectorAll("a,button").forEach((el) => {
+      el.inert = pose.copyAway > 0.9;
+    });
+    heading.style.opacity = pose.heading;
+    drawer.style.opacity = pose.decision;
+    drawer.style.transform = `translate(-50%,${(1 - pose.decision) * 24}px)`;
+    drawer.inert = pose.decision < 0.95;
+    const position = root.querySelector(".sc-fallback .console-position"),
+      world = root.querySelector(".sc-fallback .console-world");
+    if (!position || !world) return;
+    const compact = mobile
+      ? Math.min((w * 0.94) / 960, (h * 0.39) / 540)
+      : Math.min((w * 0.515) / 960, (h * 0.63) / 540);
+    const full = mobile
+      ? Math.min((w * 0.84) / 960, (h * 0.53) / 540)
+      : Math.min((w * 0.92) / 960, (h * 0.68) / 540);
+    let scale =
+      (compact + (full - compact) * pose.expand) *
+      (1 - pose.open * 0.24) *
+      (1 - pose.decision * 0.2);
+    if (mobile)
+      scale =
+        Math.min((w * 0.77) / 300, (h * 0.43) / 438) *
+        (1 - pose.decision * 0.12) *
+        // Reserve the hero actions above the compact photo on shorter phones.
+        (h < 650 ? 0.65 + 0.35 * pose.copyAway : 1);
+    const x = mobile ? 0 : w * 0.202 * (1 - pose.expand);
+    let y = mobile
+      ? h * 0.04 +
+        (-h * 0.065 - h * 0.04) * pose.expand -
+        pose.decision * h * 0.09
+      : -h * 0.02 +
+        h * 0.005 * pose.expand -
+        pose.open * h * 0.1 -
+        pose.decision * h * 0.07;
+    if (pose.heading > 0) {
+      const bounds = fallbackSceneBounds(pose, { h, scale, y, mobile });
+      const layout = layoutRef.current;
+      const fit = fitSceneBounds(bounds, sceneSpace(layout, pose));
+      const amount = 1 + (fit.scale - 1) * pose.heading;
+      const origin = h * (mobile ? 0.53 : 0.51) + y;
+      y +=
+        ((bounds.top + bounds.bottom) / 2 - origin) * (1 - amount) +
+        fit.shift * pose.heading;
+      scale *= amount;
+      const fitted = fallbackSceneBounds(pose, { h, scale, y, mobile });
+      heading.style.transform = `translate3d(0,${Math.max(12, fitted.top - layout.headingHeight - 24)}px,0)`;
+    }
+    position.style.transform = `translate(-50%,-50%) translate3d(${x}px,${y}px,0) scale(${scale})`;
+    world.style.transform = `rotateX(${pose.rotation[0]}deg) rotateY(${pose.rotation[1]}deg) rotateZ(${pose.rotation[2]}deg)`;
+    [
+      ["source", "photo"],
+      ["reading", "reading"],
+      ["rules", "rules"],
+    ].forEach(([kind, key], i) => {
+      const el = root.querySelector(".sc-fallback ." + kind + "-plane");
+      if (!el) return;
+      if (mobile) {
+        const focus = Math.min(2, pose.stage),
+          current = i === focus;
+        const center = [167, 474, 787][i];
+        el.style.transform = `translate3d(${480 - center + (current ? 0 : i < focus ? -22 : 22)}px,${current ? 0 : -17}px,${current ? 125 : 0}px)`;
+        el.style.opacity = current ? "1" : ".22";
+        el.inert = !current;
+      } else {
+        const base = {
+          photo: [-3.13, -0.04, 0.19],
+          reading: [-0.06, -0.04, 0.19],
+          rules: [3.07, -0.04, 0.19],
+        }[key];
+        el.style.transform = `translate3d(${(pose[key][0] - base[0]) * 100}px,${-(pose[key][1] - base[1]) * 100}px,${(pose[key][2] - base[2]) * 100}px)`;
+        el.style.opacity = "1";
+        el.inert = false;
+      }
+    });
+    root.querySelector(".sc-fallback .console-shell").style.opacity =
+      1 - pose.open * 0.92;
+    root.querySelector(".sc-fallback .console-base").style.opacity =
+      1 - pose.open * 0.62;
+  }
+  const canScroll = !reducedMotion && root.clientHeight > 0;
+  const oldScrollBehavior = document.documentElement.style.scrollBehavior;
+  if (canScroll) document.documentElement.style.scrollBehavior = "auto";
+  if (canScroll) {
+    gsap.registerPlugin(ScrollTrigger, ScrollToPlugin);
+    timeline = gsap
+      .timeline({
+        scrollTrigger: {
+          trigger: root,
+          start: () => `top ${navHeight}px`,
+          end: "bottom bottom",
+          scrub: 0.15,
+          onRefresh: measure,
+        },
+      })
+      .to(progressRef.current, {
+        value: 1,
+        duration: 1,
+        ease: "none",
+        onUpdate: render,
+      });
+    trigger = timeline.scrollTrigger;
+  }
+  function pause() {
+    tour?.kill();
+    tour = null;
+    onPlaybackChange(false);
+  }
+  function interrupt(event) {
+    if (event.type === "click" && !event.target?.closest?.('a[href^="#"]'))
+      return;
+    if (
+      event.type === "keydown" &&
+      ![
+        "ArrowDown",
+        "ArrowUp",
+        "PageDown",
+        "PageUp",
+        "Home",
+        "End",
+        " ",
+        "Escape",
+        "Tab",
+      ].includes(event.key)
+    )
+      return;
+    pause();
+    move?.kill();
+  }
+  const topFor = (p) =>
+    trigger ? trigger.start + (trigger.end - trigger.start) * p : 0;
+  function seek(top) {
+    window.scrollTo({ top, behavior: "instant" });
+    if (!trigger) return;
+    // Finish an outstanding scrub before seeking; otherwise a hash jump briefly
+    // plays all the intervening poses after the destination is already visible.
+    trigger.getTween?.()?.progress(1);
+    const p = Math.max(
+      0,
+      Math.min(
+        1,
+        (top - trigger.start) / Math.max(1, trigger.end - trigger.start),
+      ),
+    );
+    timeline.progress?.(p, true);
+    progressRef.current.value = p;
+    render();
+  }
+  function jumpToSection(target) {
+    pause();
+    move?.kill();
+    if (destroyed || !target) return;
+    const top = Math.max(
+      0,
+      target.getBoundingClientRect().top + window.scrollY - navHeight - 16,
+    );
+    seek(top);
+  }
+  function goToStage(index) {
+    pause();
+    move?.kill();
+    const p = [0, 0.29, 0.53, 0.86][index];
+    if (destroyed) return;
+    if (!canScroll) {
+      progressRef.current.value = p;
+      render();
+      (index === 3
+        ? drawer()
+        : root.querySelectorAll(".sc-fallback .evidence-plane")[index]
+      )?.scrollIntoView?.({ behavior: "instant", block: "center" });
+      return;
+    }
+    move = gsap.to(window, {
+      scrollTo: { y: topFor(p), autoKill: true },
+      duration: 0.85,
+      ease: "power3.out",
+    });
+  }
+  function drawer() {
+    return root.querySelector(".decision-drawer");
+  }
+  function play() {
+    pause();
+    if (!canScroll) return;
+    move?.kill();
+    seek(topFor(0));
+    onPlaybackChange(true);
+    tour = gsap.timeline({
+      onComplete: () => {
+        tour = null;
+        onPlaybackChange(false);
+      },
+    });
+    tour
+      .to(window, {
+        scrollTo: { y: topFor(0.29), autoKill: false },
+        duration: 4.3,
+        ease: "power2.inOut",
+      })
+      .to({}, { duration: 4.7 })
+      .to(window, {
+        scrollTo: { y: topFor(0.53), autoKill: false },
+        duration: 3.4,
+        ease: "power2.inOut",
+      })
+      .to({}, { duration: 4.6 })
+      .to(window, {
+        scrollTo: { y: topFor(0.86), autoKill: false },
+        duration: 3,
+        ease: "power2.inOut",
+      })
+      .to({}, { duration: 5.3 })
+      .to(window, {
+        scrollTo: { y: topFor(1), autoKill: false },
+        duration: 2.7,
+        ease: "power2.inOut",
+      });
+  }
+  function hidden() {
+    if (document.hidden) {
+      pause();
+      move?.kill();
+    }
+  }
+  ["wheel", "touchstart", "keydown", "click"].forEach((type) =>
+    window.addEventListener(type, interrupt, { passive: true }),
+  );
+  document.addEventListener("visibilitychange", hidden);
+  const observer =
+    typeof ResizeObserver === "undefined"
+      ? null
+      : new ResizeObserver(() => {
+          measure();
+          render();
+        });
+  [
+    stage,
+    root.querySelector(".scene-heading"),
+    root.querySelector(".scene-controls"),
+    root.querySelector(".decision-drawer"),
+  ]
+    .filter(Boolean)
+    .forEach((el) => observer?.observe(el));
+  render();
+  return {
+    goToStage,
+    jumpToSection,
+    play,
+    pause,
+    destroy() {
+      destroyed = true;
+      observer?.disconnect();
+      root.querySelector(".decision-drawer").style.bottom = "";
+      root.style.removeProperty("--scan-progress");
+      root.style.removeProperty("--scan-opacity");
+      if (canScroll)
+        document.documentElement.style.scrollBehavior = oldScrollBehavior;
+      pause();
+      move?.kill();
+      trigger?.kill();
+      timeline?.kill();
+      ["wheel", "touchstart", "keydown", "click"].forEach((type) =>
+        window.removeEventListener(type, interrupt),
+      );
+      document.removeEventListener("visibilitychange", hidden);
+    },
+  };
+}

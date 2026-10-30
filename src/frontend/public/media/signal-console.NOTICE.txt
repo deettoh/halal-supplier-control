@@ -1,0 +1,6 @@
+Signal Console: original procedural model created for Halal Supplier Control.
+Authoring tool: Blender 5.2.3 LTS. No third-party meshes or textures.
+Runtime file: signal-console.glb (36,888 bytes), five named meshes.
+Triangle upper estimate: 1,500. No texture dependencies.
+Semantic evidence is HTML, never baked into this model.
+Editable authoring files remain outside the application publication set.

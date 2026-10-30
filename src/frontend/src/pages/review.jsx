@@ -5,12 +5,19 @@ import { useSession } from "../lib/session.jsx";
 import { useRecord, useScopedMutation } from "../lib/api/hooks.js";
 import { Status } from "../components/status.jsx";
 import { RequestState, ErrorMessage } from "../components/request-state.jsx";
-import { DeliveryEvidence } from "../components/delivery-evidence.jsx";
+import {
+  DeliveryEvidence,
+  firstReviewIssue,
+} from "../components/delivery-evidence.jsx";
 import { DecisionForm } from "../components/decision-form.jsx";
 export default function Review() {
   const session = useSession();
   const client = useQueryClient();
   const pending = useRecord("listPending");
+  const canHold = session.gateway.capabilities?.hold === true;
+  const held = useRecord("listOnHold", { enabled: canHold });
+  const [queueMode, setQueueMode] = useState("pending");
+  const activeQuery = queueMode === "hold" ? held : pending;
   const materials = useRecord("listMaterials");
   const history = useRecord("listHistory", {
     enabled: session.gateway.mode === "preview",
@@ -18,10 +25,17 @@ export default function Review() {
   const [selectedId, setSelectedId] = useState(null);
   const [saved, setSaved] = useState(null);
   const [blocked, setBlocked] = useState(null);
+  const [blockedSnapshot, setBlockedSnapshot] = useState(null);
   const [showDetail, setShowDetail] = useState(false);
-  const queue = pending.data || [];
+  const queue = activeQuery.data || [];
   const id = selectedId ?? queue[0]?.id;
-  const selected = saved?.id === id ? saved : queue.find((d) => d.id === id);
+  const emptyQueue = activeQuery.isSuccess && queue.length === 0 && !id;
+  const selected =
+    blockedSnapshot?.id === id
+      ? blockedSnapshot
+      : saved?.id === id
+        ? saved
+        : queue.find((d) => d.id === id);
   const mutation = useScopedMutation(
     (ctx, input) => session.gateway.decide(ctx, id, input),
     {
@@ -33,8 +47,12 @@ export default function Review() {
         if (error.status === 409 || error.status === 404) {
           setSelectedId(id);
           setBlocked(id);
+          setBlockedSnapshot(selected);
           client.invalidateQueries({
-            queryKey: [...session.key, "listPending"],
+            queryKey: [
+              ...session.key,
+              queueMode === "hold" ? "listOnHold" : "listPending",
+            ],
           });
         }
       },
@@ -50,20 +68,61 @@ export default function Review() {
     setSaved(null);
     mutation.reset();
     setBlocked(null);
+    setBlockedSnapshot(null);
     setShowDetail(true);
   }
   return (
     <div className={"review-layout " + (showDetail ? "show-detail" : "")}>
       <aside className="delivery-queue" aria-label="Delivery queue">
         <h1 className="mobile-title">Review deliveries</h1>
-        <h2>Pending deliveries ({queue.length})</h2>
+        <div className="queue-tabs">
+          <button
+            type="button"
+            disabled={mutation.isPending}
+            aria-pressed={queueMode === "pending"}
+            onClick={() => {
+              if (session.confirmDiscard()) {
+                setQueueMode("pending");
+                setSelectedId(null);
+                setSaved(null);
+                mutation.reset();
+              }
+            }}
+          >
+            Pending
+          </button>
+          <button
+            type="button"
+            disabled={!canHold || mutation.isPending}
+            aria-pressed={queueMode === "hold"}
+            onClick={() => {
+              if (session.confirmDiscard()) {
+                setQueueMode("hold");
+                setSelectedId(null);
+                setSaved(null);
+                mutation.reset();
+              }
+            }}
+          >
+            On hold
+          </button>
+        </div>
+        <h2>
+          {queueMode === "hold" ? "Held" : "Pending"} deliveries ({queue.length}
+          )
+        </h2>
+        {!canHold && (
+          <p className="capability-note">
+            Hold is not available from the connected backend yet.
+          </p>
+        )}
         {mutation.isPending && (
           <p className="muted" role="status">
             Saving the current decision. You can open another delivery when it
             finishes.
           </p>
         )}
-        <RequestState query={pending} noun="deliveries">
+        <RequestState query={activeQuery} noun="deliveries">
           {queue.length === 0 && (
             <p className="muted">
               No deliveries waiting for review. New flagged deliveries will
@@ -92,7 +151,7 @@ export default function Review() {
                     {d.verdict === "substitution"
                       ? "Identity differs"
                       : d.verdict === "needs_human"
-                        ? "Reading incomplete"
+                        ? "Needs review"
                         : "Coverage needs review"}
                     <ChevronRight size={17} aria-hidden="true" />
                   </span>
@@ -116,6 +175,7 @@ export default function Review() {
                           if (session.confirmDiscard()) {
                             mutation.reset();
                             setBlocked(null);
+                            setBlockedSnapshot(null);
                             setSelectedId(d.id);
                             setSaved(d);
                             setShowDetail(true);
@@ -157,18 +217,11 @@ export default function Review() {
               <div>
                 <p>Original coverage result</p>
                 <Status value={selected.verdict} />
+                <p className="verdict-detail">{firstReviewIssue(selected)}</p>
               </div>
               <div>
                 <p>Current delivery status</p>
                 <Status value={selected.status} />
-                <p className="muted verdict-detail">
-                  {selected.verdict === "substitution"
-                    ? "Brand or manufacturer differs."
-                    : selected.verdict === "needs_human"
-                      ? "Reading incomplete. Supervisor review is required."
-                      : selected.rule_results.find((r) => r.passed === false)
-                          ?.detail}
-                </p>
               </div>
               <div className="supplier-summary">
                 <p>Supplier</p>
@@ -180,25 +233,66 @@ export default function Review() {
             {selected.error && (
               <p className="request-error">{selected.error}</p>
             )}
+            {blocked === selected.id && (
+              <div className="conflict-context">
+                <p>
+                  This delivery changed while you were reviewing. Your unsent
+                  reason and the evidence you reviewed are kept here.
+                </p>
+                <button
+                  type="button"
+                  className="button quiet"
+                  onClick={() => {
+                    if (!session.confirmDiscard()) return;
+                    setSelectedId(null);
+                    setSaved(null);
+                    setBlocked(null);
+                    setBlockedSnapshot(null);
+                    mutation.reset();
+                    activeQuery.refetch();
+                  }}
+                >
+                  Refresh queue
+                </button>
+              </div>
+            )}
             <DeliveryEvidence material={material} delivery={selected} />
           </>
         ) : (
           <div className="empty-workbench">
-            <h1>Review deliveries</h1>
+            <h1>
+              {emptyQueue
+                ? queueMode === "hold"
+                  ? "No held deliveries"
+                  : "Nothing waiting for review"
+                : "Review deliveries"}
+            </h1>
             <ErrorMessage error={mutation.error} />
             <p>
-              {id
-                ? "This delivery is no longer in the pending queue."
-                : "Select a delivery to inspect its photo and document checks."}
+              {emptyQueue
+                ? queueMode === "hold"
+                  ? "Deliveries appear here when a supervisor places them on hold."
+                  : `New flagged deliveries for ${session.identity?.tenant || "this organisation"} will appear here after receiving staff submit a check.`
+                : id
+                  ? "This delivery is no longer in the pending queue."
+                  : "Select a delivery to inspect its photo and document checks."}
             </p>
+            {emptyQueue && session.gateway.mode === "preview" && (
+              <p className="queue-preview-note">
+                Prepared preview: each organisation has its own queue. Covered
+                checks, including those with an expiry warning, appear in
+                Decided deliveries.
+              </p>
+            )}
             <button
               className="button quiet"
               onClick={() => {
                 setSelectedId(null);
                 setSaved(null);
                 setBlocked(null);
+                setBlockedSnapshot(null);
                 mutation.reset();
-                pending.refetch();
+                activeQuery.refetch();
               }}
             >
               Refresh queue
@@ -208,7 +302,8 @@ export default function Review() {
       </section>
       {selected && (
         <DecisionForm
-          key={selected.id}
+          key={selected.id + ":" + selected.status}
+          canHold={canHold}
           delivery={selected}
           onDecision={mutation.mutate}
           pending={mutation.isPending}

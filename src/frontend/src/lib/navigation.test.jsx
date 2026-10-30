@@ -1,3 +1,4 @@
+import { person } from "../test/people.js";
 import React from "react";
 import { it, expect, vi } from "vitest";
 import { render, screen, waitFor, act } from "@testing-library/react";
@@ -14,7 +15,7 @@ it("allows cancelling browser Back without losing the supplier draft, then permi
   render(
     <SessionProvider
       gateway={createPreviewGateway()}
-      initialIdentity={{ role: "supplier", tenant: "2" }}
+      initialIdentity={person(6)}
     >
       <App />
     </SessionProvider>,
@@ -30,12 +31,12 @@ it("allows cancelling browser Back without losing the supplier draft, then permi
   expect(screen.getByLabelText("Issuer")).toHaveValue("UNSAVED SAMPLE ISSUER");
   confirm.mockReturnValue(true);
   await act(async () => window.history.back());
-  await screen.findByRole("group", { name: "Choose your role" });
+  await screen.findByRole("group", { name: "Choose a demo person" });
   expect(confirm).toHaveBeenCalledTimes(2);
   await act(async () => window.history.forward());
   expect(await screen.findByLabelText("Issuer")).toHaveValue(originalIssuer);
   await user.click(screen.getByRole("link", { name: "Switch workspace" }));
-  await screen.findByRole("group", { name: "Choose your role" });
+  await screen.findByRole("group", { name: "Choose a demo person" });
   await act(async () => window.history.back());
   const restored = await screen.findByLabelText("Issuer");
   await user.clear(restored);
@@ -49,7 +50,7 @@ it("allows cancelling browser Back without losing the supplier draft, then permi
   );
   confirm.mockReturnValue(true);
   await act(async () => window.history.forward());
-  await screen.findByRole("group", { name: "Choose your role" });
+  await screen.findByRole("group", { name: "Choose a demo person" });
   expect(confirm).toHaveBeenCalledTimes(4);
   confirm.mockRestore();
 });
@@ -78,7 +79,7 @@ it("commits an ordinary internal link inside the browser snapshot update", async
     await act(async () => commit());
     expect(window.location.pathname).toBe("/demo");
     expect(
-      screen.getByRole("group", { name: "Choose your role" }),
+      screen.getByRole("group", { name: "Choose a demo person" }),
     ).toBeVisible();
   } finally {
     delete document.startViewTransition;
@@ -117,15 +118,15 @@ it("keeps Home when it is clicked after a pending Enter demo transition", async 
       </SessionProvider>,
     );
     await user.click(screen.getAllByRole("link", { name: "Enter demo" })[0]);
-    await user.click(
-      screen.getByRole("link", { name: "Halal Supplier Control", exact: true }),
-    );
+    await user.click(screen.getByRole("link", { name: "Loupe", exact: true }));
     await act(async () => {
       for (const commit of commits) commit();
     });
     expect(window.location.pathname).toBe("/");
     expect(
-      screen.getByRole("heading", { name: "Know what your documents cover." }),
+      screen.getByRole("heading", {
+        name: /Every delivery.*A clear.*next step/,
+      }),
     ).toBeVisible();
   } finally {
     delete document.startViewTransition;

@@ -8,7 +8,17 @@ export default function Activity() {
   const rows = [...(query.data || [])]
     .sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
     .filter((r) =>
-      [r.actor, r.role, r.action, r.reason || "", String(r.delivery_id || "")]
+      [
+        r.actor,
+        r.actor_title,
+        r.role,
+        r.action,
+        r.material_name,
+        r.supplier_name,
+        label(r.verdict),
+        r.reason || "",
+        String(r.delivery_id || ""),
+      ]
         .join(" ")
         .toLowerCase()
         .includes(search.trim().toLowerCase()),
@@ -30,7 +40,7 @@ export default function Activity() {
             type="search"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            placeholder="Actor, action, delivery or reason"
+            placeholder="Person, material, supplier or reason"
           />
         </div>
         {rows.length ? (
@@ -40,13 +50,20 @@ export default function Activity() {
                 <time dateTime={r.created_at}>{formatTime(r.created_at)}</time>
                 <div className="activity-actor">
                   <strong>{r.actor}</strong>
-                  <small>{label(r.role)}</small>
+                  <small>{r.actor_title || label(r.role)}</small>
                 </div>
                 <div>
                   <h2>
                     {label(r.action).replace(/^./, (c) => c.toUpperCase())}
                   </h2>
-                  {r.delivery_id !== null && <p>Delivery #{r.delivery_id}</p>}
+                  {r.delivery_id != null && (
+                    <p>
+                      {r.material_name ? r.material_name + " · " : ""}Delivery #
+                      {r.delivery_id}
+                    </p>
+                  )}
+                  {r.supplier_name && <p>{r.supplier_name}</p>}
+                  {r.verdict && <p>Coverage result: {label(r.verdict)}</p>}
                 </div>
                 <p>{r.reason || "No reason recorded."}</p>
               </li>
