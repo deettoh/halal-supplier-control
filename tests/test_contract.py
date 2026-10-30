@@ -5,6 +5,7 @@ from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
 
+import httpx2
 import pytest
 from fastapi.testclient import TestClient
 from pydantic import ValidationError
@@ -12,11 +13,12 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import Session
 from sqlalchemy.pool import StaticPool
 
-from backend import db
+from backend import db, extract
 from backend.extract import LabelExtraction as ExtractLabel
 from backend.main import app, database
 from backend.schemas import (
     ActivityResponse,
+    CertificateExtraction,
     CertificateResponse,
     DeliveryDecisionRequest,
     DeliveryResponse,
@@ -38,6 +40,7 @@ PNG = (Path(__file__).parent / "fixtures/synthetic_label.png").read_bytes()
         "certificate_renewed",
         "certificate_submitted",
         "certificate_rejected",
+        "on_hold",
         "cert_renewed",
         "delivery_checked",
         "invented",
@@ -61,6 +64,7 @@ def test_activity_action_contract_and_seed(action: str) -> None:
         "certificate_renewed",
         "certificate_submitted",
         "certificate_rejected",
+        "on_hold",
     }
     for model, values in (
         (ActivityResponse, payload),
@@ -86,6 +90,7 @@ def test_openapi_lists_supported_activity_actions() -> None:
         "certificate_renewed",
         "certificate_submitted",
         "certificate_rejected",
+        "on_hold",
     }
 
 
@@ -98,6 +103,26 @@ def contract_database() -> Generator[None, None, None]:
         poolclass=StaticPool,
     )
     db.init_db(engine)
+    with Session(engine) as people:
+        people.add_all(
+            [
+                db.Person(
+                    id=1,
+                    name="Aina",
+                    title="Receiving staff",
+                    role="staff",
+                    tenant="bakery",
+                ),
+                db.Person(
+                    id=2,
+                    name="Farid",
+                    title="Halal supervisor",
+                    role="supervisor",
+                    tenant="bakery",
+                ),
+            ]
+        )
+        people.commit()
     with Session(engine) as seeded:
         seeded.add(
             db.Person(
@@ -125,7 +150,11 @@ def contract_database() -> Generator[None, None, None]:
 def headers(role: str = "supervisor") -> dict[str, str]:
     return {
         "X-Demo-Role": role,
-        "X-Demo-Person": "5",
+        "X-Demo-Person": {
+            "supplier": "5",
+            "staff": "1",
+            "supervisor": "2",
+        }.get(role, "7"),
         "X-Demo-Tenant": "1" if role == "supplier" else "bakery",
     }
 
@@ -278,13 +307,77 @@ def test_only_supplier_can_renew(role: str) -> None:
     assert response.status_code == 403
 
 
-def test_stretch_extract_accepts_image() -> None:
-    response = client.post(
+CERTIFICATE_READING = CertificateExtraction.model_validate(
+    {
+        "issuer": "SAMPLE Food Certification Council",
+        "cert_no": "SAMPLE-GGS-2026-001",
+        "holder_name": "Golden Grain Supplies SAMPLE",
+        "expiry_date": "2026-11-30",
+        "scope": [{"product_name": "Wheat Flour", "brand": "GoldenMill"}],
+    }
+)
+
+
+def extract_certificate_photo(
+    image: bytes = PNG, role: str = "supplier"
+) -> httpx2.Response:
+    return client.post(
         "/api/certificates/extract",
-        headers=headers("supplier"),
-        files={"image": ("certificate.png", b"fake image", "image/png")},
+        headers=headers(role),
+        files={"image": ("certificate.png", image, "image/png")},
     )
-    assert response.status_code == 501
+
+
+def test_extract_returns_certificate_reading(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setattr(
+        extract, "extract_certificate", lambda _: CERTIFICATE_READING
+    )
+    response = extract_certificate_photo()
+    assert response.status_code == 200
+    assert response.json() == {
+        "extracted": CERTIFICATE_READING.model_dump(mode="json"),
+        "error": None,
+    }
+
+
+def test_extract_failure_returns_error_message(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    def broken(_: bytes) -> CertificateExtraction:
+        raise extract.ExtractionError("RunPod request failed: APIError")
+
+    monkeypatch.setattr(extract, "extract_certificate", broken)
+    response = extract_certificate_photo()
+    assert response.status_code == 200
+    assert response.json() == {
+        "extracted": None,
+        "error": "RunPod request failed: APIError",
+    }
+
+
+def test_extract_hides_invalid_configuration(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setenv("RUNPOD_ENDPOINT_URL", "secret-not-a-url")
+    monkeypatch.setenv("RUNPOD_API_KEY", "test-key")
+    response = extract_certificate_photo()
+    assert response.status_code == 200
+    assert response.json()["extracted"] is None
+    assert "secret" not in response.json()["error"]
+
+
+@pytest.mark.parametrize(
+    "image", [b"fake image", b"\x89PNG\r\n\x1a\nnot a picture"]
+)
+def test_extract_rejects_unreadable_image(image: bytes) -> None:
+    assert extract_certificate_photo(image).status_code == 422
+
+
+@pytest.mark.parametrize("role", ["staff", "supervisor"])
+def test_only_supplier_can_extract_certificate(role: str) -> None:
+    assert extract_certificate_photo(role=role).status_code == 403
 
 
 @pytest.mark.parametrize(
@@ -366,7 +459,8 @@ def test_openapi_documents_business_and_registry_routes() -> None:
         (path, method)
         for path, methods in spec["paths"].items()
         for method in methods
-        if path != "/api/health" and not path.endswith("/image")
+        if path not in {"/api/health", "/api/people"}
+        and not path.endswith("/image")
     }
     assert actual == expected
     for path, method in expected:
@@ -374,13 +468,11 @@ def test_openapi_documents_business_and_registry_routes() -> None:
         header_names = {
             p["name"] for p in operation["parameters"] if p["in"] == "header"
         }
-        expected_headers = {"X-Demo-Role", "X-Demo-Tenant"}
+        expected_headers = {"X-Demo-Role", "X-Demo-Tenant", "X-Demo-Person"}
         if path.startswith(("/api/certificates", "/api/registry")):
             expected_headers.add("X-Demo-Person")
         assert header_names == expected_headers
-        assert ("501" in operation["responses"]) == (
-            path == "/api/certificates/extract"
-        )
+        assert "501" not in operation["responses"]
         success = (
             operation["responses"].get("201") or operation["responses"]["200"]
         )

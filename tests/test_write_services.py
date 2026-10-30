@@ -27,6 +27,10 @@ def headers(role: str = "staff", tenant: str = BAKERY) -> dict[str, str]:
     result = {"X-Demo-Role": role, "X-Demo-Tenant": tenant}
     if role == "supplier":
         result["X-Demo-Person"] = "6" if tenant == "2" else "5"
+    if role in {"staff", "supervisor"}:
+        result["X-Demo-Person"] = str(
+            (1 if role == "staff" else 2) + (2 if tenant == CATERER else 0)
+        )
     return result
 
 
@@ -355,7 +359,7 @@ def test_supervisor_decides_once_with_atomic_audit(
         "accepted" if decision == "accept" else "rejected"
     )
     assert response.json()["reason"] == "Checked manually"
-    assert response.json()["decided_by"] == "supervisor"
+    assert response.json()["decided_by"] == "Farid"
     assert (
         api_client.post(
             path,

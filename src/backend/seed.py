@@ -90,6 +90,7 @@ class DeliverySeed(SeedImage):
     verdict: Verdict
     status: DeliveryStatus
     error: str | None = None
+    next_step: str | None = None
     decided_by: str | None = None
     reason: str | None = None
     created_at: AwareDatetime = Field(default_factory=db.utc_now)
@@ -98,10 +99,26 @@ class DeliverySeed(SeedImage):
     def check_checklist(self) -> "DeliverySeed":
         if tuple(item.rule for item in self.rule_results) != RULE_ORDER:
             raise ValueError(RULE_ORDER_ERROR)
+        allowed = {"request_certificate", "request_product_details"}
+        if self.status == "on_hold":
+            if (
+                self.next_step not in allowed
+                or not self.decided_by
+                or not self.reason
+            ):
+                raise ValueError(
+                    "Held delivery needs actor, reason and next_step"
+                )
+        elif self.next_step is not None:
+            raise ValueError("next_step is only valid for on_hold")
         return self
 
 
 class ActivitySeed(APIModel):
+    actor_title: str | None = None
+    material_name: str | None = None
+    verdict: Verdict | None = None
+    supplier_name: str | None = None
     id: RecordId
     tenant: NonEmptyText
     actor: NonEmptyText

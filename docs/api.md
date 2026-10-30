@@ -17,23 +17,30 @@ The route dependencies check the role, and the services check ownership by
 filtering materials, deliveries and activity to the caller's SME and by taking
 a supplier's ID from the `X-Demo-Tenant` header.
 
-Supplier and reviewer requests also need `X-Demo-Person`, the ID of a person
-in the `people` list in `src/seed/seed.json`. The backend returns 403 when
-that person's role and tenant don't match the other two headers.
+Every protected business route, including photos and certificate extraction,
+also requires `X-Demo-Person`, a positive ID from the `people` table. The
+backend validates that person against both role and tenant; mismatch gives
+403. `GET /api/people` is public for the picker, as is `/api/health`.
 
-## Thirteen routes under `/api`
+This branch implements named identities, enriched logs and Hold only. Expiry
+checking remains deferred and contract/OpenAPI versions stay 0.1.0 pending
+full v0.2 completion.
+
+
+## Routes under `/api`
 
 | Method | Path | Role | Request | Success |
 |---|---|---|---|---|
+| GET | `/api/people` | none | - | 200, seeded people for the picker |
 | GET | `/api/health` | none | - | 200, available without a database |
 | GET | `/api/materials` | staff, supervisor | - | 200, the SME's materials with computed coverage |
 | POST | `/api/deliveries` | staff | multipart `material_id`, `image` | 201, the checked delivery |
-| GET | `/api/deliveries` | supervisor | `status=pending_review` | 200, the SME's review queue |
-| POST | `/api/deliveries/{id}/decision` | supervisor | JSON `decision` (`accept` or `reject`), `reason` | 200, the updated delivery |
+| GET | `/api/deliveries` | supervisor | `status=pending_review` (default) or `on_hold` | 200, the SME's review queue |
+| POST | `/api/deliveries/{id}/decision` | supervisor | JSON `decision` (`accept`, `reject` or `hold`), `reason`; hold requires `next_step` | 200, the updated delivery |
 | GET | `/api/activity` | supervisor | - | 200, the SME's activity log, newest first |
 | GET | `/api/certificates` | supplier | - | 200, the supplier's active, superseded, pending and rejected certificates |
 | POST | `/api/certificates` | supplier | multipart `issuer`, `cert_no`, `holder_name`, `expiry_date`, `scope`, optional `image` | 201, the pending renewal |
-| POST | `/api/certificates/extract` | supplier | multipart `image` | 501, not implemented |
+| POST | `/api/certificates/extract` | supplier | multipart `image` | 200, either the certificate fields from the photo or a null `extracted` with an `error` message |
 | GET | `/api/deliveries/{id}/image` | staff, supervisor | - | 200, JPEG of the SME's delivery photo |
 | GET | `/api/certificates/{id}/image` | staff, supervisor, supplier, reviewer | - | 200, JPEG for the owning supplier, a linked SME or the registry reviewer |
 | GET | `/api/registry/renewals` | reviewer | - | 200, pending renewals, oldest first, each with the current certificate and the supplier name |
@@ -56,7 +63,6 @@ response.
 | 409 | A decision on a delivery already decided or still being checked, a second pending renewal, or a decision on a renewal already reviewed |
 | 413 | Upload larger than 10 MiB |
 | 422 | Missing or invalid headers, fields or image |
-| 501 | `POST /api/certificates/extract` |
 | 503 | Database unavailable |
 
 A request rejected with 403, 404, 413 or 422 writes no records and no activity
@@ -159,9 +165,22 @@ for a decision, and a decision row has the reviewer's note as its `reason`.
 
 ## Photos are stored and served as JPEG
 
-The upload routes accept PNG or JPEG. `backend.images` stores each upload as
-JPEG at quality 85 with full resolution, upright orientation and transparency
-flattened onto white. The model gets the same encoding resized so the longest
-side is at most 1280 pixels. The image routes return `image/jpeg` with
-`no-store` and `nosniff` headers. They need the demo headers, so a browser
-fetches each image and displays it through an object URL.
+The upload routes accept PNG or JPEG. `backend.images` stores each delivery or
+renewal photo as JPEG at quality 85 with full resolution, upright orientation
+and transparency flattened onto white. The model gets the same encoding resized
+so the longest side is at most 1280 pixels. The image routes return
+`image/jpeg` with `no-store` and `nosniff` headers. They need the demo headers,
+so a browser fetches each image and displays it through an object URL.
+
+## Hold and enriched activity
+
+A pending review may be held with a reason and next_step=request_certificate
+or request_product_details. Held deliveries may then be accepted or rejected;
+a second Hold returns 409. Accept/reject requests must omit next_step, even
+when null. Responses always include next_step, null outside on_hold. A Hold
+or later decision never replaces the original check verdict.
+
+New activity rows include actor_title, material_name, verdict and supplier_name.
+Delivery events snapshot material/verdict; certificate events snapshot supplier.
+Missing legacy metadata stays null and original recorded actors stay unchanged.
+New actors and decided_by are validated people's names, not role labels.
