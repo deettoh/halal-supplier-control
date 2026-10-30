@@ -9,6 +9,7 @@ from typing import Any
 from PIL import Image
 from pydantic import TypeAdapter
 
+from backend import rules
 from backend.schemas import DeliveryStatus, LabelExtraction, Verdict
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -31,6 +32,12 @@ def test_final_targets_preserve_the_pre_generation_plan() -> None:
     )
     assert len(final["cases"]) == len(planned["cases"]) == 24
     for case, original in zip(final["cases"], planned["cases"], strict=True):
+        # ef451fd: user revised four absent-mark targets after the first
+        # experiment. Preserve the original plan and permit only this delta.
+        if case["case_id"] in {"L25", "L26", "L27", "L28"}:
+            original["proposed_expected_extraction"]["halal_mark_present"] = (
+                None
+            )
         for field in (
             "case_id",
             "proposed_expected_extraction",
@@ -101,10 +108,7 @@ def test_finals_cover_requested_missing_and_hidden_fields() -> None:
                 fields[name]
                 for name in ("product_name", "brand", "manufacturer")
             )
-            if kind == "absent_mark":
-                assert fields["halal_mark_present"] is False
-            else:
-                assert fields["halal_mark_present"] is None
+            assert fields["halal_mark_present"] is None
             assert case["proposed_expected_verdict"] == "needs_human"
             assert case["proposed_first_failing_rule"] == "R6"
         elif kind == "hidden_text":
@@ -121,3 +125,24 @@ def test_finals_cover_requested_missing_and_hidden_fields() -> None:
             assert case["proposed_expected_verdict"] == "substitution"
             assert case["proposed_first_failing_rule"] == "R2"
     assert sorted(hidden_text) == ["manufacturer", "product_name"]
+
+
+def test_finals_targets_match_production_rules() -> None:
+    for case in document("expected_results.json")["cases"]:
+        fixture = case["evaluation_fixture"]
+        result = rules.evaluate(
+            case["proposed_expected_extraction"],
+            fixture["material"],
+            fixture["certificate"],
+            fixture["today"],
+        )
+        assert result["verdict"] == case["proposed_expected_verdict"]
+        first = next(
+            (
+                r["rule"]
+                for r in result["rule_results"]
+                if r["passed"] is False
+            ),
+            None,
+        )
+        assert first == case["proposed_first_failing_rule"]

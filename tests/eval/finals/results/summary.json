@@ -1,0 +1,1784 @@
+{
+  "dataset_id": "finals-edited-labels-2026-10-30-v1",
+  "unique_cases": 24,
+  "attempts": 72,
+  "sample_counts": {
+    "new_case_count": 24,
+    "source_photo_count": 11,
+    "approved_previews_included": 3,
+    "new_image_edits_required": 21,
+    "category_counts": {
+      "normal": 8,
+      "wrong_product": 4,
+      "substitution": 4,
+      "absent_mark": 4,
+      "hidden_mark": 2,
+      "hidden_text": 2
+    },
+    "packaging_family_count": 8,
+    "target_verdict_counts": {
+      "covered": 2,
+      "expiring": 6,
+      "substitution": 8,
+      "needs_human": 8
+    }
+  },
+  "expected_sha256": "1f72cd146709a4f8cdde6e3c08612346924ccdb67ba808da4ef80ce3754ef910",
+  "settings": {
+    "model": "qwen/qwen3-vl-8b-instruct",
+    "temperature": 0.0,
+    "prompt_sha256": "8becf1b0a009fd997ec3e90f247923953f35968964363162d2e7ba3707f68f75",
+    "code_revision": "ef451fdf5b8acca43a32044041a1dd40d1faaacf",
+    "code_sha256": {
+      "src/backend/extract.py": "5c7857a2fdb0dffc05ac5576e4f430e9000cffcc1941f981fb2e0918210a2149",
+      "src/backend/images.py": "6c8c37131fc965a0217aeb0c51368e4c8c3e2e16c5ad174777cdd596b5bf0ce4",
+      "src/backend/rules.py": "8d062f0489122aa85dfd7d6fca124692ee84a03d16bb9e8eb097081a395ae6d3",
+      "src/backend/schemas.py": "2bdfd9cd815cb00d89412b2ee87e34a482190323db9a99aeeea48def15bb2571",
+      "tests/eval/collect_predictions.py": "6d502f6867ccf3114e4b620dbb159ea2607e3c7e9ffbc7ab26d827367f306b7d"
+    }
+  },
+  "runs": [
+    {
+      "path": "tests/eval/finals/results/run-1-predictions.json",
+      "sha256": "81d345ae6b166d35106de2170efa5d03e84bcfa5b9baff1bded31b808bcabfb5",
+      "run_id": "4e90dfdc-0f3d-4433-b80b-95da00ccce3b",
+      "started_at": "2026-10-30T05:43:52.335378+00:00",
+      "completed_at": "2026-10-30T05:45:08.586909+00:00",
+      "counts": {
+        "expected_cases": 24,
+        "prediction_records": 24,
+        "missing_predictions": 0,
+        "upstream_errors": 0,
+        "unreadable_guesses": 1
+      },
+      "metrics": {
+        "schema_success": {
+          "correct": 24,
+          "total": 24,
+          "percent": 100.0
+        },
+        "field_accuracy": {
+          "correct": 87,
+          "total": 88,
+          "percent": 98.86
+        },
+        "text_literal_accuracy": {
+          "correct": 68,
+          "total": 70,
+          "percent": 97.14
+        },
+        "text_normalized_accuracy": {
+          "correct": 69,
+          "total": 70,
+          "percent": 98.57
+        },
+        "mark_accuracy": {
+          "correct": 18,
+          "total": 18,
+          "percent": 100.0
+        },
+        "whole_readable_label_accuracy": {
+          "correct": 21,
+          "total": 22,
+          "percent": 95.45
+        },
+        "unreadable_abstention": {
+          "correct": 7,
+          "total": 8,
+          "percent": 87.5
+        },
+        "verdict_accuracy": {
+          "correct": 22,
+          "total": 24,
+          "percent": 91.67
+        },
+        "initial_status_accuracy": {
+          "correct": null,
+          "total": null,
+          "percent": null
+        }
+      }
+    },
+    {
+      "path": "tests/eval/finals/results/run-2-predictions.json",
+      "sha256": "a7b355393032c36a6c348653eefd1e076efd1e5c023134e4f28e5a82cdc27046",
+      "run_id": "788b8640-92a0-4562-a3eb-9addb7956287",
+      "started_at": "2026-10-30T05:45:11.313552+00:00",
+      "completed_at": "2026-10-30T05:46:14.005120+00:00",
+      "counts": {
+        "expected_cases": 24,
+        "prediction_records": 24,
+        "missing_predictions": 0,
+        "upstream_errors": 0,
+        "unreadable_guesses": 1
+      },
+      "metrics": {
+        "schema_success": {
+          "correct": 24,
+          "total": 24,
+          "percent": 100.0
+        },
+        "field_accuracy": {
+          "correct": 87,
+          "total": 88,
+          "percent": 98.86
+        },
+        "text_literal_accuracy": {
+          "correct": 68,
+          "total": 70,
+          "percent": 97.14
+        },
+        "text_normalized_accuracy": {
+          "correct": 69,
+          "total": 70,
+          "percent": 98.57
+        },
+        "mark_accuracy": {
+          "correct": 18,
+          "total": 18,
+          "percent": 100.0
+        },
+        "whole_readable_label_accuracy": {
+          "correct": 21,
+          "total": 22,
+          "percent": 95.45
+        },
+        "unreadable_abstention": {
+          "correct": 7,
+          "total": 8,
+          "percent": 87.5
+        },
+        "verdict_accuracy": {
+          "correct": 22,
+          "total": 24,
+          "percent": 91.67
+        },
+        "initial_status_accuracy": {
+          "correct": null,
+          "total": null,
+          "percent": null
+        }
+      }
+    },
+    {
+      "path": "tests/eval/finals/results/run-3-predictions.json",
+      "sha256": "2431503d04e8d9ca6bd928c1e3a79a1871689f0cce2f6e9e1240c2c4898d14be",
+      "run_id": "5311d3b1-faf3-48c1-a4d1-4f63fee006f8",
+      "started_at": "2026-10-30T05:46:16.397095+00:00",
+      "completed_at": "2026-10-30T05:47:14.046784+00:00",
+      "counts": {
+        "expected_cases": 24,
+        "prediction_records": 24,
+        "missing_predictions": 0,
+        "upstream_errors": 0,
+        "unreadable_guesses": 1
+      },
+      "metrics": {
+        "schema_success": {
+          "correct": 24,
+          "total": 24,
+          "percent": 100.0
+        },
+        "field_accuracy": {
+          "correct": 87,
+          "total": 88,
+          "percent": 98.86
+        },
+        "text_literal_accuracy": {
+          "correct": 68,
+          "total": 70,
+          "percent": 97.14
+        },
+        "text_normalized_accuracy": {
+          "correct": 69,
+          "total": 70,
+          "percent": 98.57
+        },
+        "mark_accuracy": {
+          "correct": 18,
+          "total": 18,
+          "percent": 100.0
+        },
+        "whole_readable_label_accuracy": {
+          "correct": 21,
+          "total": 22,
+          "percent": 95.45
+        },
+        "unreadable_abstention": {
+          "correct": 7,
+          "total": 8,
+          "percent": 87.5
+        },
+        "verdict_accuracy": {
+          "correct": 22,
+          "total": 24,
+          "percent": 91.67
+        },
+        "initial_status_accuracy": {
+          "correct": null,
+          "total": null,
+          "percent": null
+        }
+      }
+    }
+  ],
+  "pooled_attempt_metrics": {
+    "schema_success": {
+      "correct": 72,
+      "total": 72,
+      "percent": 100.0
+    },
+    "field_accuracy": {
+      "correct": 261,
+      "total": 264,
+      "percent": 98.86
+    },
+    "text_literal_accuracy": {
+      "correct": 204,
+      "total": 210,
+      "percent": 97.14
+    },
+    "text_normalized_accuracy": {
+      "correct": 207,
+      "total": 210,
+      "percent": 98.57
+    },
+    "mark_accuracy": {
+      "correct": 54,
+      "total": 54,
+      "percent": 100.0
+    },
+    "whole_readable_label_accuracy": {
+      "correct": 63,
+      "total": 66,
+      "percent": 95.45
+    },
+    "unreadable_abstention": {
+      "correct": 21,
+      "total": 24,
+      "percent": 87.5
+    },
+    "verdict_accuracy": {
+      "correct": 66,
+      "total": 72,
+      "percent": 91.67
+    },
+    "initial_status_accuracy": {
+      "correct": null,
+      "total": null,
+      "percent": null
+    }
+  },
+  "category_verdicts": {
+    "absent_mark": {
+      "correct": 12,
+      "total": 12,
+      "percent": 100.0
+    },
+    "hidden_mark": {
+      "correct": 6,
+      "total": 6,
+      "percent": 100.0
+    },
+    "hidden_text": {
+      "correct": 3,
+      "total": 6,
+      "percent": 50.0
+    },
+    "normal": {
+      "correct": 21,
+      "total": 24,
+      "percent": 87.5
+    },
+    "substitution": {
+      "correct": 12,
+      "total": 12,
+      "percent": 100.0
+    },
+    "wrong_product": {
+      "correct": 12,
+      "total": 12,
+      "percent": 100.0
+    }
+  },
+  "consistency": {
+    "literal_extraction_consistent": {
+      "correct": 24,
+      "total": 24,
+      "percent": 100.0
+    },
+    "normalized_extraction_consistent": {
+      "correct": 24,
+      "total": 24,
+      "percent": 100.0
+    },
+    "verdict_consistent": {
+      "correct": 24,
+      "total": 24,
+      "percent": 100.0
+    }
+  },
+  "latency_seconds": {
+    "successful_extractions": {
+      "count": 72,
+      "median": 2.4581142000388354,
+      "p95": 3.967105899937451,
+      "min": 2.111466099973768,
+      "max": 4.8701990998815745
+    },
+    "failed_extractions": {
+      "count": 0,
+      "median": null,
+      "p95": null,
+      "min": null,
+      "max": null
+    },
+    "offline_rules": {
+      "count": 72,
+      "median": 7.734994869679213e-05,
+      "p95": 0.00027249986305832863,
+      "min": 4.3899985030293465e-05,
+      "max": 0.000337099889293313
+    }
+  },
+  "target_revision": "ef451fd",
+  "null_target_policy": "Per user revision, absent and hidden marks both target null. Legacy unreadable_abstention scores all null targets, including clearly absent marks. mark_accuracy covers present marks only.",
+  "timing_scope": "extraction_seconds includes preprocessing, client setup, network, queue/cold-start wait, inference and response validation; rules_seconds measures offline rules only; file reading excluded",
+  "cases": [
+    {
+      "case_id": "L09",
+      "scenario": "normal",
+      "expected": {
+        "product_name": "Cocoa Powder",
+        "brand": "SilverCocoa",
+        "manufacturer": "Silver Valley Foods",
+        "halal_mark_present": true
+      },
+      "observed": [
+        {
+          "product_name": "Cocoa Powder",
+          "brand": "SilverCocoa",
+          "manufacturer": "Silver Valley Foods",
+          "halal_mark_present": true
+        },
+        {
+          "product_name": "Cocoa Powder",
+          "brand": "SilverCocoa",
+          "manufacturer": "Silver Valley Foods",
+          "halal_mark_present": true
+        },
+        {
+          "product_name": "Cocoa Powder",
+          "brand": "SilverCocoa",
+          "manufacturer": "Silver Valley Foods",
+          "halal_mark_present": true
+        }
+      ],
+      "expected_verdict": "covered",
+      "verdicts": [
+        "covered",
+        "covered",
+        "covered"
+      ],
+      "errors": [
+        null,
+        null,
+        null
+      ],
+      "incorrect_fields_by_run": [
+        [],
+        [],
+        []
+      ],
+      "verdict_correct_by_run": [
+        true,
+        true,
+        true
+      ],
+      "extraction_seconds": [
+        4.345698599936441,
+        3.753336900146678,
+        2.982527600135654
+      ],
+      "literal_extraction_consistent": true,
+      "normalized_extraction_consistent": true,
+      "verdict_consistent": true
+    },
+    {
+      "case_id": "L10",
+      "scenario": "normal",
+      "expected": {
+        "product_name": "Wheat Flour",
+        "brand": "GoldenMill",
+        "manufacturer": "Golden Grain Foods",
+        "halal_mark_present": true
+      },
+      "observed": [
+        {
+          "product_name": "Wheat Flour",
+          "brand": "GoldenMill",
+          "manufacturer": "Golden Grain Foods",
+          "halal_mark_present": true
+        },
+        {
+          "product_name": "Wheat Flour",
+          "brand": "GoldenMill",
+          "manufacturer": "Golden Grain Foods",
+          "halal_mark_present": true
+        },
+        {
+          "product_name": "Wheat Flour",
+          "brand": "GoldenMill",
+          "manufacturer": "Golden Grain Foods",
+          "halal_mark_present": true
+        }
+      ],
+      "expected_verdict": "expiring",
+      "verdicts": [
+        "expiring",
+        "expiring",
+        "expiring"
+      ],
+      "errors": [
+        null,
+        null,
+        null
+      ],
+      "incorrect_fields_by_run": [
+        [],
+        [],
+        []
+      ],
+      "verdict_correct_by_run": [
+        true,
+        true,
+        true
+      ],
+      "extraction_seconds": [
+        3.1648794999346137,
+        2.7540249000303447,
+        2.111466099973768
+      ],
+      "literal_extraction_consistent": true,
+      "normalized_extraction_consistent": true,
+      "verdict_consistent": true
+    },
+    {
+      "case_id": "L11",
+      "scenario": "normal",
+      "expected": {
+        "product_name": "Cocoa Powder",
+        "brand": "SilverCocoa",
+        "manufacturer": "Silver Valley Foods",
+        "halal_mark_present": true
+      },
+      "observed": [
+        {
+          "product_name": "Cocoa Powder 200 G",
+          "brand": "SilverCocoa",
+          "manufacturer": "Silver Valley Foods",
+          "halal_mark_present": true
+        },
+        {
+          "product_name": "Cocoa Powder 200 G",
+          "brand": "SilverCocoa",
+          "manufacturer": "Silver Valley Foods",
+          "halal_mark_present": true
+        },
+        {
+          "product_name": "Cocoa Powder 200 G",
+          "brand": "SilverCocoa",
+          "manufacturer": "Silver Valley Foods",
+          "halal_mark_present": true
+        }
+      ],
+      "expected_verdict": "covered",
+      "verdicts": [
+        "substitution",
+        "substitution",
+        "substitution"
+      ],
+      "errors": [
+        null,
+        null,
+        null
+      ],
+      "incorrect_fields_by_run": [
+        [
+          "product_name"
+        ],
+        [
+          "product_name"
+        ],
+        [
+          "product_name"
+        ]
+      ],
+      "verdict_correct_by_run": [
+        false,
+        false,
+        false
+      ],
+      "extraction_seconds": [
+        3.9202171999495476,
+        3.236423800000921,
+        2.612419200129807
+      ],
+      "literal_extraction_consistent": true,
+      "normalized_extraction_consistent": true,
+      "verdict_consistent": true
+    },
+    {
+      "case_id": "L12",
+      "scenario": "normal",
+      "expected": {
+        "product_name": "Wheat Flour",
+        "brand": "GoldenMill",
+        "manufacturer": "Golden Grain Foods",
+        "halal_mark_present": true
+      },
+      "observed": [
+        {
+          "product_name": "Wheat Flour",
+          "brand": "GoldenMill",
+          "manufacturer": "Golden Grain Foods",
+          "halal_mark_present": true
+        },
+        {
+          "product_name": "Wheat Flour",
+          "brand": "GoldenMill",
+          "manufacturer": "Golden Grain Foods",
+          "halal_mark_present": true
+        },
+        {
+          "product_name": "Wheat Flour",
+          "brand": "GoldenMill",
+          "manufacturer": "Golden Grain Foods",
+          "halal_mark_present": true
+        }
+      ],
+      "expected_verdict": "expiring",
+      "verdicts": [
+        "expiring",
+        "expiring",
+        "expiring"
+      ],
+      "errors": [
+        null,
+        null,
+        null
+      ],
+      "incorrect_fields_by_run": [
+        [],
+        [],
+        []
+      ],
+      "verdict_correct_by_run": [
+        true,
+        true,
+        true
+      ],
+      "extraction_seconds": [
+        3.967105899937451,
+        3.507919500116259,
+        2.3122644999530166
+      ],
+      "literal_extraction_consistent": true,
+      "normalized_extraction_consistent": true,
+      "verdict_consistent": true
+    },
+    {
+      "case_id": "L13",
+      "scenario": "normal",
+      "expected": {
+        "product_name": "Bread Flour",
+        "brand": "GoldenMill",
+        "manufacturer": "Golden Grain Foods",
+        "halal_mark_present": true
+      },
+      "observed": [
+        {
+          "product_name": "Bread Flour",
+          "brand": "GoldenMill",
+          "manufacturer": "Golden Grain Foods",
+          "halal_mark_present": true
+        },
+        {
+          "product_name": "Bread Flour",
+          "brand": "GoldenMill",
+          "manufacturer": "Golden Grain Foods",
+          "halal_mark_present": true
+        },
+        {
+          "product_name": "Bread Flour",
+          "brand": "GoldenMill",
+          "manufacturer": "Golden Grain Foods",
+          "halal_mark_present": true
+        }
+      ],
+      "expected_verdict": "expiring",
+      "verdicts": [
+        "expiring",
+        "expiring",
+        "expiring"
+      ],
+      "errors": [
+        null,
+        null,
+        null
+      ],
+      "incorrect_fields_by_run": [
+        [],
+        [],
+        []
+      ],
+      "verdict_correct_by_run": [
+        true,
+        true,
+        true
+      ],
+      "extraction_seconds": [
+        3.7269560999702662,
+        3.315703900065273,
+        2.4582309001125395
+      ],
+      "literal_extraction_consistent": true,
+      "normalized_extraction_consistent": true,
+      "verdict_consistent": true
+    },
+    {
+      "case_id": "L14",
+      "scenario": "normal",
+      "expected": {
+        "product_name": "Cake Flour",
+        "brand": "GoldenMill",
+        "manufacturer": "Golden Grain Foods",
+        "halal_mark_present": true
+      },
+      "observed": [
+        {
+          "product_name": "Cake Flour",
+          "brand": "GoldenMill",
+          "manufacturer": "Golden Grain Foods",
+          "halal_mark_present": true
+        },
+        {
+          "product_name": "Cake Flour",
+          "brand": "GoldenMill",
+          "manufacturer": "Golden Grain Foods",
+          "halal_mark_present": true
+        },
+        {
+          "product_name": "Cake Flour",
+          "brand": "GoldenMill",
+          "manufacturer": "Golden Grain Foods",
+          "halal_mark_present": true
+        }
+      ],
+      "expected_verdict": "expiring",
+      "verdicts": [
+        "expiring",
+        "expiring",
+        "expiring"
+      ],
+      "errors": [
+        null,
+        null,
+        null
+      ],
+      "incorrect_fields_by_run": [
+        [],
+        [],
+        []
+      ],
+      "verdict_correct_by_run": [
+        true,
+        true,
+        true
+      ],
+      "extraction_seconds": [
+        3.4488635999150574,
+        3.4357338999398053,
+        2.2478354999329895
+      ],
+      "literal_extraction_consistent": true,
+      "normalized_extraction_consistent": true,
+      "verdict_consistent": true
+    },
+    {
+      "case_id": "L15",
+      "scenario": "normal",
+      "expected": {
+        "product_name": "Rice Flour",
+        "brand": "GoldenMill",
+        "manufacturer": "Golden Grain Foods",
+        "halal_mark_present": true
+      },
+      "observed": [
+        {
+          "product_name": "Rice Flour",
+          "brand": "GoldenMill",
+          "manufacturer": "Golden Grain Foods",
+          "halal_mark_present": true
+        },
+        {
+          "product_name": "Rice Flour",
+          "brand": "GoldenMill",
+          "manufacturer": "Golden Grain Foods",
+          "halal_mark_present": true
+        },
+        {
+          "product_name": "Rice Flour",
+          "brand": "GoldenMill",
+          "manufacturer": "Golden Grain Foods",
+          "halal_mark_present": true
+        }
+      ],
+      "expected_verdict": "expiring",
+      "verdicts": [
+        "expiring",
+        "expiring",
+        "expiring"
+      ],
+      "errors": [
+        null,
+        null,
+        null
+      ],
+      "incorrect_fields_by_run": [
+        [],
+        [],
+        []
+      ],
+      "verdict_correct_by_run": [
+        true,
+        true,
+        true
+      ],
+      "extraction_seconds": [
+        3.705417900113389,
+        2.3349140000063926,
+        2.4986107000149786
+      ],
+      "literal_extraction_consistent": true,
+      "normalized_extraction_consistent": true,
+      "verdict_consistent": true
+    },
+    {
+      "case_id": "L16",
+      "scenario": "normal",
+      "expected": {
+        "product_name": "Wheat Flour",
+        "brand": "GoldenMill",
+        "manufacturer": "Golden Grain Foods",
+        "halal_mark_present": true
+      },
+      "observed": [
+        {
+          "product_name": "Wheat Flour",
+          "brand": "GoldenMill",
+          "manufacturer": "Golden Grain Foods",
+          "halal_mark_present": true
+        },
+        {
+          "product_name": "Wheat Flour",
+          "brand": "GoldenMill",
+          "manufacturer": "Golden Grain Foods",
+          "halal_mark_present": true
+        },
+        {
+          "product_name": "Wheat Flour",
+          "brand": "GoldenMill",
+          "manufacturer": "Golden Grain Foods",
+          "halal_mark_present": true
+        }
+      ],
+      "expected_verdict": "expiring",
+      "verdicts": [
+        "expiring",
+        "expiring",
+        "expiring"
+      ],
+      "errors": [
+        null,
+        null,
+        null
+      ],
+      "incorrect_fields_by_run": [
+        [],
+        [],
+        []
+      ],
+      "verdict_correct_by_run": [
+        true,
+        true,
+        true
+      ],
+      "extraction_seconds": [
+        4.8701990998815745,
+        2.5987348000053316,
+        2.5796719000209123
+      ],
+      "literal_extraction_consistent": true,
+      "normalized_extraction_consistent": true,
+      "verdict_consistent": true
+    },
+    {
+      "case_id": "L17",
+      "scenario": "wrong_product",
+      "expected": {
+        "product_name": "Semolina",
+        "brand": "GoldenMill",
+        "manufacturer": "Golden Grain Foods",
+        "halal_mark_present": true
+      },
+      "observed": [
+        {
+          "product_name": "Semolina",
+          "brand": "GoldenMill",
+          "manufacturer": "Golden Grain Foods",
+          "halal_mark_present": true
+        },
+        {
+          "product_name": "Semolina",
+          "brand": "GoldenMill",
+          "manufacturer": "Golden Grain Foods",
+          "halal_mark_present": true
+        },
+        {
+          "product_name": "Semolina",
+          "brand": "GoldenMill",
+          "manufacturer": "Golden Grain Foods",
+          "halal_mark_present": true
+        }
+      ],
+      "expected_verdict": "substitution",
+      "verdicts": [
+        "substitution",
+        "substitution",
+        "substitution"
+      ],
+      "errors": [
+        null,
+        null,
+        null
+      ],
+      "incorrect_fields_by_run": [
+        [],
+        [],
+        []
+      ],
+      "verdict_correct_by_run": [
+        true,
+        true,
+        true
+      ],
+      "extraction_seconds": [
+        3.9736677000764757,
+        2.4026240000966936,
+        2.189496099948883
+      ],
+      "literal_extraction_consistent": true,
+      "normalized_extraction_consistent": true,
+      "verdict_consistent": true
+    },
+    {
+      "case_id": "L18",
+      "scenario": "wrong_product",
+      "expected": {
+        "product_name": "Rice Flour",
+        "brand": "GoldenMill",
+        "manufacturer": "Golden Grain Foods",
+        "halal_mark_present": true
+      },
+      "observed": [
+        {
+          "product_name": "Rice Flour",
+          "brand": "GoldenMill",
+          "manufacturer": "Golden Grain Foods",
+          "halal_mark_present": true
+        },
+        {
+          "product_name": "Rice Flour",
+          "brand": "GoldenMill",
+          "manufacturer": "Golden Grain Foods",
+          "halal_mark_present": true
+        },
+        {
+          "product_name": "Rice Flour",
+          "brand": "GoldenMill",
+          "manufacturer": "Golden Grain Foods",
+          "halal_mark_present": true
+        }
+      ],
+      "expected_verdict": "substitution",
+      "verdicts": [
+        "substitution",
+        "substitution",
+        "substitution"
+      ],
+      "errors": [
+        null,
+        null,
+        null
+      ],
+      "incorrect_fields_by_run": [
+        [],
+        [],
+        []
+      ],
+      "verdict_correct_by_run": [
+        true,
+        true,
+        true
+      ],
+      "extraction_seconds": [
+        3.712370000081137,
+        2.232535900082439,
+        2.312631399836391
+      ],
+      "literal_extraction_consistent": true,
+      "normalized_extraction_consistent": true,
+      "verdict_consistent": true
+    },
+    {
+      "case_id": "L19",
+      "scenario": "wrong_product",
+      "expected": {
+        "product_name": "Wheat Flour",
+        "brand": "GoldenMill",
+        "manufacturer": "Golden Grain Foods",
+        "halal_mark_present": true
+      },
+      "observed": [
+        {
+          "product_name": "Wheat Flour",
+          "brand": "GoldenMill",
+          "manufacturer": "Golden Grain Foods",
+          "halal_mark_present": true
+        },
+        {
+          "product_name": "Wheat Flour",
+          "brand": "GoldenMill",
+          "manufacturer": "Golden Grain Foods",
+          "halal_mark_present": true
+        },
+        {
+          "product_name": "Wheat Flour",
+          "brand": "GoldenMill",
+          "manufacturer": "Golden Grain Foods",
+          "halal_mark_present": true
+        }
+      ],
+      "expected_verdict": "substitution",
+      "verdicts": [
+        "substitution",
+        "substitution",
+        "substitution"
+      ],
+      "errors": [
+        null,
+        null,
+        null
+      ],
+      "incorrect_fields_by_run": [
+        [],
+        [],
+        []
+      ],
+      "verdict_correct_by_run": [
+        true,
+        true,
+        true
+      ],
+      "extraction_seconds": [
+        3.221002300037071,
+        2.4324181000702083,
+        2.472291100071743
+      ],
+      "literal_extraction_consistent": true,
+      "normalized_extraction_consistent": true,
+      "verdict_consistent": true
+    },
+    {
+      "case_id": "L20",
+      "scenario": "wrong_product",
+      "expected": {
+        "product_name": "Cocoa Liquor",
+        "brand": "SilverCocoa",
+        "manufacturer": "Silver Valley Foods",
+        "halal_mark_present": true
+      },
+      "observed": [
+        {
+          "product_name": "Cocoa Liquor",
+          "brand": "SilverCocoa",
+          "manufacturer": "Silver Valley Foods",
+          "halal_mark_present": true
+        },
+        {
+          "product_name": "Cocoa Liquor",
+          "brand": "SilverCocoa",
+          "manufacturer": "Silver Valley Foods",
+          "halal_mark_present": true
+        },
+        {
+          "product_name": "Cocoa Liquor",
+          "brand": "SilverCocoa",
+          "manufacturer": "Silver Valley Foods",
+          "halal_mark_present": true
+        }
+      ],
+      "expected_verdict": "substitution",
+      "verdicts": [
+        "substitution",
+        "substitution",
+        "substitution"
+      ],
+      "errors": [
+        null,
+        null,
+        null
+      ],
+      "incorrect_fields_by_run": [
+        [],
+        [],
+        []
+      ],
+      "verdict_correct_by_run": [
+        true,
+        true,
+        true
+      ],
+      "extraction_seconds": [
+        3.355138999875635,
+        2.245091099990532,
+        2.398726799990982
+      ],
+      "literal_extraction_consistent": true,
+      "normalized_extraction_consistent": true,
+      "verdict_consistent": true
+    },
+    {
+      "case_id": "L21",
+      "scenario": "substitution",
+      "expected": {
+        "product_name": "Wheat Flour",
+        "brand": "HarvestStone",
+        "manufacturer": "Golden Grain Foods",
+        "halal_mark_present": true
+      },
+      "observed": [
+        {
+          "product_name": "Wheat Flour",
+          "brand": "HarvestStone",
+          "manufacturer": "Golden Grain Foods",
+          "halal_mark_present": true
+        },
+        {
+          "product_name": "Wheat Flour",
+          "brand": "HarvestStone",
+          "manufacturer": "Golden Grain Foods",
+          "halal_mark_present": true
+        },
+        {
+          "product_name": "Wheat Flour",
+          "brand": "HarvestStone",
+          "manufacturer": "Golden Grain Foods",
+          "halal_mark_present": true
+        }
+      ],
+      "expected_verdict": "substitution",
+      "verdicts": [
+        "substitution",
+        "substitution",
+        "substitution"
+      ],
+      "errors": [
+        null,
+        null,
+        null
+      ],
+      "incorrect_fields_by_run": [
+        [],
+        [],
+        []
+      ],
+      "verdict_correct_by_run": [
+        true,
+        true,
+        true
+      ],
+      "extraction_seconds": [
+        2.3325865000952035,
+        2.4023476999718696,
+        2.5646671999711543
+      ],
+      "literal_extraction_consistent": true,
+      "normalized_extraction_consistent": true,
+      "verdict_consistent": true
+    },
+    {
+      "case_id": "L22",
+      "scenario": "substitution",
+      "expected": {
+        "product_name": "Wheat Flour",
+        "brand": "GoldenMill",
+        "manufacturer": "Meadow Forge Foods",
+        "halal_mark_present": true
+      },
+      "observed": [
+        {
+          "product_name": "WHEAT FLOUR",
+          "brand": "GoldenMill",
+          "manufacturer": "Meadow Forge Foods",
+          "halal_mark_present": true
+        },
+        {
+          "product_name": "WHEAT FLOUR",
+          "brand": "GoldenMill",
+          "manufacturer": "Meadow Forge Foods",
+          "halal_mark_present": true
+        },
+        {
+          "product_name": "WHEAT FLOUR",
+          "brand": "GoldenMill",
+          "manufacturer": "Meadow Forge Foods",
+          "halal_mark_present": true
+        }
+      ],
+      "expected_verdict": "substitution",
+      "verdicts": [
+        "substitution",
+        "substitution",
+        "substitution"
+      ],
+      "errors": [
+        null,
+        null,
+        null
+      ],
+      "incorrect_fields_by_run": [
+        [],
+        [],
+        []
+      ],
+      "verdict_correct_by_run": [
+        true,
+        true,
+        true
+      ],
+      "extraction_seconds": [
+        2.571502899983898,
+        2.3277319001499563,
+        2.3946161998901516
+      ],
+      "literal_extraction_consistent": true,
+      "normalized_extraction_consistent": true,
+      "verdict_consistent": true
+    },
+    {
+      "case_id": "L23",
+      "scenario": "substitution",
+      "expected": {
+        "product_name": "Cocoa Powder",
+        "brand": "AmberCocoa",
+        "manufacturer": "Silver Valley Foods",
+        "halal_mark_present": true
+      },
+      "observed": [
+        {
+          "product_name": "Cocoa Powder",
+          "brand": "AmberCocoa",
+          "manufacturer": "Silver Valley Foods",
+          "halal_mark_present": true
+        },
+        {
+          "product_name": "Cocoa Powder",
+          "brand": "AmberCocoa",
+          "manufacturer": "Silver Valley Foods",
+          "halal_mark_present": true
+        },
+        {
+          "product_name": "Cocoa Powder",
+          "brand": "AmberCocoa",
+          "manufacturer": "Silver Valley Foods",
+          "halal_mark_present": true
+        }
+      ],
+      "expected_verdict": "substitution",
+      "verdicts": [
+        "substitution",
+        "substitution",
+        "substitution"
+      ],
+      "errors": [
+        null,
+        null,
+        null
+      ],
+      "incorrect_fields_by_run": [
+        [],
+        [],
+        []
+      ],
+      "verdict_correct_by_run": [
+        true,
+        true,
+        true
+      ],
+      "extraction_seconds": [
+        2.4833935000933707,
+        2.3685347998980433,
+        2.404581699986011
+      ],
+      "literal_extraction_consistent": true,
+      "normalized_extraction_consistent": true,
+      "verdict_consistent": true
+    },
+    {
+      "case_id": "L24",
+      "scenario": "substitution",
+      "expected": {
+        "product_name": "Cocoa Powder",
+        "brand": "SilverCocoa",
+        "manufacturer": "Riverbend Foods",
+        "halal_mark_present": true
+      },
+      "observed": [
+        {
+          "product_name": "Cocoa Powder",
+          "brand": "SilverCocoa",
+          "manufacturer": "Riverbend Foods",
+          "halal_mark_present": true
+        },
+        {
+          "product_name": "Cocoa Powder",
+          "brand": "SilverCocoa",
+          "manufacturer": "Riverbend Foods",
+          "halal_mark_present": true
+        },
+        {
+          "product_name": "Cocoa Powder",
+          "brand": "SilverCocoa",
+          "manufacturer": "Riverbend Foods",
+          "halal_mark_present": true
+        }
+      ],
+      "expected_verdict": "substitution",
+      "verdicts": [
+        "substitution",
+        "substitution",
+        "substitution"
+      ],
+      "errors": [
+        null,
+        null,
+        null
+      ],
+      "incorrect_fields_by_run": [
+        [],
+        [],
+        []
+      ],
+      "verdict_correct_by_run": [
+        true,
+        true,
+        true
+      ],
+      "extraction_seconds": [
+        2.272445500129834,
+        2.5516420998610556,
+        2.6230679999571294
+      ],
+      "literal_extraction_consistent": true,
+      "normalized_extraction_consistent": true,
+      "verdict_consistent": true
+    },
+    {
+      "case_id": "L25",
+      "scenario": "absent_mark",
+      "expected": {
+        "product_name": "Wheat Flour",
+        "brand": "GoldenMill",
+        "manufacturer": "Golden Grain Foods",
+        "halal_mark_present": null
+      },
+      "observed": [
+        {
+          "product_name": "Wheat Flour",
+          "brand": "GoldenMill",
+          "manufacturer": "Golden Grain Foods",
+          "halal_mark_present": null
+        },
+        {
+          "product_name": "Wheat Flour",
+          "brand": "GoldenMill",
+          "manufacturer": "Golden Grain Foods",
+          "halal_mark_present": null
+        },
+        {
+          "product_name": "Wheat Flour",
+          "brand": "GoldenMill",
+          "manufacturer": "Golden Grain Foods",
+          "halal_mark_present": null
+        }
+      ],
+      "expected_verdict": "needs_human",
+      "verdicts": [
+        "needs_human",
+        "needs_human",
+        "needs_human"
+      ],
+      "errors": [
+        null,
+        null,
+        null
+      ],
+      "incorrect_fields_by_run": [
+        [],
+        [],
+        []
+      ],
+      "verdict_correct_by_run": [
+        true,
+        true,
+        true
+      ],
+      "extraction_seconds": [
+        2.3878560999874026,
+        2.4579974999651313,
+        2.17643509991467
+      ],
+      "literal_extraction_consistent": true,
+      "normalized_extraction_consistent": true,
+      "verdict_consistent": true
+    },
+    {
+      "case_id": "L26",
+      "scenario": "absent_mark",
+      "expected": {
+        "product_name": "Rice Flour",
+        "brand": "GoldenMill",
+        "manufacturer": "Golden Grain Foods",
+        "halal_mark_present": null
+      },
+      "observed": [
+        {
+          "product_name": "Rice Flour",
+          "brand": "GoldenMill",
+          "manufacturer": "Golden Grain Foods",
+          "halal_mark_present": null
+        },
+        {
+          "product_name": "Rice Flour",
+          "brand": "GoldenMill",
+          "manufacturer": "Golden Grain Foods",
+          "halal_mark_present": null
+        },
+        {
+          "product_name": "Rice Flour",
+          "brand": "GoldenMill",
+          "manufacturer": "Golden Grain Foods",
+          "halal_mark_present": null
+        }
+      ],
+      "expected_verdict": "needs_human",
+      "verdicts": [
+        "needs_human",
+        "needs_human",
+        "needs_human"
+      ],
+      "errors": [
+        null,
+        null,
+        null
+      ],
+      "incorrect_fields_by_run": [
+        [],
+        [],
+        []
+      ],
+      "verdict_correct_by_run": [
+        true,
+        true,
+        true
+      ],
+      "extraction_seconds": [
+        2.4864999998826534,
+        2.212874799966812,
+        2.2326863000635058
+      ],
+      "literal_extraction_consistent": true,
+      "normalized_extraction_consistent": true,
+      "verdict_consistent": true
+    },
+    {
+      "case_id": "L27",
+      "scenario": "absent_mark",
+      "expected": {
+        "product_name": "Cocoa Powder",
+        "brand": "SilverCocoa",
+        "manufacturer": "Silver Valley Foods",
+        "halal_mark_present": null
+      },
+      "observed": [
+        {
+          "product_name": "Cocoa Powder",
+          "brand": "SilverCocoa",
+          "manufacturer": "Silver Valley Foods",
+          "halal_mark_present": null
+        },
+        {
+          "product_name": "Cocoa Powder",
+          "brand": "SilverCocoa",
+          "manufacturer": "Silver Valley Foods",
+          "halal_mark_present": null
+        },
+        {
+          "product_name": "Cocoa Powder",
+          "brand": "SilverCocoa",
+          "manufacturer": "Silver Valley Foods",
+          "halal_mark_present": null
+        }
+      ],
+      "expected_verdict": "needs_human",
+      "verdicts": [
+        "needs_human",
+        "needs_human",
+        "needs_human"
+      ],
+      "errors": [
+        null,
+        null,
+        null
+      ],
+      "incorrect_fields_by_run": [
+        [],
+        [],
+        []
+      ],
+      "verdict_correct_by_run": [
+        true,
+        true,
+        true
+      ],
+      "extraction_seconds": [
+        3.201054400065914,
+        2.325036099879071,
+        2.304458500118926
+      ],
+      "literal_extraction_consistent": true,
+      "normalized_extraction_consistent": true,
+      "verdict_consistent": true
+    },
+    {
+      "case_id": "L28",
+      "scenario": "absent_mark",
+      "expected": {
+        "product_name": "Cocoa Powder",
+        "brand": "SilverCocoa",
+        "manufacturer": "Silver Valley Foods",
+        "halal_mark_present": null
+      },
+      "observed": [
+        {
+          "product_name": "Cocoa Powder",
+          "brand": "SilverCocoa",
+          "manufacturer": "Silver Valley Foods",
+          "halal_mark_present": null
+        },
+        {
+          "product_name": "Cocoa Powder",
+          "brand": "SilverCocoa",
+          "manufacturer": "Silver Valley Foods",
+          "halal_mark_present": null
+        },
+        {
+          "product_name": "Cocoa Powder",
+          "brand": "SilverCocoa",
+          "manufacturer": "Silver Valley Foods",
+          "halal_mark_present": null
+        }
+      ],
+      "expected_verdict": "needs_human",
+      "verdicts": [
+        "needs_human",
+        "needs_human",
+        "needs_human"
+      ],
+      "errors": [
+        null,
+        null,
+        null
+      ],
+      "incorrect_fields_by_run": [
+        [],
+        [],
+        []
+      ],
+      "verdict_correct_by_run": [
+        true,
+        true,
+        true
+      ],
+      "extraction_seconds": [
+        3.3200302999466658,
+        2.2738364001270384,
+        2.262442799983546
+      ],
+      "literal_extraction_consistent": true,
+      "normalized_extraction_consistent": true,
+      "verdict_consistent": true
+    },
+    {
+      "case_id": "L29",
+      "scenario": "hidden_mark",
+      "expected": {
+        "product_name": "Wheat Flour",
+        "brand": "GoldenMill",
+        "manufacturer": "Golden Grain Foods",
+        "halal_mark_present": null
+      },
+      "observed": [
+        {
+          "product_name": "Wheat Flour",
+          "brand": "GoldenMill",
+          "manufacturer": "Golden Grain Foods",
+          "halal_mark_present": null
+        },
+        {
+          "product_name": "Wheat Flour",
+          "brand": "GoldenMill",
+          "manufacturer": "Golden Grain Foods",
+          "halal_mark_present": null
+        },
+        {
+          "product_name": "Wheat Flour",
+          "brand": "GoldenMill",
+          "manufacturer": "Golden Grain Foods",
+          "halal_mark_present": null
+        }
+      ],
+      "expected_verdict": "needs_human",
+      "verdicts": [
+        "needs_human",
+        "needs_human",
+        "needs_human"
+      ],
+      "errors": [
+        null,
+        null,
+        null
+      ],
+      "incorrect_fields_by_run": [
+        [],
+        [],
+        []
+      ],
+      "verdict_correct_by_run": [
+        true,
+        true,
+        true
+      ],
+      "extraction_seconds": [
+        2.3363420001696795,
+        2.279844000004232,
+        2.367128600133583
+      ],
+      "literal_extraction_consistent": true,
+      "normalized_extraction_consistent": true,
+      "verdict_consistent": true
+    },
+    {
+      "case_id": "L30",
+      "scenario": "hidden_mark",
+      "expected": {
+        "product_name": "Cocoa Powder",
+        "brand": "SilverCocoa",
+        "manufacturer": "Silver Valley Foods",
+        "halal_mark_present": null
+      },
+      "observed": [
+        {
+          "product_name": "Cocoa Powder",
+          "brand": "SilverCocoa",
+          "manufacturer": "Silver Valley Foods",
+          "halal_mark_present": null
+        },
+        {
+          "product_name": "Cocoa Powder",
+          "brand": "SilverCocoa",
+          "manufacturer": "Silver Valley Foods",
+          "halal_mark_present": null
+        },
+        {
+          "product_name": "Cocoa Powder",
+          "brand": "SilverCocoa",
+          "manufacturer": "Silver Valley Foods",
+          "halal_mark_present": null
+        }
+      ],
+      "expected_verdict": "needs_human",
+      "verdicts": [
+        "needs_human",
+        "needs_human",
+        "needs_human"
+      ],
+      "errors": [
+        null,
+        null,
+        null
+      ],
+      "incorrect_fields_by_run": [
+        [],
+        [],
+        []
+      ],
+      "verdict_correct_by_run": [
+        true,
+        true,
+        true
+      ],
+      "extraction_seconds": [
+        2.2828713001217693,
+        2.199633000185713,
+        2.4255043000448495
+      ],
+      "literal_extraction_consistent": true,
+      "normalized_extraction_consistent": true,
+      "verdict_consistent": true
+    },
+    {
+      "case_id": "L31",
+      "scenario": "hidden_text",
+      "expected": {
+        "product_name": null,
+        "brand": "GoldenMill",
+        "manufacturer": "Golden Grain Foods",
+        "halal_mark_present": true
+      },
+      "observed": [
+        {
+          "product_name": null,
+          "brand": "GoldenMill",
+          "manufacturer": "Golden Grain Foods",
+          "halal_mark_present": true
+        },
+        {
+          "product_name": null,
+          "brand": "GoldenMill",
+          "manufacturer": "Golden Grain Foods",
+          "halal_mark_present": true
+        },
+        {
+          "product_name": null,
+          "brand": "GoldenMill",
+          "manufacturer": "Golden Grain Foods",
+          "halal_mark_present": true
+        }
+      ],
+      "expected_verdict": "needs_human",
+      "verdicts": [
+        "needs_human",
+        "needs_human",
+        "needs_human"
+      ],
+      "errors": [
+        null,
+        null,
+        null
+      ],
+      "incorrect_fields_by_run": [
+        [],
+        [],
+        []
+      ],
+      "verdict_correct_by_run": [
+        true,
+        true,
+        true
+      ],
+      "extraction_seconds": [
+        2.4705050999764353,
+        2.4159925000276417,
+        2.3464207001961768
+      ],
+      "literal_extraction_consistent": true,
+      "normalized_extraction_consistent": true,
+      "verdict_consistent": true
+    },
+    {
+      "case_id": "L32",
+      "scenario": "hidden_text",
+      "expected": {
+        "product_name": "Cocoa Powder",
+        "brand": "SilverCocoa",
+        "manufacturer": null,
+        "halal_mark_present": true
+      },
+      "observed": [
+        {
+          "product_name": "Cocoa Powder",
+          "brand": "SilverCocoa",
+          "manufacturer": "Sunrise Bakery",
+          "halal_mark_present": true
+        },
+        {
+          "product_name": "Cocoa Powder",
+          "brand": "SilverCocoa",
+          "manufacturer": "Sunrise Bakery",
+          "halal_mark_present": true
+        },
+        {
+          "product_name": "Cocoa Powder",
+          "brand": "SilverCocoa",
+          "manufacturer": "Sunrise Bakery",
+          "halal_mark_present": true
+        }
+      ],
+      "expected_verdict": "needs_human",
+      "verdicts": [
+        "substitution",
+        "substitution",
+        "substitution"
+      ],
+      "errors": [
+        null,
+        null,
+        null
+      ],
+      "incorrect_fields_by_run": [
+        [
+          "manufacturer"
+        ],
+        [
+          "manufacturer"
+        ],
+        [
+          "manufacturer"
+        ]
+      ],
+      "verdict_correct_by_run": [
+        false,
+        false,
+        false
+      ],
+      "extraction_seconds": [
+        2.5589086001273245,
+        2.5262529000174254,
+        2.2984744999557734
+      ],
+      "literal_extraction_consistent": true,
+      "normalized_extraction_consistent": true,
+      "verdict_consistent": true
+    }
+  ],
+  "limitations": [
+    "Repeated synthetic cases are correlated; not real delivery accuracy.",
+    "Saved live mode is not independently attested by the offline scorer.",
+    "No full delivery API, supervisor workflow or initial status measured.",
+    "Targets were revised after observing a previous experiment.",
+    "These results are development/regression evidence, not a holdout."
+  ]
+}
