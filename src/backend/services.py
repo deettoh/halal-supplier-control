@@ -149,13 +149,13 @@ def materials(
 
 
 def delivery_queue(
-    session: Session, context: DemoContext
+    session: Session, context: DemoContext, status: str = "pending_review"
 ) -> list[DeliveryResponse]:
     rows = session.scalars(
         select(db.Delivery)
         .where(
             db.Delivery.tenant == context.tenant,
-            db.Delivery.status == "pending_review",
+            db.Delivery.status == status,
             or_(
                 db.Delivery.error.is_(None),
                 db.Delivery.error != INCOMPLETE_EXTRACTION,
@@ -302,7 +302,10 @@ def _matches_demo_cache(payload: bytes, label: LabelExtraction) -> bool:
 
 
 def create_delivery(
-    session: Session, context: DemoContext, material_id: int, payload: bytes
+    session: Session,
+    context: NamedDemoContext,
+    material_id: int,
+    payload: bytes,
 ) -> DeliveryResponse:
     material = session.scalar(
         select(db.Material).where(
@@ -315,6 +318,8 @@ def create_delivery(
     item = db.Delivery(
         tenant=context.tenant,
         material_id=material.id,
+        received_by=context.name,
+        received_title=context.title,
         image="/api/deliveries/pending/image",
         image_bytes=_stored_photo(payload),
         extracted=None,
@@ -359,7 +364,7 @@ def create_delivery(
     assert saved is not None
     # A timed-out fallback may already have been reviewed. Preserve the
     # supervisor's decision and the exact evidence they reviewed.
-    if saved.status in {"accepted", "rejected"}:
+    if saved.status in {"accepted", "rejected", "on_hold"}:
         return delivery_response(saved)
     saved.extracted = extracted.model_dump() if extracted is not None else None
     saved.rule_results = (
@@ -377,7 +382,10 @@ def create_delivery(
     session.add(
         db.ActivityLog(
             tenant=context.tenant,
-            actor=context.role,
+            actor=context.name,
+            actor_title=context.title,
+            material_name=material.name,
+            verdict=saved.verdict,
             role=context.role,
             action=saved.status,
             delivery_id=saved.id,
@@ -389,7 +397,7 @@ def create_delivery(
 
 def decide_delivery(
     session: Session,
-    context: DemoContext,
+    context: NamedDemoContext,
     delivery_id: int,
     request: DeliveryDecisionRequest,
 ) -> DeliveryResponse:
@@ -402,31 +410,46 @@ def decide_delivery(
     )
     if row is None:
         raise HTTPException(404, "Delivery not found")
-    if row.status != "pending_review":
+    if row.status not in {"pending_review", "on_hold"}:
         raise HTTPException(409, "Delivery already resolved")
+    if row.status == "on_hold" and request.decision == "hold":
+        raise HTTPException(409, "Delivery already on hold")
+    material = session.get(db.Material, row.material_id)
+    assert material is not None
     if (
         row.error == INCOMPLETE_EXTRACTION
         and _aware(row.created_at) > _processing_cutoff()
     ):
         raise HTTPException(409, "Label extraction is still in progress")
-    if row.error == INCOMPLETE_EXTRACTION:
+    if row.error == INCOMPLETE_EXTRACTION and row.status == "pending_review":
         # Recovery for evidence left by a terminated extraction worker.
         session.add(
             db.ActivityLog(
                 tenant=context.tenant,
-                actor="staff",
+                actor=row.received_by or "staff",
+                actor_title=row.received_title,
+                material_name=material.name,
+                verdict=row.verdict,
                 role="staff",
                 action="pending_review",
                 delivery_id=row.id,
             )
         )
-    row.status = "accepted" if request.decision == "accept" else "rejected"
-    row.decided_by = context.role
+    row.status = {
+        "accept": "accepted",
+        "reject": "rejected",
+        "hold": "on_hold",
+    }[request.decision]
+    row.next_step = request.next_step if request.decision == "hold" else None
+    row.decided_by = context.name
     row.reason = request.reason
     session.add(
         db.ActivityLog(
             tenant=context.tenant,
-            actor=context.role,
+            actor=context.name,
+            actor_title=context.title,
+            material_name=material.name,
+            verdict=row.verdict,
             role=context.role,
             action=row.status,
             delivery_id=row.id,
@@ -481,6 +504,8 @@ def renew_certificate(
             db.ActivityLog(
                 tenant=tenant,
                 actor=context.name,
+                actor_title=context.title,
+                supplier_name=supplier.name,
                 role=context.role,
                 action="certificate_submitted",
             )
@@ -601,11 +626,15 @@ def decide_renewal(
         .distinct()
         .order_by(db.Material.tenant)
     )
+    supplier = session.get(db.Supplier, owner)
+    assert supplier is not None
     for tenant in tenants:
         session.add(
             db.ActivityLog(
                 tenant=tenant,
                 actor=context.name,
+                actor_title=context.title,
+                supplier_name=supplier.name,
                 role=context.role,
                 action="certificate_renewed"
                 if request.decision == "verify"

@@ -58,7 +58,11 @@ def test_reads_and_delivery_rules_share_malaysian_date(
         assert cert is not None
         cert.expiry_date = date(2026, 10, 21)
         session.commit()
-    headers = {"X-Demo-Role": "staff", "X-Demo-Tenant": TENANT}
+    headers = {
+        "X-Demo-Role": "staff",
+        "X-Demo-Tenant": TENANT,
+        "X-Demo-Person": "1",
+    }
     materials = api_client.get("/api/materials", headers=headers).json()
     assert materials[0]["coverage_status"] == coverage
     image = (

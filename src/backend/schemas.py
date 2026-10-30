@@ -29,7 +29,7 @@ Verdict = Literal[
     "covered", "expiring", "substitution", "not_covered", "needs_human"
 ]
 DeliveryStatus = Literal[
-    "auto_accepted", "pending_review", "accepted", "rejected"
+    "auto_accepted", "pending_review", "accepted", "rejected", "on_hold"
 ]
 CertificateStatus = Literal["active", "superseded", "pending", "rejected"]
 ActivityAction = Literal[
@@ -40,6 +40,7 @@ ActivityAction = Literal[
     "certificate_renewed",
     "certificate_submitted",
     "certificate_rejected",
+    "on_hold",
 ]
 RuleName = Literal["R1", "R2", "R3", "R4", "R5", "R6"]
 RULE_ORDER: tuple[RuleName, ...] = get_args(RuleName)
@@ -77,11 +78,19 @@ class DemoContext(APIModel):
 
 
 class NamedDemoContext(DemoContext):
-    """Validated identity for certificate submissions and registry review."""
+    """Validated demo identity for protected business requests."""
 
     person_id: RecordId
     name: NonEmptyText
     title: NonEmptyText
+
+
+class PersonResponse(APIModel):
+    id: RecordId
+    name: NonEmptyText
+    title: NonEmptyText
+    role: DemoRole
+    tenant: NonEmptyText
 
 
 class DeliveryCreateRequest(APIModel):
@@ -94,7 +103,7 @@ class DeliveryCreateRequest(APIModel):
 
 
 class DeliveryListQuery(APIModel):
-    status: Literal["pending_review"] = "pending_review"
+    status: Literal["pending_review", "on_hold"] = "pending_review"
 
 
 class DeliveryDecisionRequest(APIModel):
@@ -107,8 +116,19 @@ class DeliveryDecisionRequest(APIModel):
         },
     )
 
-    decision: Literal["accept", "reject"]
+    decision: Literal["accept", "reject", "hold"]
+    next_step: (
+        Literal["request_certificate", "request_product_details"] | None
+    ) = None
     reason: NonEmptyText = Field(description="Required for both decisions")
+
+    @model_validator(mode="after")
+    def validate_next_step(self) -> "DeliveryDecisionRequest":
+        if self.decision == "hold" and self.next_step is None:
+            raise ValueError("next_step is required for hold")
+        if self.decision != "hold" and "next_step" in self.model_fields_set:
+            raise ValueError("next_step is only allowed for hold")
+        return self
 
 
 class RuleResult(APIModel):
@@ -151,6 +171,9 @@ class DeliveryResponse(APIModel):
     error: str | None = Field(
         description="Safe extraction error message, otherwise null"
     )
+    next_step: (
+        Literal["request_certificate", "request_product_details"] | None
+    ) = None
     decided_by: str | None
     reason: str | None
     created_at: AwareDatetime
@@ -241,6 +264,10 @@ class CertificateExtractResponse(APIModel):
 
 
 class ActivityResponse(APIModel):
+    actor_title: str | None = None
+    material_name: str | None = None
+    verdict: Verdict | None = None
+    supplier_name: str | None = None
     id: RecordId
     actor: NonEmptyText
     role: DemoRole
