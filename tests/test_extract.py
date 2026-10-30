@@ -1,4 +1,4 @@
-"""Tests for the label extraction schema and RunPod extractor."""
+"""Tests for the extraction schemas and the RunPod extractors."""
 
 import base64
 import hashlib
@@ -15,6 +15,8 @@ from PIL import ExifTags, Image
 from pydantic import ValidationError
 
 from backend.extract import (
+    CERTIFICATE_JSON_SCHEMA,
+    CERTIFICATE_PROMPT,
     LABEL_JSON_SCHEMA,
     MAX_IMAGE_SIDE,
     MAX_RETRIES,
@@ -22,9 +24,11 @@ from backend.extract import (
     ExtractionError,
     LabelExtraction,
     _runpod_client,
+    extract_certificate,
     extract_label,
     load_demo_cache,
 )
+from backend.schemas import CertificateExtraction
 
 LABEL_FIELDS = {"product_name", "brand", "manufacturer", "halal_mark_present"}
 IMAGE_SIZE = (64, 32)
@@ -35,6 +39,13 @@ LABEL = {
     "brand": "Seri Melur",
     "manufacturer": "Kilang Kicap Contoh Sdn Bhd",
     "halal_mark_present": True,
+}
+CERTIFICATE = {
+    "issuer": "SAMPLE Food Certification Council",
+    "cert_no": "SAMPLE-KCM-2027-001",
+    "holder_name": "Kilang Kicap Contoh SAMPLE",
+    "expiry_date": "2027-06-30",
+    "scope": [{"product_name": "Kicap Manis", "brand": "Seri Melur"}],
 }
 
 RequestBody = dict[str, Any]
@@ -337,3 +348,45 @@ def test_rejects_response_without_choices() -> None:
     )
     with pytest.raises(ExtractionError, match="no choices"):
         extract_label(IMAGE, client=client)
+
+
+def test_certificate_request_sends_certificate_schema_and_prompt() -> None:
+    client, requests = fake_client(json.dumps(CERTIFICATE))
+    extract_certificate(IMAGE, client=client)
+    body: RequestBody = json.loads(requests[0].content)
+    schema = body["response_format"]["json_schema"]["schema"]
+    assert schema == CERTIFICATE_JSON_SCHEMA
+    texts = [
+        part["text"]
+        for part in body["messages"][0]["content"]
+        if part["type"] == "text"
+    ]
+    assert texts == [CERTIFICATE_PROMPT]
+
+
+def test_returns_certificate_from_response() -> None:
+    client, _ = fake_client(json.dumps(CERTIFICATE))
+    certificate = extract_certificate(IMAGE, client=client)
+    assert certificate == CertificateExtraction.model_validate(CERTIFICATE)
+
+
+def test_certificate_error_status_raises_extraction_error() -> None:
+    client = mock_client(
+        lambda _: httpx2.Response(httpx2.codes.SERVICE_UNAVAILABLE)
+    )
+    with pytest.raises(ExtractionError, match="RunPod request failed"):
+        extract_certificate(IMAGE, client=client)
+
+
+def test_rejects_certificate_reply_missing_field() -> None:
+    client, _ = fake_client(json.dumps({"issuer": CERTIFICATE["issuer"]}))
+    with pytest.raises(ExtractionError, match="certificate schema") as caught:
+        extract_certificate(IMAGE, client=client)
+    assert isinstance(caught.value.__cause__, ValidationError)
+
+
+def test_certificate_schema_requires_every_scope_key() -> None:
+    scope = CERTIFICATE_JSON_SCHEMA["properties"]["scope"]["anyOf"][0]
+    name = scope["items"]["$ref"].rsplit("/", 1)[1]
+    item = CERTIFICATE_JSON_SCHEMA["$defs"][name]
+    assert set(item["required"]) == set(item["properties"])
