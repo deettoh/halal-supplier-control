@@ -149,6 +149,40 @@
   font-size: 15px;
   color: var(--muted);
 }
+.prepared-photos {
+  margin-top: 24px;
+  border-top: 1px solid var(--line);
+  padding-top: 16px;
+}
+.prepared-photos summary {
+  font-weight: 700;
+  cursor: pointer;
+  min-height: 44px;
+  padding: 10px 0;
+}
+.prepared-photos p {
+  font-size: 15px;
+  color: var(--muted);
+  margin: 8px 0;
+}
+.prepared-photos ul {
+  list-style: none;
+  padding: 0;
+  display: grid;
+  gap: 12px;
+}
+.prepared-photos li {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  flex-wrap: wrap;
+}
+.prepared-photos a {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  font-size: 14px;
+  padding: 8px 0;
+}
 .receiving-submit {
   grid-column: 1/-1;
   display: grid;
