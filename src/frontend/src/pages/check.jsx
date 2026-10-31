@@ -8,6 +8,7 @@ import { RequestState, ErrorMessage } from "../components/request-state.jsx";
 import { PhotoViewer } from "../components/photo-viewer.jsx";
 import {
   DeliveryEvidence,
+  MobileEvidenceDetails,
   firstReviewIssue,
 } from "../components/delivery-evidence.jsx";
 import { Status } from "../components/status.jsx";
@@ -131,11 +132,13 @@ export default function CheckDelivery() {
               Saved for supervisor review. {result.error}
             </p>
           )}
-          <DeliveryEvidence
-            delivery={result}
-            material={selected}
-            file={image}
-          />
+          <MobileEvidenceDetails label="Photo and six checks" key={result.id}>
+            <DeliveryEvidence
+              delivery={result}
+              material={selected}
+              file={image}
+            />
+          </MobileEvidenceDetails>
           <button className="button primary next-delivery" onClick={reset}>
             Check next delivery
             <ArrowRight size={18} aria-hidden="true" />
@@ -157,20 +160,25 @@ export default function CheckDelivery() {
                 disabled={busy}
               />
               {selected && (
-                <dl className="approved-identity">
-                  <div>
-                    <dt>Approved brand</dt>
-                    <dd>{selected.approved_brand}</dd>
-                  </div>
-                  <div>
-                    <dt>Manufacturer</dt>
-                    <dd>{selected.approved_manufacturer}</dd>
-                  </div>
-                  <div>
-                    <dt>Supplier</dt>
-                    <dd>{selected.supplier_name}</dd>
-                  </div>
-                </dl>
+                <MobileEvidenceDetails
+                  label="Material details"
+                  key={selected.id}
+                >
+                  <dl className="approved-identity">
+                    <div>
+                      <dt>Approved brand</dt>
+                      <dd>{selected.approved_brand}</dd>
+                    </div>
+                    <div>
+                      <dt>Manufacturer</dt>
+                      <dd>{selected.approved_manufacturer}</dd>
+                    </div>
+                    <div>
+                      <dt>Supplier</dt>
+                      <dd>{selected.supplier_name}</dd>
+                    </div>
+                  </dl>
+                </MobileEvidenceDetails>
               )}
             </section>
             <section className="photo-step">
@@ -229,25 +237,30 @@ export default function CheckDelivery() {
                 </small>
               </div>
               {image && (
-                <div
-                  className="selected-photo"
+                <MobileEvidenceDetails
+                  label="Selected photo"
                   key={image.name + image.lastModified}
                 >
-                  <p className="file-name">{image.name}</p>
-                  <PhotoViewer file={image} />
-                  <button
-                    type="button"
-                    className="button quiet"
-                    disabled={busy}
-                    onClick={() => {
-                      setImage(null);
-                      if (fileInput.current) fileInput.current.value = "";
-                    }}
+                  <div
+                    className="selected-photo"
+                    key={image.name + image.lastModified}
                   >
-                    <RotateCcw size={17} aria-hidden="true" />
-                    Remove photo
-                  </button>
-                </div>
+                    <p className="file-name">{image.name}</p>
+                    <PhotoViewer file={image} />
+                    <button
+                      type="button"
+                      className="button quiet"
+                      disabled={busy}
+                      onClick={() => {
+                        setImage(null);
+                        if (fileInput.current) fileInput.current.value = "";
+                      }}
+                    >
+                      <RotateCcw size={17} aria-hidden="true" />
+                      Remove photo
+                    </button>
+                  </div>
+                </MobileEvidenceDetails>
               )}
               {session.gateway.mode === "preview" && (
                 <details className="prepared-photos">

@@ -1,7 +1,29 @@
-import React, { useState } from "react";
+import React, { useId, useState } from "react";
 import { PhotoViewer } from "./photo-viewer.jsx";
 import { RuleStatus } from "./status.jsx";
 import { ChevronDown } from "lucide-react";
+// CSS keeps desktop content fully expanded without adding a visible control.
+export function MobileEvidenceDetails({ label, children }) {
+  const [expanded, setExpanded] = useState(false);
+  const id = useId();
+  return (
+    <div className="mobile-evidence-disclosure" data-expanded={expanded}>
+      <button
+        type="button"
+        className="button quiet mobile-evidence-toggle"
+        aria-expanded={expanded}
+        aria-controls={id}
+        onClick={() => setExpanded((value) => !value)}
+      >
+        {label}
+        <ChevronDown size={18} aria-hidden="true" />
+      </button>
+      <div id={id} className="mobile-evidence-content">
+        {children}
+      </div>
+    </div>
+  );
+}
 export const ruleLabels = {
   R1: "Readable label",
   R2: "Product, brand and manufacturer",

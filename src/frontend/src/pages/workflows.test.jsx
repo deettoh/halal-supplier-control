@@ -60,8 +60,9 @@ it.each(["Label photo", "Take photo"])(
   "submits the original JPEG selected through %s without auto-submitting",
   async (source) => {
     const user = userEvent.setup();
-    const createDelivery = vi.fn(async () =>
-      data.cases.find((entry) => entry.id === "covered").responses["6"],
+    const createDelivery = vi.fn(
+      async () =>
+        data.cases.find((entry) => entry.id === "covered").responses["6"],
     );
     wrap(<CheckDelivery />, { ...createPreviewGateway(), createDelivery });
     await materialAndPhoto(user);
@@ -89,6 +90,35 @@ it("blocks the previous photo after an unsupported replacement selection", async
   expect(
     screen.getByRole("button", { name: "Check delivery", exact: true }),
   ).toBeDisabled();
+});
+it("keeps every check and its reason available behind the mobile evidence control", async () => {
+  const user = userEvent.setup();
+  const delivery = data.cases.find((entry) => entry.id === "alt-brand")
+    .responses["6"];
+  wrap(<CheckDelivery />, {
+    ...createPreviewGateway(),
+    createDelivery: vi.fn(async () => delivery),
+  });
+  await materialAndPhoto(user);
+  await user.click(
+    screen.getByRole("button", { name: "Check delivery", exact: true }),
+  );
+  await screen.findByRole("heading", { name: "Sent for supervisor review" });
+  const toggle = screen.getByRole("button", { name: "Photo and six checks" });
+  expect(toggle).toHaveAttribute("aria-expanded", "false");
+  toggle.focus();
+  await user.keyboard("{Enter}");
+  expect(toggle).toHaveAttribute("aria-expanded", "true");
+  const content = document.getElementById(toggle.getAttribute("aria-controls"));
+  for (const rule of delivery.rule_results) {
+    const row = within(content).getByTestId("rule-" + rule.rule);
+    expect(within(row).getByText(rule.detail)).toBeInTheDocument();
+  }
+  expect(
+    screen.getByRole("button", { name: "Check next delivery" }),
+  ).toBeEnabled();
+  await user.keyboard("{Enter}");
+  expect(toggle).toHaveAttribute("aria-expanded", "false");
 });
 it("preserves a prepared JPEG's MIME type and bytes when submitting it", async () => {
   const user = userEvent.setup();

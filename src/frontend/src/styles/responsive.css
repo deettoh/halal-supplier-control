@@ -504,3 +504,45 @@
     animation-iteration-count: 1 !important;
   }
 }
+.mobile-evidence-disclosure,
+.mobile-evidence-content {
+  display: contents;
+}
+.mobile-evidence-toggle {
+  display: none;
+}
+@media (max-width: 760px) {
+  .check-page .mobile-evidence-disclosure {
+    display: block;
+    margin-top: 12px;
+  }
+  .check-page .mobile-evidence-toggle {
+    display: flex;
+    justify-content: space-between;
+    width: 100%;
+    min-height: 44px;
+  }
+  .check-page .mobile-evidence-content {
+    display: block;
+    margin-top: 12px;
+  }
+  .check-page
+    .mobile-evidence-disclosure[data-expanded="false"]
+    > .mobile-evidence-content {
+    display: none;
+  }
+  .check-page
+    .mobile-evidence-disclosure[data-expanded="true"]
+    > .mobile-evidence-toggle
+    svg {
+    transform: rotate(180deg);
+  }
+  .check-page > .page-intro > p,
+  .check-page .comparison-hint,
+  .check-page .check-instruction,
+  .check-page .photo-input > label > svg,
+  .check-page .selected-photo > .button > svg,
+  .check-page .next-delivery > svg {
+    display: none;
+  }
+}
