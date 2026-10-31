@@ -160,14 +160,15 @@ it("offers an explicit replay after the once-per-session opening", () => {
   expect(screen.getByRole("main")).toHaveFocus();
 });
 
-it("honors the app's manual motion setting on first visit and replay", () => {
+it("ignores the retired manual motion setting on first visit and replay", () => {
   sessionStorage.setItem("hsc-less-motion", "1");
   try {
     openLanding();
-    expect(screen.queryByRole("button", { name: "Skip intro" })).toBeNull();
+    expect(screen.getByRole("button", { name: "Skip intro" })).toBeVisible();
+    fireEvent.keyDown(window, { key: "Escape" });
     fireEvent.click(screen.getByRole("button", { name: "Replay intro" }));
-    expect(screen.queryByRole("button", { name: "Skip intro" })).toBeNull();
-    expect(document.body.style.overflow).toBe("auto");
+    expect(screen.getByRole("button", { name: "Skip intro" })).toBeVisible();
+    expect(document.body.style.overflow).toBe("hidden");
   } finally {
     sessionStorage.removeItem("hsc-less-motion");
   }

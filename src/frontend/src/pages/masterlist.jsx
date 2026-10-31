@@ -122,8 +122,8 @@ export default function Masterlist() {
           <div className="empty-state">
             <h2>
               {materials.length
-                ? "No matching materials."
-                : "No materials on record yet."}
+                ? "No matching materials"
+                : "No materials on record yet"}
             </h2>
             <p>
               {materials.length

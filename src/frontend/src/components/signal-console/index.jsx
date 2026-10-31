@@ -11,8 +11,6 @@ import React, {
 import { useGSAP } from "@gsap/react";
 import {
   ArrowRight,
-  Play,
-  Pause,
   Camera,
   FileText,
   ListChecks,
@@ -30,13 +28,6 @@ function mediaReduced() {
     window.matchMedia?.("(prefers-reduced-motion: reduce)").matches ?? true
   );
 }
-function storedReduced() {
-  try {
-    return sessionStorage.getItem("hsc-less-motion") === "1";
-  } catch {
-    return false;
-  }
-}
 export default function LandingScene({ apiRef }) {
   const root = useRef(),
     progressRef = useRef({ value: 0 }),
@@ -47,9 +38,8 @@ export default function LandingScene({ apiRef }) {
   const [stage, setStage] = useState(0),
     [field, setField] = useState("brand"),
     [rule, setRule] = useState("R2"),
-    [playing, setPlaying] = useState(false),
     [held, setHeld] = useState(false);
-  const [less, setLess] = useState(() => mediaReduced() || storedReduced());
+  const [less, setLess] = useState(mediaReduced);
   const [wide, setWide] = useState(() => window.innerWidth >= 900);
   const [started, setStarted] = useState(false);
   const [ready, setReady] = useState(false),
@@ -63,7 +53,7 @@ export default function LandingScene({ apiRef }) {
   useEffect(() => {
     const resize = () => setWide(window.innerWidth >= 900),
       mq = window.matchMedia?.("(prefers-reduced-motion: reduce)");
-    const change = () => setLess(mediaReduced() || storedReduced());
+    const change = () => setLess(mediaReduced());
     window.addEventListener("resize", resize);
     mq?.addEventListener?.("change", change);
     return () => {
@@ -82,9 +72,10 @@ export default function LandingScene({ apiRef }) {
         root: root.current,
         progressRef,
         layoutRef,
-        invalidate: () => invalidateRef.current(),
+        invalidate: () => {
+          if (can3D) invalidateRef.current();
+        },
         onStageChange: setStage,
-        onPlaybackChange: setPlaying,
         reducedMotion: staticMode,
       });
       return () => controller.current?.destroy();
@@ -117,25 +108,12 @@ export default function LandingScene({ apiRef }) {
     controller.current?.pause();
     setRule(value);
   }
-  function toggleMotion() {
-    if (mediaReduced() || forcedStatic) return;
-    controller.current?.pause();
-    const next = !less;
-    try {
-      sessionStorage.setItem("hsc-less-motion", next ? "1" : "0");
-    } catch {
-      /* The current page still honors the preference. */
-    }
-    setLess(next);
-    if (window.scrollY > 0)
-      root.current?.scrollIntoView({ behavior: "instant" });
-  }
   const title =
     stage < 2
-      ? "Open the evidence."
+      ? "Open the evidence"
       : stage === 2
-        ? "The difference is in the detail."
-        : "Clear evidence. Human control.";
+        ? "The difference is in the detail"
+        : "Clear evidence, human control";
   return (
     <section
       id="walkthrough"
@@ -150,9 +128,9 @@ export default function LandingScene({ apiRef }) {
         </div>
         <div className="hero-copy">
           <h1>
-            Every delivery. <br />A clear
+            Every delivery <br />A clear
             <br />
-            <span> next step.</span>
+            <span> next step</span>
           </h1>
           <p>
             Read the label. Check document coverage.
@@ -163,46 +141,19 @@ export default function LandingScene({ apiRef }) {
             <AppLink className="primary" href="/demo">
               Enter demo <ArrowRight aria-hidden="true" />
             </AppLink>
-            <button
-              className="text-action"
-              type="button"
-              onClick={() =>
-                playing
-                  ? controller.current?.pause()
-                  : controller.current?.play()
-              }
-              disabled={staticMode}
-              aria-pressed={playing}
-              aria-describedby={
-                staticMode ? "walkthrough-motion-note" : undefined
-              }
-            >
-              {playing ? "Pause walkthrough" : "Watch the idea"}{" "}
-              {playing ? (
-                <Pause aria-hidden="true" />
-              ) : (
-                <Play aria-hidden="true" />
-              )}
-            </button>
           </div>
           <p className="quiet-note">
             For food businesses. Built around the evidence.
           </p>
-          {staticMode && (
-            <p className="motion-explanation" id="walkthrough-motion-note">
-              Motion is off. Use Photo, Read, Rules and Human review to explore
-              the evidence.
-            </p>
-          )}
         </div>
         <div className="scene-heading">
           <h2>{title}</h2>
           <p>
             {stage < 2
-              ? "One label. Three connected views."
+              ? "One label, three connected views"
               : stage === 2
-                ? "Select a field. Follow the reason."
-                : "A reason recorded. A next step agreed."}
+                ? "Select a field, follow the reason"
+                : "A reason recorded, a next step agreed"}
           </p>
         </div>
         {(can3D || started) && !failed && (
@@ -214,6 +165,7 @@ export default function LandingScene({ apiRef }) {
             <SceneBoundary onFailure={onFailure}>
               <Suspense fallback={null}>
                 <SceneCanvas
+                  active={can3D}
                   progressRef={progressRef}
                   invalidateRef={invalidateRef}
                   layoutRef={layoutRef}
@@ -246,7 +198,7 @@ export default function LandingScene({ apiRef }) {
               F
             </span>
             <div>
-              <strong>The next step is human.</strong>
+              <strong>The next step is human</strong>
               <span>Farid · Halal supervisor · Sunrise Bakery SAMPLE</span>
             </div>
           </div>
@@ -290,54 +242,6 @@ export default function LandingScene({ apiRef }) {
               );
             })}
           </div>
-          <span className="stage-help">
-            {stage === 1
-              ? "Select a field to compare the reading with the approved material."
-              : stage === 2
-                ? "Select a check to see its reason."
-                : stage === 3
-                  ? "The supervisor records a reason and a next step."
-                  : "Illustrative SAMPLE journey. No live records change."}
-          </span>
-          <span className="scene-disclosure">
-            Prepared SAMPLE · No live model call or record changes.
-          </span>
-        </div>
-        <div
-          className="review-toolbar sc-playback"
-          role="group"
-          aria-label="Walkthrough playback"
-        >
-          <button
-            type="button"
-            onClick={() =>
-              playing ? controller.current?.pause() : controller.current?.play()
-            }
-            disabled={staticMode}
-            aria-describedby={
-              staticMode ? "walkthrough-motion-note" : undefined
-            }
-          >
-            {playing ? (
-              <Pause aria-hidden="true" />
-            ) : (
-              <Play aria-hidden="true" />
-            )}
-            {playing ? "Pause walkthrough" : "Play walkthrough"}
-          </button>
-          <span className="toolbar-divider" />
-          <button
-            type="button"
-            aria-pressed={staticMode}
-            title={
-              mediaReduced()
-                ? "Reduced motion follows your device preference"
-                : undefined
-            }
-            onClick={toggleMotion}
-          >
-            {staticMode ? "Motion off" : "Less motion"}
-          </button>
         </div>
       </div>
     </section>

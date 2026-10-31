@@ -21,7 +21,7 @@ it("submits for review without announcing that the new record is active", async 
     screen.getByRole("button", { name: "Submit renewal for review" }),
   );
   expect(
-    await screen.findByRole("heading", { name: "Renewal submitted." }),
+    await screen.findByRole("heading", { name: "Renewal submitted" }),
   ).toBeInTheDocument();
   const records = await g.listCertificates(person(5));
   expect(records.find((c) => c.id === 1).status).toBe("active");

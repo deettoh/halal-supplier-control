@@ -206,8 +206,8 @@ export default function Registry() {
             <section className="registry-receipt" role="status">
               <h2 ref={receiptRef} tabIndex={-1}>
                 {receipt.status === "active"
-                  ? "Renewal verified."
-                  : "Renewal rejected."}
+                  ? "Renewal verified"
+                  : "Renewal rejected"}
               </h2>
               <p>{receipt.cert_no}</p>
               <Status value={receipt.status} />
@@ -245,7 +245,7 @@ export default function Registry() {
             !query.error && (
               <div className="registry-clear">
                 <Check size={32} aria-hidden="true" />
-                <h2>The registry queue is clear.</h2>
+                <h2>The registry queue is clear</h2>
                 <p>
                   Supplier submissions will appear here. Current records stay in
                   place while renewals wait for review.

@@ -55,12 +55,12 @@ export default function Landing() {
           >
             <div className="registry-copy">
               <h2 id="registry-title">
-                One approved renewal.
+                One approved renewal
                 <br />
                 <span>
                   Shared across
                   <br />
-                  linked buyers.
+                  linked buyers
                 </span>
               </h2>
               <p>
@@ -140,8 +140,8 @@ export default function Landing() {
           <section className="roles-section" aria-labelledby="roles-title">
             <div className="roles-lead">
               <h2 id="roles-title">
-                The same evidence.
-                <br />A clear role for everyone.
+                The same evidence
+                <br />A clear role for everyone
               </h2>
               <p>
                 From the receiving door to the shared registry, each person has
@@ -170,6 +170,9 @@ export default function Landing() {
         <footer className="site-footer">
           <span>Loupe</span>
           <p>
+            Landing illustrations use prepared SAMPLE data, with no model calls
+            or record changes.
+            <br />
             SAMPLE demonstration. Document coverage only.
             <br />
             Not a religious ruling or independent certificate-authenticity

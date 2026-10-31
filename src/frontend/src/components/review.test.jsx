@@ -108,7 +108,7 @@ it.each(["saved", "conflict"])(
     ).toBeInTheDocument();
     expect(other).toBeDisabled();
     await act(async () => release());
-    if (outcome === "saved") await screen.findByText("Decision recorded.");
+    if (outcome === "saved") await screen.findByText("Decision recorded");
     else await screen.findByRole("alert");
     await user.click(
       screen.getByRole("button", {
@@ -137,9 +137,9 @@ it("describes automatic acceptance without inventing a supervisor rejection", ()
       }}
     />,
   );
-  expect(screen.getByText("Automatically accepted.")).toBeInTheDocument();
+  expect(screen.getByText("Automatically accepted")).toBeInTheDocument();
   expect(screen.queryByText(/Rejected by/)).not.toBeInTheDocument();
-  expect(screen.queryByText("Decision recorded.")).not.toBeInTheDocument();
+  expect(screen.queryByText("Decision recorded")).not.toBeInTheDocument();
 });
 it("does not describe a manufacturer mismatch as a changed brand", async () => {
   const base = createPreviewGateway();
@@ -227,7 +227,7 @@ it("records actual supervisor result without changing the coverage verdict", asy
     "Return changed brand to supplier.",
   );
   await user.click(screen.getByRole("button", { name: "Record decision" }));
-  await screen.findByText("Decision recorded.");
+  await screen.findByText("Decision recorded");
   expect(screen.getAllByText("Substitution").length).toBeGreaterThan(0);
   expect(
     screen.getByText("Return changed brand to supplier."),
@@ -254,7 +254,7 @@ it("refetches the queue and blocks stale decisions after 409", async () => {
   expect(
     screen.getByRole("button", { name: "Record decision" }),
   ).toBeDisabled();
-  expect(screen.queryByText("Decision recorded.")).not.toBeInTheDocument();
+  expect(screen.queryByText("Decision recorded")).not.toBeInTheDocument();
 });
 it("keeps a conflict visible when the resolved row leaves the queue and clears it on refresh", async () => {
   const user = userEvent.setup();

@@ -68,7 +68,7 @@ export default function DemoEntry({ requestedPath }) {
           <h1>
             Choose your
             <br />
-            workspace.
+            workspace
           </h1>
           <p>
             Pick a SAMPLE person. Their role and organisation come with them.
@@ -90,7 +90,7 @@ export default function DemoEntry({ requestedPath }) {
 
           {session.people.status === "error" && (
             <div className="request-error" role="alert">
-              <h2>Demo people are unavailable.</h2>
+              <h2>Demo people are unavailable</h2>
               <p>
                 {session.people.error?.status === 404
                   ? "The connected backend has not added named demo entry yet. Use the prepared preview to review the design, or retry after the team updates it."

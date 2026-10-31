@@ -4,8 +4,24 @@ import {
   fitSceneBounds,
   cssPlaneMatrix,
   fallbackSceneBounds,
+  sceneSpace,
 } from "./scene-layout.js";
 import { scenePose } from "./scene-pose.js";
+
+it("keeps the opening phone photo below the hero and leaves room for the tabs", () => {
+  const layout = {
+    heroBottom: 250,
+    headingHeight: 60,
+    controlsTop: 580,
+    drawerHeight: 100,
+  };
+  const start = sceneSpace(layout, scenePose(0), { mobile: true });
+  expect(start.top).toBeGreaterThan(layout.heroBottom);
+  expect(start.bottom).toBeLessThan(layout.controlsTop);
+  const reading = sceneSpace(layout, scenePose(0.29), { mobile: true });
+  expect(reading.top).toBeLessThan(start.top);
+  expect(reading.top).toBeGreaterThan(layout.headingHeight);
+});
 
 it("fits a spread console between its caption and controls without enlarging it", () => {
   const bounds = { top: 70, bottom: 610 };

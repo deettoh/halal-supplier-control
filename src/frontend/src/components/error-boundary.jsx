@@ -10,7 +10,7 @@ export class ErrorBoundary extends React.Component {
   render() {
     return this.state.failed ? (
       <main className="page">
-        <h1>We couldn't open this view.</h1>
+        <h1>We couldn't open this view</h1>
         <p>Reload the page to try again. Unsaved changes may be lost.</p>
         <button
           className="button primary"

@@ -5,7 +5,7 @@ export default function NotFound() {
   const { identity } = useSession();
   return (
     <div className="page">
-      <h1>This page isn't available.</h1>
+      <h1>This page isn't available</h1>
       <p>Return to your workspace or choose another role.</p>
       <Link
         className="button primary"

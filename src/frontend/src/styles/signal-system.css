@@ -48,6 +48,9 @@
   pointer-events: none;
   top: 0;
 }
+.signal-landing .scene-stage {
+  min-height: 0;
+}
 .sc-canvas {
   position: absolute;
   inset: 0;
@@ -98,13 +101,8 @@
 .sc-html-host .rules-plane {
   width: 310px;
 }
-.sc-playback.review-toolbar {
-  position: absolute;
-  bottom: 2%;
-  z-index: 25;
-}
 .signal-landing .scene-controls {
-  bottom: 12%;
+  bottom: max(20px, env(safe-area-inset-bottom));
 }
 .signal-landing .decision-drawer {
   bottom: 23%;
@@ -250,12 +248,6 @@
 .signal-landing .scene-controls {
   gap: 6px;
 }
-.scene-disclosure {
-  color: var(--muted);
-  font-size: 11px;
-  line-height: 1.4;
-  text-align: center;
-}
 html[data-motion="reduced"] * {
   scroll-behavior: auto !important;
   transition-duration: 0.08s !important;
@@ -281,7 +273,7 @@ html[data-motion="reduced"] * {
     font-size: clamp(43px, 9.8vw, 66px);
   }
   .signal-landing .scene-controls {
-    bottom: 12%;
+    bottom: max(20px, env(safe-area-inset-bottom));
   }
   .signal-landing .decision-drawer {
     bottom: 24%;
@@ -299,20 +291,9 @@ html[data-motion="reduced"] * {
     right: 18px;
     top: 18px;
   }
-  .sc-playback.review-toolbar {
-    bottom: 2.5%;
-  }
   .signal-landing .sc-fallback .console-position {
     top: 53%;
   }
-}
-body.less-motion .signal-landing .sc-playback.review-toolbar {
-  position: relative;
-  inset: auto;
-  left: auto;
-  transform: none;
-  margin: 20px auto 0;
-  width: max-content;
 }
 body.less-motion .signal-landing .scene-controls {
   bottom: auto;

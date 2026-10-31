@@ -501,10 +501,10 @@ export default function Certificates() {
               <section className="renewal-receipt" role="status">
                 <h2 ref={receipt} tabIndex={-1}>
                   {receiptRecord.status === "pending"
-                    ? "Renewal submitted."
+                    ? "Renewal submitted"
                     : receiptRecord.status === "active"
-                      ? "Renewal verified."
-                      : "Renewal reviewed."}
+                      ? "Renewal verified"
+                      : "Renewal reviewed"}
                 </h2>
                 <p>{receiptRecord.cert_no}</p>
                 <Status value={receiptRecord.status} />
@@ -518,7 +518,7 @@ export default function Certificates() {
             )}
             {pending && (
               <div className="pending-notice">
-                <h2>A renewal is waiting for review.</h2>
+                <h2>A renewal is waiting for review</h2>
                 <p>
                   The active record stays in place until a reviewer verifies
                   this submission.

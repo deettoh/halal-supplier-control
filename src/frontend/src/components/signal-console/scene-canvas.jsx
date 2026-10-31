@@ -7,6 +7,7 @@ import { fitSceneBounds, cssPlaneMatrix, sceneSpace } from "./scene-layout.js";
 import { EvidencePlane } from "./panels.jsx";
 
 function ConsoleModel({
+  active,
   progressRef,
   invalidateRef,
   layoutRef,
@@ -60,7 +61,7 @@ function ConsoleModel({
     };
   }, [model, invalidate, invalidateRef, gl, onReady, onFailure]);
   useFrame(() => {
-    if (!root.current || size.width <= 0 || size.height <= 0) return;
+    if (!active || !root.current || size.width <= 0 || size.height <= 0) return;
     const pose = scenePose(progressRef.current.value);
     const view = viewport.getCurrentViewport(camera, [0, 0, 0]);
     const compact = Math.min(
@@ -68,12 +69,12 @@ function ConsoleModel({
       (size.height * 0.63) / 540,
     );
     const full = Math.min(
-      (size.width * 0.92) / 960,
-      (size.height * 0.68) / 540,
+      (size.width * 0.94) / 960,
+      (size.height * 0.76) / 540,
     );
     const pixelScale =
       (compact + (full - compact) * pose.expand) *
-      (1 - pose.open * 0.24) *
+      (1 - pose.open * 0.18) *
       (1 - pose.decision * 0.2);
     const scale = (pixelScale * 100 * view.height) / size.height;
     root.current.scale.setScalar(scale);

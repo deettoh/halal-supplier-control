@@ -1,9 +1,14 @@
 // Keep the animated object inside the space reserved for it, never under its copy.
-export function sceneSpace(layout, pose) {
+export function sceneSpace(layout, pose, { mobile = false } = {}) {
   // As the trays separate, the whole caption/object composition rises together.
   const captionTop = 20 + 24 * (1 - pose.open) * (1 - pose.decision);
   return {
-    top: captionTop + layout.headingHeight + 24,
+    top: mobile
+      ? Math.max(
+          (captionTop + layout.headingHeight + 24) * pose.heading,
+          (layout.heroBottom + 20) * (1 - pose.copyAway),
+        )
+      : captionTop + layout.headingHeight + 24,
     bottom:
       layout.controlsTop - 24 - pose.decision * (layout.drawerHeight + 16),
   };
