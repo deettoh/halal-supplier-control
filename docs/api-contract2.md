@@ -131,6 +131,15 @@ The picker then shows people instead of roles, and the frontend stops hardcoding
 
 From these the screen builds "Aina, receiving staff, checked Cocoa Powder, Covered".
 
+**Audit-context correction:** the default seed starts with empty deliveries
+and activity history; it does not manufacture a completed check. New flagged
+check events record the first failed rule and its detail in `reason`, including
+extraction recovery. Passing automatic checks leave reason null. Certificate
+events identify the certificate number in the reason; verification/rejection
+also retain the reviewer's note. `CertificateResponse.review_note` remains
+the original note. Historical rows are preserved without invented context.
+
+
 ---
 
 ## 3. Renewal review by the registry reviewer
@@ -186,9 +195,9 @@ From these the screen builds "Aina, receiving staff, checked Cocoa Powder, Cover
 
 | Event | `action` | `actor` | `reason` |
 | --- | --- | --- | --- |
-| Supplier submits | `certificate_submitted` (new) | Supplier contact's name | `null` |
-| Reviewer verifies | `certificate_renewed` (existing) | Reviewer's name | Reviewer's note |
-| Reviewer rejects | `certificate_rejected` (new) | Reviewer's name | Reviewer's note |
+| Supplier submits | `certificate_submitted` (new) | Supplier contact's name | Certificate number and submission description |
+| Reviewer verifies | `certificate_renewed` (existing) | Reviewer's name | Certificate number followed by reviewer's note |
+| Reviewer rejects | `certificate_rejected` (new) | Reviewer's name | Certificate number followed by reviewer's note |
 
 ---
 

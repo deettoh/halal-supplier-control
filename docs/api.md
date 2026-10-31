@@ -224,7 +224,19 @@ Activity `action` is one of `auto_accepted`, `pending_review`, `accepted`,
 and a database constraint enforce this list. For new events, actor and title
 identify the named person; legacy role-only history is retained. A certificate event writes one row to each linked SME. The
 actor is the supplier contact's name for a submission and the reviewer's name
-for a decision, and a decision row has the reviewer's note as its `reason`.
+for a decision. New flagged-check rows record the first failed rule ID and
+its detail in `reason`; successful automatic checks leave it null. This also
+applies to delayed extraction recovery rows.
+
+New certificate submission reasons identify the certificate number, for
+example `Certificate SAMPLE-RENEWAL submitted for review.` Verification and
+rejection reasons include both the number and the reviewer's note, for
+example `Certificate SAMPLE-RENEWAL: Checked documents`. The certificate's
+`review_note` remains the note alone. These events also retain an internal
+`certificate_id`. Existing historical rows are not rewritten.
+
+The default seed has no deliveries or activity rows. Test fixtures use the
+same normal startup seeding without deleting history to hide synthetic data.
 
 ## Photos are stored and served as JPEG
 

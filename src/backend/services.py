@@ -268,6 +268,18 @@ def _failed_checks(message: str) -> list[dict[str, object]]:
     ]
 
 
+def _failed_rule_reason(row: db.Delivery) -> str | None:
+    """Explain the first failing rule without inventing a reason for passes."""
+    return next(
+        (
+            f"{check['rule']}: {check['detail']}"
+            for check in row.rule_results
+            if check["passed"] is False
+        ),
+        None,
+    )
+
+
 def _extract_label(
     payload: bytes,
 ) -> tuple[LabelExtraction | None, str | None]:
@@ -417,6 +429,7 @@ def create_delivery(
             role=context.role,
             action=saved.status,
             delivery_id=saved.id,
+            reason=_failed_rule_reason(saved),
         )
     )
     session.commit()
@@ -461,6 +474,7 @@ def decide_delivery(
                 role="staff",
                 action="pending_review",
                 delivery_id=row.id,
+                reason=_failed_rule_reason(row),
             )
         )
     row.status = {
@@ -536,6 +550,8 @@ def renew_certificate(
                 supplier_name=supplier.name,
                 role=context.role,
                 action="certificate_submitted",
+                certificate_id=row.id,
+                reason=f"Certificate {row.cert_no} submitted for review.",
             )
         )
     session.commit()
@@ -749,7 +765,8 @@ def decide_renewal(
                 action="certificate_renewed"
                 if request.decision == "verify"
                 else "certificate_rejected",
-                reason=request.note,
+                certificate_id=row.id,
+                reason=f"Certificate {row.cert_no}: {request.note}",
             )
         )
     session.commit()

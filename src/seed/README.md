@@ -5,6 +5,10 @@ materials across Sunrise Bakery SAMPLE and Crescent Caterer SAMPLE, and 7
 people. The certificate images in `certificates/` are AI-generated PNGs
 marked SAMPLE.
 
+`deliveries` and `activity_log` are intentionally empty. Startup and demo
+reset must not invent completed checks or activity. Workflow tests use the
+normal seed loader without deleting seeded history afterward.
+
 To recount the rows, run:
 
 ```bash
