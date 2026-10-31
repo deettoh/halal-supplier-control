@@ -132,6 +132,7 @@ class ActivitySeed(APIModel):
     role: DemoRole
     action: ActivityAction
     delivery_id: RecordId | None = None
+    certificate_id: RecordId | None = None
     reason: str | None = None
     created_at: AwareDatetime = Field(default_factory=db.utc_now)
 

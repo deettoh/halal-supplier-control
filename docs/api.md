@@ -188,10 +188,12 @@ The response is, for example:
 ```
 
 `certificates_checked` counts active certificates examined, including those
-already requested or outside the windows. `requests_created` counts shared
-certificate requests, not SME activity rows: one certificate qualifying for
-two SMEs creates one request and two log entries. Multiple materials within
-the same SME do not create duplicate entries.
+already requested or outside the windows. `requests_created` counts distinct
+certificates that gained at least one new SME request entry in this run,
+not the number of SME log rows. One certificate qualifying for two SMEs
+returns 1 and creates two entries. If another SME qualifies in a later run,
+that run also returns 1 for the certificate; an unchanged repeat returns 0.
+Multiple materials within the same SME do not create duplicate entries.
 
 All qualifying SMEs receive `renewal_requested` activity rows with the
 reviewer's name/title and supplier name. Material, verdict and delivery ID
@@ -199,11 +201,14 @@ are null; the reason identifies the certificate number and expiry date.
 The certificate's new `renewal_requested_on` date is set using the Malaysian
 calendar and returned by the certificate API for the supplier page.
 
-Requests and logs commit atomically. PostgreSQL certificate row locks prevent
-concurrent clicks from duplicating requests. A second run creates zero new
-requests for already marked certificates. As specified by the contract, the
-marker is shared per certificate: an SME whose warning window starts later
-does not get an additional log after the certificate was already requested.
+Requests and logs commit atomically. PostgreSQL certificate row locks and a
+partial unique index prevent concurrent duplicates for the same SME and
+certificate. Each log stores an internal `certificate_id`; this does not
+change the activity API response. A second run with no newly eligible SME
+creates zero entries. An SME whose own window starts later receives its
+entry then, even if another SME already received a request for that certificate.
+`renewal_requested_on` remains the first supplier request date and is never
+moved forward when a later SME becomes eligible.
 No request is created for an unlinked certificate. Missing or invalid SME
 settings return 503 and roll back the operation.
 

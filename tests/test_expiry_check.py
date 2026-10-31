@@ -6,6 +6,7 @@ from datetime import UTC, datetime, timedelta
 import pytest
 from fastapi.testclient import TestClient
 from sqlalchemy import Engine, delete, event, func, select, text
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
 from backend import db
@@ -78,6 +79,7 @@ def test_sme_windows_and_repeat_clicks(
             == 4
         )
         for row in session.scalars(select(db.ActivityLog)):
+            assert row.certificate_id == 1
             assert row.supplier_name == "Golden Grain Supplies SAMPLE"
             assert row.material_name is None
             assert row.verdict is None
@@ -164,9 +166,10 @@ def test_unlinked_supplier_is_checked_without_request(
     assert logs(api_engine) == []
 
 
-def test_global_request_marker_skips_later_sme_window(
-    api_client: TestClient, api_engine: Engine
+def test_each_sme_gets_its_request_when_its_window_starts(
+    api_client: TestClient, api_engine: Engine, monkeypatch: pytest.MonkeyPatch
 ) -> None:
+    first_day = db.business_today()
     with Session(api_engine) as session:
         cert = session.get(db.Certificate, 1)
         assert cert is not None
@@ -177,18 +180,198 @@ def test_global_request_marker_skips_later_sme_window(
         == 1
     )
     assert {r[0] for r in logs(api_engine)} == {BAKERY}
-    with Session(api_engine) as session:
-        policy = session.scalar(
-            select(db.SMESettings).where(db.SMESettings.tenant == CATERER)
-        )
-        assert policy is not None
-        policy.expiry_warning_days = 60
-        session.commit()
+    # Advancing five days moves from 50 to 45 days remaining without changing
+    # either SME's policy. Crescent now qualifies and Sunrise is not repeated.
+    monkeypatch.setattr(
+        db, "utc_now", lambda: datetime(2026, 10, 27, tzinfo=UTC)
+    )
+    assert (
+        api_client.post(ENDPOINT, headers=REVIEWER).json()["requests_created"]
+        == 1
+    )
+    assert {r[0] for r in logs(api_engine)} == {BAKERY, CATERER}
+    assert len(logs(api_engine)) == 2
     assert (
         api_client.post(ENDPOINT, headers=REVIEWER).json()["requests_created"]
         == 0
     )
-    assert {r[0] for r in logs(api_engine)} == {BAKERY}
+    assert len(logs(api_engine)) == 2
+    with Session(api_engine) as session:
+        cert = session.get(db.Certificate, 1)
+        assert cert is not None and cert.renewal_requested_on == first_day
+        events = list(
+            session.scalars(select(db.ActivityLog).order_by(db.ActivityLog.id))
+        )
+        assert [row.certificate_id for row in events] == [1, 1]
+        assert [row.created_at.date() for row in events] == [
+            first_day,
+            first_day + timedelta(days=5),
+        ]
+
+
+def test_option_a_counts_certificates_not_sme_entries(
+    api_client: TestClient, api_engine: Engine
+) -> None:
+    with Session(api_engine) as session:
+        for certificate in session.scalars(
+            select(db.Certificate).where(db.Certificate.status == "active")
+        ):
+            certificate.expiry_date = db.business_today() + timedelta(days=30)
+        session.commit()
+    assert api_client.post(ENDPOINT, headers=REVIEWER).json() == {
+        "certificates_checked": 2,
+        "requests_created": 2,
+    }
+    # Both suppliers have two linked SMEs. Four SME entries still mean only
+    # two certificates gained new requests in this run.
+    assert len(logs(api_engine)) == 4
+    assert (
+        api_client.post(ENDPOINT, headers=REVIEWER).json()["requests_created"]
+        == 0
+    )
+    assert len(logs(api_engine)) == 4
+
+
+def test_new_certificate_for_same_supplier_gets_new_sme_requests(
+    api_client: TestClient, api_engine: Engine
+) -> None:
+    assert (
+        api_client.post(ENDPOINT, headers=REVIEWER).json()["requests_created"]
+        == 1
+    )
+    with Session(api_engine) as session:
+        old = session.get(db.Certificate, 1)
+        assert old is not None
+        old.status = "superseded"
+        session.flush()
+        new = db.Certificate(
+            supplier_id=1,
+            issuer=old.issuer,
+            cert_no="SAMPLE-RENEWED-002",
+            holder_name=old.holder_name,
+            expiry_date=db.business_today() + timedelta(days=30),
+            scope=old.scope,
+            status="active",
+        )
+        session.add(new)
+        session.flush()
+        new_id = new.id
+        session.commit()
+    assert (
+        api_client.post(ENDPOINT, headers=REVIEWER).json()["requests_created"]
+        == 1
+    )
+    assert (
+        api_client.post(ENDPOINT, headers=REVIEWER).json()["requests_created"]
+        == 0
+    )
+    with Session(api_engine) as session:
+        pairs = [
+            (r.tenant, r.certificate_id)
+            for r in session.scalars(select(db.ActivityLog))
+        ]
+        assert len(pairs) == 4
+        assert set(pairs) == {
+            (BAKERY, 1),
+            (CATERER, 1),
+            (BAKERY, new_id),
+            (CATERER, new_id),
+        }
+
+
+def test_database_prevents_duplicate_sme_certificate_request(
+    api_client: TestClient, api_engine: Engine
+) -> None:
+    api_client.post(ENDPOINT, headers=REVIEWER)
+    with Session(api_engine) as session:
+        session.add(
+            db.ActivityLog(
+                tenant=BAKERY,
+                actor="Nadia",
+                role="reviewer",
+                action="renewal_requested",
+                certificate_id=1,
+            )
+        )
+        with pytest.raises(IntegrityError):
+            session.flush()
+        session.rollback()
+        session.add(
+            db.ActivityLog(
+                tenant=BAKERY,
+                actor="Nadia",
+                role="reviewer",
+                action="certificate_renewed",
+                certificate_id=1,
+            )
+        )
+        session.flush()
+    assert len(logs(api_engine)) == 2
+
+
+def test_legacy_request_history_is_linked_before_later_sme_request(
+    api_client: TestClient, api_engine: Engine, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    with Session(api_engine) as session:
+        cert = session.get(db.Certificate, 1)
+        assert cert is not None
+        cert.expiry_date = db.business_today() + timedelta(days=50)
+        session.commit()
+    assert (
+        api_client.post(ENDPOINT, headers=REVIEWER).json()["requests_created"]
+        == 1
+    )
+    with api_engine.begin() as connection:
+        table = db.qualified_table_name(connection, "activity_log")
+        if connection.dialect.name == "postgresql":
+            connection.execute(
+                text(f"ALTER TABLE {table} DROP COLUMN certificate_id")
+            )
+        else:
+            connection.execute(
+                text(f"UPDATE {table} SET certificate_id = NULL")
+            )
+    db.init_db(api_engine)
+    db.init_db(api_engine)
+    with Session(api_engine) as session:
+        row = session.scalar(select(db.ActivityLog))
+        assert (
+            row is not None
+            and row.certificate_id == 1
+            and row.tenant == BAKERY
+        )
+    monkeypatch.setattr(
+        db, "utc_now", lambda: datetime(2026, 10, 27, tzinfo=UTC)
+    )
+    assert (
+        api_client.post(ENDPOINT, headers=REVIEWER).json()["requests_created"]
+        == 1
+    )
+    assert {r[0] for r in logs(api_engine)} == {BAKERY, CATERER}
+    assert len(logs(api_engine)) == 2
+
+
+def test_unknown_legacy_request_is_not_guessed_or_deleted(
+    api_engine: Engine,
+) -> None:
+    with Session(api_engine) as session:
+        session.add(
+            db.ActivityLog(
+                tenant=BAKERY,
+                actor="Historical reviewer",
+                role="reviewer",
+                action="renewal_requested",
+                supplier_name="Unknown supplier",
+                reason="Historical request without a certificate reference",
+            )
+        )
+        session.commit()
+    with pytest.raises(ValueError, match="explicit certificate_id"):
+        db.init_db(api_engine)
+    with Session(api_engine) as session:
+        row = session.scalar(select(db.ActivityLog))
+        assert row is not None and row.actor == "Historical reviewer"
+        assert row.certificate_id is None
 
 
 def test_missing_sme_policy_rolls_back_request(

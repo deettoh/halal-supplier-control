@@ -230,7 +230,13 @@ class CertificateResponse(APIModel):
 
 class ExpiryCheckResponse(APIModel):
     certificates_checked: int = Field(ge=0)
-    requests_created: int = Field(ge=0)
+    requests_created: int = Field(
+        ge=0,
+        description=(
+            "Number of distinct certificates gaining at least one new SME "
+            "request entry in this run, not the number of SME log rows."
+        ),
+    )
 
 
 class RenewalResponse(APIModel):

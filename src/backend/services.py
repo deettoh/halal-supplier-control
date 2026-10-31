@@ -609,7 +609,7 @@ def pending_renewals(session: Session) -> list[RenewalResponse]:
 def expiry_check(
     session: Session, context: NamedDemoContext
 ) -> ExpiryCheckResponse:
-    """Record one supplier request per qualifying, unrequested certificate.
+    """Record each SME's first request for a qualifying certificate.
 
     Each qualifying linked SME gets one activity entry in the same
     transaction. Certificate row locks prevent concurrent reviewer clicks
@@ -627,11 +627,17 @@ def expiry_check(
     )
     requests_created = 0
     for certificate in certificates:
-        if certificate.renewal_requested_on is not None:
-            continue
         days_remaining = (certificate.expiry_date - today).days
         if days_remaining < 0:
             continue
+        requested_tenants = set(
+            session.scalars(
+                select(db.ActivityLog.tenant).where(
+                    db.ActivityLog.action == "renewal_requested",
+                    db.ActivityLog.certificate_id == certificate.id,
+                )
+            )
+        )
         tenants = session.scalars(
             select(db.Material.tenant)
             .where(db.Material.supplier_id == certificate.supplier_id)
@@ -641,7 +647,8 @@ def expiry_check(
         qualifying = [
             tenant
             for tenant in tenants
-            if days_remaining
+            if tenant not in requested_tenants
+            and days_remaining
             <= rule_settings(session, tenant).expiry_warning_days
         ]
         if not qualifying:
@@ -656,6 +663,8 @@ def expiry_check(
                     actor_title=context.title,
                     role=context.role,
                     action="renewal_requested",
+                    certificate_id=certificate.id,
+                    created_at=db.utc_now(),
                     supplier_name=supplier.name,
                     material_name=None,
                     verdict=None,
@@ -667,7 +676,10 @@ def expiry_check(
                     ),
                 )
             )
-        certificate.renewal_requested_on = today
+        if certificate.renewal_requested_on is None:
+            certificate.renewal_requested_on = today
+        # Option A: count this certificate once for this run, even if several
+        # SMEs gained entries or its first supplier request predates this run.
         requests_created += 1
     session.commit()
     return ExpiryCheckResponse(

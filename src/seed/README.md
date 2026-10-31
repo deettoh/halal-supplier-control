@@ -116,6 +116,6 @@ editor or scheduler.
 
 Certificate seed rows may omit `renewal_requested_on` (defaults to null) or
 set an ISO date for a historical request. Activity rows may use
-`renewal_requested` with the reviewer name/title and supplier name, leaving
-delivery ID, material and verdict null. The existing seed records are not
+`renewal_requested` with the reviewer name/title, supplier name and an
+internal `certificate_id`, leaving delivery ID, material and verdict null. The existing seed records are not
 changed or pre-marked by the expiry implementation.
