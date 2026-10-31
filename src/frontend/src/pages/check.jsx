@@ -2,7 +2,6 @@ import React, { useEffect, useRef, useState } from "react";
 import { Camera, Upload, ArrowRight, RotateCcw } from "lucide-react";
 import { useSession, useDraft } from "../lib/session.jsx";
 import { useRecord, useScopedMutation } from "../lib/api/hooks.js";
-import { previewCases } from "../lib/preview/gateway.js";
 import { MaterialPicker } from "../components/material-picker.jsx";
 import { RequestState, ErrorMessage } from "../components/request-state.jsx";
 import { PhotoViewer } from "../components/photo-viewer.jsx";
@@ -19,7 +18,6 @@ export default function CheckDelivery() {
   const [image, setImage] = useState(null);
   const [result, setResult] = useState(null);
   const [inputError, setInputError] = useState(null);
-  const [preparing, setPreparing] = useState(false);
   const resultHeading = useRef(null);
   const errorHeading = useRef(null);
   const fileInput = useRef(null);
@@ -28,7 +26,7 @@ export default function CheckDelivery() {
     { onSuccess: (value) => setResult(value) },
   );
   const selected = materials.data?.find((m) => m.id === materialId);
-  const busy = mutation.isPending || preparing;
+  const busy = mutation.isPending;
   useDraft(!result && (!!image || mutation.isPending));
   useEffect(() => {
     if (result) resultHeading.current?.focus();
@@ -55,24 +53,6 @@ export default function CheckDelivery() {
     chooseFile(event.currentTarget.files?.[0]);
     // Permit selecting the same photo again after removal or validation failure.
     event.currentTarget.value = "";
-  }
-  async function prepared(example) {
-    setPreparing(true);
-    try {
-      const response = await fetch(example.image);
-      if (!response.ok)
-        throw new Error("We couldn't load this prepared photo. Try again.");
-      const photo = await response.blob();
-      chooseFile(
-        new File([photo], example.image.split("/").at(-1), {
-          type: photo.type,
-        }),
-      );
-    } catch (error) {
-      setInputError(error);
-    } finally {
-      setPreparing(false);
-    }
   }
   function reset() {
     setResult(null);
@@ -262,41 +242,6 @@ export default function CheckDelivery() {
                   </div>
                 </MobileEvidenceDetails>
               )}
-              {session.gateway.mode === "preview" && (
-                <details className="prepared-photos">
-                  <summary>Try a prepared label</summary>
-                  <p>
-                    This preview checks only the exact prepared photo and
-                    material pairs. Other photos need the backend.
-                  </p>
-                  {selected ? (
-                    <ul>
-                      {previewCases
-                        .filter((c) => c.materialIds.includes(selected.id))
-                        .map((c) => (
-                          <li key={c.id}>
-                            <button
-                              type="button"
-                              className="button quiet"
-                              disabled={busy}
-                              onClick={() => prepared(c)}
-                            >
-                              {c.title}
-                            </button>
-                            <a href={c.image} download>
-                              Download photo
-                            </a>
-                          </li>
-                        ))}
-                    </ul>
-                  ) : (
-                    <p>
-                      Choose Cocoa Powder or Wheat Flour to try a prepared
-                      label.
-                    </p>
-                  )}
-                </details>
-              )}
             </section>
             <div className="receiving-submit">
               <button
@@ -305,9 +250,7 @@ export default function CheckDelivery() {
               >
                 {mutation.isPending
                   ? "Reading the label and checking the records…"
-                  : preparing
-                    ? "Preparing photo…"
-                    : "Check delivery"}
+                  : "Check delivery"}
                 {!busy && <ArrowRight size={18} aria-hidden="true" />}
               </button>
               {mutation.isPending && (
