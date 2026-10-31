@@ -39,7 +39,7 @@ export function Shell({ children }) {
       </a>
       <aside className="navigation-rail">
         <AppLink href="/" className="wordmark" aria-label="Loupe home">
-          <LoupeBrand monochrome />
+          <LoupeBrand />
         </AppLink>
         <nav aria-label="Workspace">
           {links.map(([href, text, Icon]) => (
@@ -53,20 +53,6 @@ export function Shell({ children }) {
             </AppLink>
           ))}
         </nav>
-        <div className="demo-disclosure">
-          <strong>SAMPLE</strong>
-          {session.gateway.mode === "preview" ? (
-            <>
-              <p>Design preview · SAMPLE data</p>
-              <p>Illustrative UI only.</p>
-            </>
-          ) : (
-            <>
-              <p>Backend connection</p>
-              <p>Inference source unreported.</p>
-            </>
-          )}
-        </div>
       </aside>
       <div className="workspace">
         <header className="workspace-header">

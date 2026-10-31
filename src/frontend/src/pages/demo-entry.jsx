@@ -7,7 +7,7 @@ import { AppLink } from "../lib/navigation.jsx";
 import { transitionUpdate } from "../lib/motion.js";
 import { LoupeBrand } from "../components/loupe-brand.jsx";
 
-import { ArrowRight, RefreshCw } from "lucide-react";
+import { ArrowLeft, ArrowRight, RefreshCw } from "lucide-react";
 
 import { useQueryClient } from "@tanstack/react-query";
 
@@ -60,7 +60,10 @@ export default function DemoEntry({ requestedPath }) {
         <AppLink className="wordmark" href="/">
           <LoupeBrand />
         </AppLink>
-        <AppLink href="/">Back to introduction</AppLink>
+        <AppLink className="button primary" href="/">
+          <ArrowLeft size={18} aria-hidden="true" />
+          Back to introduction
+        </AppLink>
       </header>
 
       <main className="entry-page route-arrival">
