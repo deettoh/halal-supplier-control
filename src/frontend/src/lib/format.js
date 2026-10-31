@@ -17,9 +17,10 @@ export function formatDate(value) {
   const [year, month, day] = value.split("-").map(Number);
   return day + " " + months[month - 1] + " " + year;
 }
+export const BUSINESS_TIME_ZONE = "Asia/Kuala_Lumpur";
 export function formatTime(value) {
   return new Intl.DateTimeFormat("en-MY", {
-    timeZone: "Asia/Kuala_Lumpur",
+    timeZone: BUSINESS_TIME_ZONE,
     day: "numeric",
     month: "short",
     year: "numeric",

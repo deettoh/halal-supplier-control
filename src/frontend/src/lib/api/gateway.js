@@ -3,6 +3,7 @@ import {
   ApiError,
   UnsupportedCapabilityError,
 } from "./client.js";
+import { BUSINESS_TIME_ZONE } from "../format.js";
 export { ApiError, UnsupportedCapabilityError } from "./client.js";
 export function createLiveGateway(options) {
   const { request, requestPublic } = createTransport(options);
@@ -13,6 +14,11 @@ export function createLiveGateway(options) {
   return {
     mode: "live",
     capabilities: { hold: true, expiry: true, certificateExtract: true },
+    // en-CA gives YYYY-MM-DD and KL time matches the backend's business date
+    today: () =>
+      new Intl.DateTimeFormat("en-CA", {
+        timeZone: BUSINESS_TIME_ZONE,
+      }).format(new Date()),
     listPeople: (options) => requestPublic("/api/people", options),
     readHealth: (options) => requestPublic("/api/health", options),
     listMaterials: read("/api/materials", ["staff", "supervisor"]),
