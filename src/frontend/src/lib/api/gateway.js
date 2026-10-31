@@ -12,7 +12,7 @@ export function createLiveGateway(options) {
       request(path, { context, roles, signal });
   return {
     mode: "live",
-    capabilities: { hold: false, expiry: true, certificateExtract: false },
+    capabilities: { hold: true, expiry: true, certificateExtract: true },
     listPeople: (options) => requestPublic("/api/people", options),
     readHealth: (options) => requestPublic("/api/health", options),
     listMaterials: read("/api/materials", ["staff", "supervisor"]),
@@ -20,11 +20,7 @@ export function createLiveGateway(options) {
     listActivity: read("/api/activity", ["supervisor"]),
     listCertificates: read("/api/certificates", ["supplier"]),
     listRenewals: read("/api/registry/renewals", ["reviewer"]),
-    async listOnHold() {
-      throw new UnsupportedCapabilityError(
-        "Held deliveries are not available from the connected backend yet.",
-      );
-    },
+    listOnHold: read("/api/deliveries?status=on_hold", ["supervisor"]),
     runExpiryCheck(context) {
       return request("/api/registry/expiry-check", {
         context,
