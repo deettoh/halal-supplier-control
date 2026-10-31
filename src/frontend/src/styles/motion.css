@@ -1,4 +1,4 @@
-/* Motion confirms actions; it never controls when an action becomes available. */
+/* motion confirms actions and doesn't control when an action becomes available */
 :root {
   --motion-ease: cubic-bezier(0.16, 1, 0.3, 1);
 }
@@ -61,8 +61,7 @@ main:focus {
     animation-duration: 220ms;
     animation-timing-function: var(--motion-ease);
   }
-  /* A CSS property may exist while the snapshot API is unavailable. Keep
-     a brief arrival for those browsers and ordinary Back/Forward navigation. */
+  /* brief arrival on every route change, including without the snapshot API */
   .route-arrival {
     animation: view-arrive 200ms var(--motion-ease);
   }

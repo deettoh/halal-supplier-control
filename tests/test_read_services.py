@@ -1,4 +1,4 @@
-"""Exercise real read routes against isolated SQLite/PostgreSQL databases."""
+"""Exercise read routes against isolated SQLite and PostgreSQL."""
 
 from datetime import UTC, date, datetime
 from pathlib import Path

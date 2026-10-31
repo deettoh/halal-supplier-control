@@ -56,7 +56,7 @@ def parse_date(value: object) -> date | None:
 
 
 def parse_scope(value: object) -> list[CertificateScopeItem]:
-    """Read API scope objects, accepting older string-list fixtures too."""
+    """Read API scope objects or plain product-name strings."""
     if isinstance(value, str):
         try:
             value = json.loads(value)
@@ -127,19 +127,21 @@ def evaluate(
     *,
     settings: RuleSettings | None = None,
 ) -> Evaluation:
-    """
-    Evaluate document coverage for one delivery.
+    """Evaluate document coverage for one delivery.
+
+    Args:
+        label: Label fields as a model, dict or JSON text.
+        material: Approved material values.
+        certificate: Active certificate values.
+        today: Evaluation date.
+        settings: SME policy or None for the seed policy of the tenant.
 
     Returns:
-        {
-            "verdict": str,
-            "rule_results": [
-                {"rule": str, "passed": bool|None, "detail": str}
-            ]
-        }
+        Verdict from the first failed rule and six rule results, with
+        passed None for a rule not evaluated.
 
-    passed=None means a rule could not be evaluated.
-    The first failed rule determines the verdict.
+    Raises:
+        ValueError: If today is invalid or no policy source is supplied.
     """
 
     if isinstance(label, LabelExtraction):
@@ -205,7 +207,7 @@ def evaluate(
         r2 = None
         add("R2", None, "Not evaluated: label information incomplete.")
 
-    # R3 - Match product and any explicit certificate brand restriction.
+    # R3 - Match product and any explicit certificate brand restriction
     scope = parse_scope(certificate.get("scope"))
 
     if r1:
@@ -266,7 +268,6 @@ def evaluate(
         r6 = None
         add("R6", None, "Not evaluated: label information incomplete.")
 
-    # First failing rule determines the verdict.
     verdict: Verdict
     if not r1:
         verdict = "needs_human"

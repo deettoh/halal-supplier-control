@@ -89,7 +89,7 @@ app = FastAPI(
     title="Halal Supplier Control",
     version=CONTRACT_VERSION,
     description=(
-        "Reports document coverage only, never a halal ruling. Demo headers "
+        "Reports document coverage without a halal ruling. Demo headers "
         "simulate identity. Certificate extraction is a stretch feature."
     ),
 )
@@ -199,7 +199,7 @@ def list_people(session: Database) -> list[PersonResponse]:
 def list_materials(
     context: Reader, session: Database
 ) -> list[MaterialResponse]:
-    """Chosen SME's masterlist with coverage computed on every read."""
+    """Return the chosen SME's masterlist with coverage on read."""
     return services.materials(session, context)
 
 
@@ -221,7 +221,7 @@ def create_delivery(
     ],
     session: Database,
 ) -> DeliveryResponse:
-    """Photo + material_id; extraction failures will be saved for review."""
+    """Check one delivery photo and save any failure for review."""
     return services.create_delivery(
         session,
         context,
@@ -241,7 +241,7 @@ def list_deliveries(
     query: Annotated[DeliveryListQuery, Query()],
     session: Database,
 ) -> list[DeliveryResponse]:
-    """Pending-review or on-hold queue for the chosen SME."""
+    """Return the chosen SME's pending-review or on-hold queue."""
     return services.delivery_queue(session, context, query.status)
 
 
@@ -274,7 +274,7 @@ def decide_delivery(
 def list_activity(
     context: Supervisor, session: Database
 ) -> list[ActivityResponse]:
-    """Chosen SME's audit activity, newest first."""
+    """Return the chosen SME's audit activity, newest first."""
     return services.activity(session, context)
 
 
@@ -287,7 +287,7 @@ def list_activity(
 def list_certificates(
     context: Supplier, session: Database
 ) -> list[CertificateResponse]:
-    """Supplier's own certificates, including pending and rejected renewals."""
+    """Return all of the supplier's certificates."""
     return services.certificates(session, context)
 
 
@@ -310,10 +310,7 @@ def renew_certificate(
     ],
     session: Database,
 ) -> CertificateResponse:
-    """Submit a pending renewal using form fields and an optional image.
-
-    Supplier ID comes from X-Demo-Tenant, never from this form.
-    """
+    """Submit a pending renewal for the X-Demo-Tenant supplier."""
     payload = services.read_photo(request.image) if request.image else None
     return services.renew_certificate(session, context, request, payload)
 
@@ -327,7 +324,7 @@ def renew_certificate(
 def list_renewals(
     context: Reviewer, session: Database
 ) -> list[RenewalResponse]:
-    """Pending renewals, oldest first, next to the active certificate."""
+    """List pending renewals, oldest first, with active certificates."""
     return services.pending_renewals(session)
 
 
@@ -413,7 +410,7 @@ def jpeg_response(payload: bytes) -> Response:
 def delivery_image(
     id: DeliveryId, context: Reader, session: Database
 ) -> Response:
-    """Stored JPEG for staff/supervisor of the delivery's SME."""
+    """Return the stored JPEG to staff or supervisors of the SME."""
     return jpeg_response(services.delivery_photo(session, context, id))
 
 
@@ -436,7 +433,7 @@ def delivery_image(
 def certificate_image(
     id: CertificateId, context: PhotoReader, session: Database
 ) -> Response:
-    """Stored JPEG for the owning supplier or a staff/supervisor linked SME."""
+    """Return the JPEG to its supplier, a linked SME or a reviewer."""
     return jpeg_response(services.certificate_photo(session, context, id))
 
 

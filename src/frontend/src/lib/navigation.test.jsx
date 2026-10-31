@@ -55,7 +55,7 @@ it("allows cancelling browser Back without losing the supplier draft, then permi
   await screen.findByRole("group", { name: "Choose a demo person" });
   expect(confirm).toHaveBeenCalledTimes(4);
   confirm.mockRestore();
-  // This integration test includes lazy routes, typing and five real traversals.
+  // lazy routes, typing and six history traversals need the longer timeout
 }, 10000);
 
 it("commits an ordinary internal link inside the browser snapshot update", async () => {

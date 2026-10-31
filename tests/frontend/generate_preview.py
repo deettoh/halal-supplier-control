@@ -1,4 +1,4 @@
-"""Build UI snapshots with the team's rules; no browser rules."""
+"""Build UI snapshots with backend.rules."""
 
 import copy
 import hashlib

@@ -1,8 +1,6 @@
-"""SQLAlchemy models and lazy PostgreSQL access for the application tables.
+"""SQLAlchemy models and lazy PostgreSQL access."""
 
-Importing this module never connects or creates tables. Initialise explicitly:
-    uv run --env-file .env python src/backend/db.py
-"""
+# initialise with uv run --env-file .env python src/backend/db.py
 
 import os
 import sys
@@ -41,7 +39,7 @@ from sqlalchemy.orm import (
 )
 from sqlalchemy.schema import CreateColumn
 
-# Serialize schema creation and seeding across simultaneous PostgreSQL workers.
+# serializes schema creation and seeding across PostgreSQL workers
 STARTUP_LOCK = 0x48414C414C4442
 BUSINESS_TIMEZONE = ZoneInfo("Asia/Kuala_Lumpur")
 ACTIVITY_ACTION_CHECK = (
@@ -56,7 +54,7 @@ def utc_now() -> datetime:
 
 
 def business_today() -> date:
-    """Calendar date for certificate rules in Malaysia, independent of host."""
+    """Return today's date in Malaysia for certificate rules."""
     return utc_now().astimezone(BUSINESS_TIMEZONE).date()
 
 
@@ -72,7 +70,7 @@ class Supplier(Base):
 
 
 class SMESettings(Base):
-    """One persisted rule policy per SME, using its existing tenant name."""
+    """Persisted rule policy of one SME tenant."""
 
     __tablename__ = "sme_settings"
     __table_args__ = (
@@ -92,7 +90,7 @@ class SMESettings(Base):
 
 
 class Person(Base):
-    """Fictional demo identities shared with the named-person work."""
+    """Fictional demo identity selected by X-Demo-Person."""
 
     __tablename__ = "people"
     __table_args__ = (
@@ -111,7 +109,7 @@ class Person(Base):
 
 
 class Certificate(Base):
-    """Shared supplier registry; intentionally has no SME tenant column."""
+    """Supplier registry entry shared across SMEs."""
 
     __tablename__ = "certificates"
     __table_args__ = (
@@ -158,7 +156,7 @@ class Certificate(Base):
 
 
 class Material(Base):
-    """SME masterlist entry; coverage is calculated, never stored here."""
+    """SME masterlist entry with coverage computed on read."""
 
     __tablename__ = "materials"
     __table_args__ = (
@@ -274,7 +272,7 @@ class ActivityLog(Base):
     actor: Mapped[str] = mapped_column(String(200))
     role: Mapped[str] = mapped_column(String(30))
     action: Mapped[str] = mapped_column(String(100))
-    # Certificate renewal writes one entry per linked SME without a delivery.
+    # null for certificate events, which have no delivery
     delivery_id: Mapped[int | None] = mapped_column(index=True)
     certificate_id: Mapped[int | None] = mapped_column(
         ForeignKey("certificates.id")
@@ -286,7 +284,7 @@ class ActivityLog(Base):
 
 
 def create_db_engine(database_url: str | None = None) -> Engine:
-    """Use the supplied URL or DATABASE_URL, preserving its SSL options."""
+    """Build an engine from URL or DATABASE_URL and keep SSL options."""
     raw_url = (
         os.environ.get("DATABASE_URL")
         if database_url is None
@@ -311,7 +309,7 @@ def create_db_engine(database_url: str | None = None) -> Engine:
 
 @lru_cache(maxsize=1)
 def get_engine() -> Engine:
-    """One engine per process, created only when first requested."""
+    """Return the process engine and create it on first call."""
     return create_db_engine()
 
 
@@ -321,10 +319,10 @@ def get_session_factory() -> sessionmaker[Session]:
 
 
 def get_db() -> Generator[Session, None, None]:
-    """FastAPI dependency; handlers explicitly commit successful writes.
+    """Yield a session and roll back uncommitted work on close.
 
-    Closing rolls back uncommitted work, including after handler exceptions.
-    Routes still need role and tenant/supplier ownership checks.
+    Yields:
+        Session for one caller.
     """
     with get_session_factory()() as session:
         yield session
@@ -363,8 +361,7 @@ def _upgrade_activity_actions(connection: Connection) -> None:
         return
     activity = qualified_table_name(connection, "activity_log")
     deliveries = qualified_table_name(connection, "deliveries")
-    # A historical check records its original automatic outcome, even when
-    # a supervisor has subsequently changed the delivery's current status.
+    # keep the automatic outcome despite later supervisor changes
     connection.execute(
         text(
             f"UPDATE {activity} AS a SET action = CASE "
@@ -382,8 +379,7 @@ def _upgrade_activity_actions(connection: Connection) -> None:
             text(f"UPDATE {activity} SET action = :new WHERE action = :old"),
             {"new": current, "old": previous},
         )
-    # Unexpected historical values need explicit correction, never deletion
-    # or guessed replacement. Failure rolls the entire upgrade back.
+    # unknown actions need manual correction and abort the upgrade
     invalid = connection.scalar(
         text(
             f"SELECT count(*) FROM {activity} "
@@ -404,7 +400,7 @@ def _upgrade_activity_actions(connection: Connection) -> None:
 
 
 def _upgrade_renewal_review(connection: Connection) -> None:
-    """Narrow, transactional upgrade from the v0.1 PostgreSQL schema."""
+    """Add renewal-review columns and checks to a v0.1 schema."""
     if connection.dialect.name != "postgresql":
         return
     schema = database_schema(connection)
@@ -541,7 +537,7 @@ def _upgrade_identity_hold(connection: Connection) -> None:
 
 
 def _upgrade_expiry_check(connection: Connection) -> None:
-    """Add the request marker, preserving existing certificates and history."""
+    """Add the request marker and keep certificates and history."""
     schema = database_schema(connection)
     present = {
         c["name"]
@@ -659,8 +655,7 @@ def _upgrade_renewal_dedup(connection: Connection) -> None:
 def _initialize_schema(connection: Connection) -> None:
     lock_startup(connection)
     Base.metadata.create_all(connection)
-    # Narrow additive upgrade for databases created before binary storage.
-    # Existing image references/rows are retained; no conversion or reset.
+    # adds image_bytes to databases created before binary storage
     schema = database_schema(connection)
     for table_name in ("certificates", "deliveries"):
         columns = {
@@ -686,10 +681,13 @@ def _initialize_schema(connection: Connection) -> None:
 
 
 def init_db(engine: Engine | Connection | None = None) -> None:
-    """Create tables and apply documented image, audit and renewal upgrades.
+    """Create tables and apply upgrades under the startup lock.
 
-    Upgrades run under the startup lock in one transaction. Other schema
-    changes still require an explicit migration.
+    Args:
+        engine: Engine, open connection or None for the default engine.
+
+    Raises:
+        ValueError: If DATABASE_URL or stored history is invalid.
     """
     target = get_engine() if engine is None else engine
     if isinstance(target, Connection):

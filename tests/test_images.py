@@ -1,4 +1,4 @@
-"""Photo storage encoding preserves source files and useful image detail."""
+"""Check JPEG resolution, transparency, orientation and bad input."""
 
 import io
 

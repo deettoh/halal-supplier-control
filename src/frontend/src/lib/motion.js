@@ -27,7 +27,7 @@ export function transitionUpdate(update) {
     activeTransition?.skipTransition?.();
     const transition = document.startViewTransition(commit);
     activeTransition = transition;
-    // Rapid navigation can skip a snapshot. The update still runs exactly once.
+    // rapid navigation can skip a snapshot and the latest update runs once
     transition.ready?.catch(() => {});
     transition.updateCallbackDone?.catch(() => {});
     const clear = () => {

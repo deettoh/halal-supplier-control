@@ -1,4 +1,4 @@
-"""Prepared UI examples must remain compatible with the real backend."""
+"""Check prepared UI examples against backend schemas and rules."""
 
 import hashlib
 import json
@@ -75,8 +75,6 @@ def test_renewal_snapshots_cover_both_buyers_without_browser_rules() -> None:
             for m in data["materials"]["10"][tenant]
         )
     for activity in data["initial_activity"]["Sunrise Bakery SAMPLE"]:
-        # Named log enrichment is the explicitly labelled v0.2 preview target;
-        # validate its existing fields against today's strict backend model.
         target_fields = {
             "actor_title",
             "material_name",

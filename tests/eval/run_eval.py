@@ -1,4 +1,4 @@
-"""Score saved predictions; never load credentials or call the model."""
+"""Score saved predictions without credentials or model calls."""
 
 import argparse
 import hashlib
@@ -10,7 +10,7 @@ from typing import Any
 
 from pydantic import TypeAdapter, ValidationError
 
-# Support direct execution from the repository without installing its sources.
+# support direct execution without installing the sources
 sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "src"))
 from backend.schemas import (
     DeliveryStatus,
@@ -39,7 +39,7 @@ def metric(correct: int | None, total: int | None) -> dict[str, Any]:
 
 
 def normalized(value: str) -> str:
-    """Preserve punctuation/digits while normalizing Unicode and whitespace."""
+    """Return NFC casefolded text with collapsed whitespace."""
     return " ".join(unicodedata.normalize("NFC", value).casefold().split())
 
 

@@ -119,8 +119,7 @@ function ConsoleModel({
     const layout = layoutRef.current;
     if (pose.heading > 0 && layout.heading) {
       const space = sceneSpace(layout, pose);
-      // Perspective changes the apparent bounds of each tray. Resolve against
-      // their projected corners, so copy and controls never share their space.
+      // fit to projected corners because perspective changes tray bounds
       for (let pass = 0; pass < 3; pass++) {
         const fit = fitSceneBounds(bounds(), space);
         root.current.scale.multiplyScalar(1 + (fit.scale - 1) * pose.heading);

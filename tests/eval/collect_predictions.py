@@ -132,7 +132,7 @@ def main() -> None:
     parser.add_argument("--output", type=Path, required=True)
     args = parser.parse_args()
     expected = ExpectedResults.model_validate_json(args.expected.read_bytes())
-    # Reserve the output before paid requests; never overwrite a run.
+    # fail before paid requests if the output file already exists
     args.output.parent.mkdir(parents=True, exist_ok=True)
     code_paths = [
         "src/backend/extract.py",

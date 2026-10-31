@@ -1,4 +1,4 @@
-"""The destructive reset is explicit, manual and has no startup/API hook."""
+"""Check demo reset CLI confirmation, counts and error reporting."""
 
 from pathlib import Path
 

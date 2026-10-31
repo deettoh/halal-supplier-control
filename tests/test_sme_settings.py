@@ -1,4 +1,4 @@
-"""Persisted tenant policies affect live checks without changing other SMEs."""
+"""Check that a persisted policy affects only its own tenant."""
 
 from datetime import timedelta
 from pathlib import Path
@@ -153,8 +153,7 @@ def test_delivery_and_masterlist_use_database_policy_for_each_sme(
         )
         assert response.status_code == 201
         assert response.json()["verdict"] == verdict
-    # A later read uses the edited database policy; it is not cached or
-    # reloaded from seed. Existing delivery verdict snapshots stay unchanged.
+    # the materials read uses the edited database policy
     with Session(api_engine) as session:
         saved = list(
             session.scalars(select(db.Delivery).order_by(db.Delivery.id))

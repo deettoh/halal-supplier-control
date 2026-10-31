@@ -16,7 +16,7 @@ def digest(path: Path) -> str:
 
 
 def latency(values: list[float]) -> dict[str, Any]:
-    """Summarize seconds; p95 uses nearest rank."""
+    """Summarize seconds with a nearest-rank p95."""
     if not values:
         return {
             "count": 0,
@@ -36,7 +36,7 @@ def latency(values: list[float]) -> dict[str, Any]:
 
 
 def combine(expected_path: Path, paths: list[Path]) -> dict[str, Any]:
-    """Validate provenance; count failed attempts as incorrect."""
+    """Validate provenance and count failed attempts as incorrect."""
     if len(paths) != 3 or len({p.resolve() for p in paths}) != 3:
         raise ValueError("Provide three distinct prediction paths")
     expected = read_document(expected_path)

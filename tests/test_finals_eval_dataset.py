@@ -32,8 +32,7 @@ def test_final_targets_preserve_the_pre_generation_plan() -> None:
     )
     assert len(final["cases"]) == len(planned["cases"]) == 24
     for case, original in zip(final["cases"], planned["cases"], strict=True):
-        # ef451fd: user revised four absent-mark targets after the first
-        # experiment. Preserve the original plan and permit only this delta.
+        # only permitted delta is ef451fd's null L25-L28 mark targets
         if case["case_id"] in {"L25", "L26", "L27", "L28"}:
             original["proposed_expected_extraction"]["halal_mark_present"] = (
                 None

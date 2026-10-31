@@ -1,9 +1,6 @@
-"""Explicitly replace demo records from seed JSON; never called at startup.
+"""Replace demo records from seed JSON on explicit request."""
 
-Stop the application before running from the repository root:
-    uv run --directory src --env-file ../.env python -m backend.reset_demo \
-        --confirm-reset-demo
-"""
+# run from the repo root with the application stopped
 
 import argparse
 import sys
@@ -21,10 +18,17 @@ from backend.seed import DEFAULT_SEED_PATH, load_seed, seed_empty_tables
 def reset_demo_database(
     engine: Engine | None = None, seed_path: Path = DEFAULT_SEED_PATH
 ) -> dict[str, int]:
-    """Replace application data atomically, retaining schema and ID sequences.
+    """Replace all demo data with seed rows in one transaction.
 
-    Call only while the application is stopped. Caller must explicitly intend
-    to discard existing uploads, renewals, decisions and audit history.
+    Args:
+        engine: Target engine or None for the default engine.
+        seed_path: Seed JSON file.
+
+    Returns:
+        Inserted row counts by table.
+
+    Raises:
+        ValueError: If the seed file is missing or lacks required rows.
     """
     seed = load_seed(seed_path)
     if seed is None:
