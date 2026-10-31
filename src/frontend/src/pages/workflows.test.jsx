@@ -35,6 +35,49 @@ async function materialAndPhoto(user) {
     new File(["bytes"], "label.png", { type: "image/png" }),
   );
 }
+it("offers a file picker without forcing the camera, alongside a camera input", async () => {
+  const user = userEvent.setup();
+  wrap(<CheckDelivery />);
+  const upload = await screen.findByLabelText("Label photo");
+  expect(upload).not.toHaveAttribute("capture");
+  const camera = screen.getByLabelText("Take photo");
+  expect(camera).toHaveAttribute("capture", "environment");
+  expect(upload).toBeDisabled();
+  expect(camera).toBeDisabled();
+  await materialAndPhoto(user);
+  expect(upload).toBeEnabled();
+  expect(camera).toBeEnabled();
+  const captured = new File(["camera bytes"], "camera.jpg", {
+    type: "image/jpeg",
+  });
+  await user.upload(camera, captured);
+  expect(screen.getByText("camera.jpg")).toBeInTheDocument();
+  await user.click(screen.getByRole("button", { name: "Remove photo" }));
+  await user.upload(camera, captured);
+  expect(screen.getByText("camera.jpg")).toBeInTheDocument();
+});
+it.each(["Label photo", "Take photo"])(
+  "submits the original JPEG selected through %s without auto-submitting",
+  async (source) => {
+    const user = userEvent.setup();
+    const createDelivery = vi.fn(async () =>
+      data.cases.find((entry) => entry.id === "covered").responses["6"],
+    );
+    wrap(<CheckDelivery />, { ...createPreviewGateway(), createDelivery });
+    await materialAndPhoto(user);
+    const image = new File(["original JPEG bytes"], "existing-label.jpg", {
+      type: "image/jpeg",
+    });
+    await user.upload(screen.getByLabelText(source), image);
+    expect(createDelivery).not.toHaveBeenCalled();
+    await user.click(
+      screen.getByRole("button", { name: "Check delivery", exact: true }),
+    );
+    await waitFor(() => expect(createDelivery).toHaveBeenCalledOnce());
+    expect(createDelivery.mock.calls[0][1]).toEqual({ material_id: 6, image });
+    expect(createDelivery.mock.calls[0][1].image).toBe(image);
+  },
+);
 it("blocks the previous photo after an unsupported replacement selection", async () => {
   const user = userEvent.setup({ applyAccept: false });
   wrap(<CheckDelivery />);
