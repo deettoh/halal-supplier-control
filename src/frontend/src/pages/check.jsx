@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
-import { Camera, ArrowRight, RotateCcw } from "lucide-react";
+import { Camera, Upload, ArrowRight, RotateCcw } from "lucide-react";
 import { useSession, useDraft } from "../lib/session.jsx";
 import { useRecord, useScopedMutation } from "../lib/api/hooks.js";
 import { previewCases } from "../lib/preview/gateway.js";
@@ -50,6 +50,11 @@ export default function CheckDelivery() {
     setInputError(null);
     setImage(file);
   }
+  function selectPhoto(event) {
+    chooseFile(event.currentTarget.files?.[0]);
+    // Permit selecting the same photo again after removal or validation failure.
+    event.currentTarget.value = "";
+  }
   async function prepared(example) {
     setPreparing(true);
     try {
@@ -87,7 +92,7 @@ export default function CheckDelivery() {
     <div className="page check-page">
       <div className="page-intro">
         <h1>Check a delivery</h1>
-        <p>Choose the material, then photograph its label.</p>
+        <p>Choose the material, then take or upload a label photo.</p>
       </div>
       {result ? (
         <section className="delivery-result confirmed-receipt">
@@ -169,7 +174,7 @@ export default function CheckDelivery() {
               )}
             </section>
             <section className="photo-step">
-              <h2>Photograph the label</h2>
+              <h2>Add a label photo</h2>
               <p className="muted">
                 Keep the product name, brand and manufacturer readable.
               </p>
@@ -178,23 +183,47 @@ export default function CheckDelivery() {
                   <Camera size={20} aria-hidden="true" />
                   Label photo
                 </label>
-                <input
-                  ref={fileInput}
-                  className="photo-file-control"
-                  id="label-photo-input"
-                  type="file"
-                  accept="image/png,image/jpeg"
-                  capture="environment"
-                  disabled={!selected || busy}
-                  onChange={(e) => chooseFile(e.target.files?.[0])}
-                />
-                <label
-                  className="button quiet photo-file-button"
-                  htmlFor="label-photo-input"
-                  aria-hidden="true"
-                >
-                  {image ? "Replace photo" : "Choose photo"}
-                </label>
+                <div className="photo-source-actions">
+                  <div className="photo-picker">
+                    <input
+                      className="photo-file-control"
+                      id="label-camera-input"
+                      aria-label="Take photo"
+                      type="file"
+                      accept="image/png,image/jpeg"
+                      capture="environment"
+                      disabled={!selected || busy}
+                      onChange={selectPhoto}
+                    />
+                    <label
+                      className="button quiet photo-file-button"
+                      htmlFor="label-camera-input"
+                      aria-hidden="true"
+                    >
+                      <Camera size={18} aria-hidden="true" />
+                      Take photo
+                    </label>
+                  </div>
+                  <div className="photo-picker">
+                    <input
+                      ref={fileInput}
+                      className="photo-file-control"
+                      id="label-photo-input"
+                      type="file"
+                      accept="image/png,image/jpeg"
+                      disabled={!selected || busy}
+                      onChange={selectPhoto}
+                    />
+                    <label
+                      className="button quiet photo-file-button"
+                      htmlFor="label-photo-input"
+                      aria-hidden="true"
+                    >
+                      <Upload size={18} aria-hidden="true" />
+                      Upload photo
+                    </label>
+                  </div>
+                </div>
                 <small>
                   PNG or JPEG, up to 10 MiB. Your original file is submitted.
                 </small>

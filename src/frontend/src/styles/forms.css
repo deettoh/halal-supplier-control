@@ -104,10 +104,20 @@
 .photo-input input {
   width: 100%;
 }
+.photo-source-actions {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 160px), 1fr));
+  gap: 12px;
+  margin-block: 8px;
+}
+.photo-picker {
+  position: relative;
+  min-width: 0;
+}
 .photo-input .photo-file-control {
   position: absolute;
-  top: 32px;
-  height: 46px;
+  inset: 0;
+  height: 100%;
   opacity: 0;
   z-index: 1;
   cursor: pointer;
@@ -121,7 +131,9 @@
 }
 .photo-input .photo-file-button {
   justify-content: center;
+  gap: 8px;
   min-height: 46px;
+  padding-inline: 10px;
   margin: 0;
 }
 .receipt-reference {
