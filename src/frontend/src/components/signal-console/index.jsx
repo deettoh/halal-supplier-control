@@ -36,7 +36,7 @@ export default function LandingScene({ apiRef }) {
     layoutRef = useRef({}),
     engaged = useRef(false);
   const [stage, setStage] = useState(0),
-    [field, setField] = useState("brand"),
+    [field, setField] = useState("manufacturer"),
     [rule, setRule] = useState("R2"),
     [held, setHeld] = useState(false);
   const [less, setLess] = useState(mediaReduced);
@@ -195,17 +195,19 @@ export default function LandingScene({ apiRef }) {
         >
           <div className="decision-person">
             <span className="avatar" aria-hidden="true">
-              F
+              R
             </span>
             <div>
               <strong>The next step is human</strong>
-              <span>Farid · Halal supervisor · Sunrise Bakery SAMPLE</span>
+              <span>Ravi · Halal supervisor · Crescent Caterer SAMPLE</span>
             </div>
           </div>
           <div className="decision-detail">
             <span className="decision-tag">Illustrative decision</span>
-            <strong>Different brand. Request product details.</strong>
-            <span>Reason: brand differs from the approved material.</span>
+            <strong>Different manufacturer. Request product details.</strong>
+            <span>
+              Reason: manufacturer differs from the approved material.
+            </span>
           </div>
           <button
             type="button"

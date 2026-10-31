@@ -17,17 +17,17 @@ it("keeps the evidence readable without WebGL and lets visitors compare each ret
   const user = userEvent.setup();
   open();
   await user.click(
-    screen.getByRole("button", { name: /Product.*Cocoa Powder/ }),
+    screen.getByRole("button", { name: /Product.*Wheat Flour/ }),
   );
   expect(
-    screen.getByRole("button", { name: /Product.*Cocoa Powder/ }),
+    screen.getByRole("button", { name: /Product.*Wheat Flour/ }),
   ).toHaveAttribute("aria-pressed", "true");
   expect(screen.getByText("Approved product")).toBeVisible();
   expect(
     screen.getByText(/Landing illustrations use prepared SAMPLE data/),
   ).toBeVisible();
   await user.click(
-    screen.getByRole("button", { name: /Manufacturer.*Silver Valley Foods/ }),
+    screen.getByRole("button", { name: /Manufacturer.*Meadow Forge Foods/ }),
   );
   expect(screen.getByText("Approved manufacturer")).toBeVisible();
   expect(screen.getByRole("heading", { name: "The checks" })).toBeVisible();
