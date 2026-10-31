@@ -116,7 +116,8 @@ it("submits the original photo and treats saved extraction failure as a saved re
       return new Response(JSON.stringify(data.materials["00"][staff.tenant]));
     submitted = init.body.get("image");
     const saved = {
-      ...data.deliveries[staff.tenant][1],
+      ...data.cases.find((c) => c.id === "partial").responses["6"],
+      id: 104,
       extracted: null,
       error: "The label could not be read.",
     };

@@ -127,6 +127,33 @@ def generate() -> dict[str, Any]:
             True,
             "Expiring flour record",
         ),
+        (
+            "alt-brand-flour",
+            "label-alt-brand-flour.jpg",
+            "HarvestStone",
+            "Wheat Flour",
+            "Golden Grain Foods",
+            True,
+            "Changed flour brand",
+        ),
+        (
+            "alt-manufacturer",
+            "label-alt-manufacturer.jpg",
+            "GoldenMill",
+            "Wheat Flour",
+            "Meadow Forge Foods",
+            True,
+            "Changed flour manufacturer",
+        ),
+        (
+            "absent-mark",
+            "label-absent-mark.jpg",
+            "GoldenMill",
+            "Wheat Flour",
+            "Golden Grain Foods",
+            None,
+            "Flour without a halal mark",
+        ),
     ]:
         image = "/media/" + filename
         content = (
@@ -178,15 +205,16 @@ def generate() -> dict[str, Any]:
             }
         )
     tenant = "Sunrise Bakery SAMPLE"
-    alt = copy.deepcopy(cases[0]["responses"]["6"])
+    by_id = {c["id"]: c for c in cases}
+    alt = copy.deepcopy(by_id["alt-brand-flour"]["responses"]["1"])
     alt["id"] = 102
-    partial = copy.deepcopy(cases[2]["responses"]["6"])
-    partial.update(id=104, created_at="2026-10-22T10:34:00+08:00")
+    absent = copy.deepcopy(by_id["absent-mark"]["responses"]["1"])
+    absent.update(id=104, created_at="2026-10-22T10:34:00+08:00")
     initial_activity: dict[str, list[dict[str, Any]]] = {
         tenant: [],
         "Crescent Caterer SAMPLE": [],
     }
-    for d in [alt, partial]:
+    for d in [alt, absent]:
         initial_activity[tenant].append(
             ActivityResponse(
                 id=d["id"],
@@ -227,7 +255,7 @@ def generate() -> dict[str, Any]:
         "cases": cases,
         "source_materials": materials,
         "source_certificates": active,
-        "deliveries": {tenant: [alt, partial], "Crescent Caterer SAMPLE": []},
+        "deliveries": {tenant: [alt, absent], "Crescent Caterer SAMPLE": []},
         "initial_activity": initial_activity,
     }
 
