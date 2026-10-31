@@ -47,7 +47,7 @@ BUSINESS_TIMEZONE = ZoneInfo("Asia/Kuala_Lumpur")
 ACTIVITY_ACTION_CHECK = (
     "action IN ('auto_accepted', 'pending_review', 'accepted', "
     "'rejected', 'certificate_renewed', 'certificate_submitted', "
-    "'certificate_rejected', 'on_hold')"
+    "'certificate_rejected', 'on_hold', 'renewal_requested')"
 )
 
 
@@ -151,6 +151,7 @@ class Certificate(Base):
     status: Mapped[str] = mapped_column(String(20), default="active")
     review_note: Mapped[str | None] = mapped_column(Text)
     reviewed_by: Mapped[str | None] = mapped_column(String(200))
+    renewal_requested_on: Mapped[date | None] = mapped_column(Date)
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), default=utc_now
     )
@@ -250,6 +251,18 @@ class ActivityLog(Base):
             name="ck_activity_role",
         ),
         Index("ix_activity_tenant_created_at", "tenant", "created_at"),
+        Index(
+            "uq_activity_renewal_tenant_certificate",
+            "tenant",
+            "certificate_id",
+            unique=True,
+            postgresql_where=text(
+                "action = 'renewal_requested' AND certificate_id IS NOT NULL"
+            ),
+            sqlite_where=text(
+                "action = 'renewal_requested' AND certificate_id IS NOT NULL"
+            ),
+        ),
     )
 
     id: Mapped[int] = mapped_column(primary_key=True)
@@ -263,6 +276,9 @@ class ActivityLog(Base):
     action: Mapped[str] = mapped_column(String(100))
     # Certificate renewal writes one entry per linked SME without a delivery.
     delivery_id: Mapped[int | None] = mapped_column(index=True)
+    certificate_id: Mapped[int | None] = mapped_column(
+        ForeignKey("certificates.id")
+    )
     reason: Mapped[str | None] = mapped_column(Text)
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), default=utc_now
@@ -524,6 +540,122 @@ def _upgrade_identity_hold(connection: Connection) -> None:
         )
 
 
+def _upgrade_expiry_check(connection: Connection) -> None:
+    """Add the request marker, preserving existing certificates and history."""
+    schema = database_schema(connection)
+    present = {
+        c["name"]
+        for c in inspect(connection).get_columns("certificates", schema)
+    }
+    if "renewal_requested_on" not in present:
+        table = qualified_table_name(connection, "certificates")
+        definition = str(
+            CreateColumn(
+                Base.metadata.tables["certificates"].c.renewal_requested_on
+            ).compile(dialect=connection.dialect)
+        )
+        connection.execute(
+            text(f"ALTER TABLE {table} ADD COLUMN {definition}")
+        )
+    if connection.dialect.name != "postgresql":
+        return
+    existing = next(
+        (
+            c
+            for c in inspect(connection).get_check_constraints(
+                "activity_log", schema
+            )
+            if c["name"] == "ck_activity_action"
+        ),
+        None,
+    )
+    if existing is not None and "renewal_requested" in existing["sqltext"]:
+        return
+    table = qualified_table_name(connection, "activity_log")
+    if existing is not None:
+        connection.execute(
+            text(f"ALTER TABLE {table} DROP CONSTRAINT ck_activity_action")
+        )
+    connection.execute(
+        text(
+            f"ALTER TABLE {table} ADD CONSTRAINT ck_activity_action "
+            f"CHECK ({ACTIVITY_ACTION_CHECK})"
+        )
+    )
+
+
+def _upgrade_renewal_dedup(connection: Connection) -> None:
+    """Link expiry requests to certificates without guessing identity."""
+    schema = database_schema(connection)
+    present = {
+        c["name"]
+        for c in inspect(connection).get_columns("activity_log", schema)
+    }
+    if "certificate_id" not in present:
+        activity_name = qualified_table_name(connection, "activity_log")
+        certificate_name = qualified_table_name(connection, "certificates")
+        connection.execute(
+            text(
+                f"ALTER TABLE {activity_name} ADD COLUMN "
+                "certificate_id INTEGER "
+                f"REFERENCES {certificate_name}(id)"
+            )
+        )
+    activity = Base.metadata.tables["activity_log"]
+    certificates = Base.metadata.tables["certificates"]
+    suppliers = Base.metadata.tables["suppliers"]
+    legacy = list(
+        connection.execute(
+            activity.select()
+            .with_only_columns(
+                activity.c.id, activity.c.supplier_name, activity.c.reason
+            )
+            .where(
+                activity.c.action == "renewal_requested",
+                activity.c.certificate_id.is_(None),
+            )
+        ).mappings()
+    )
+    if legacy:
+        candidates: dict[tuple[str, str], list[int]] = {}
+        rows = connection.execute(
+            certificates.select()
+            .with_only_columns(
+                certificates.c.id,
+                certificates.c.cert_no,
+                certificates.c.expiry_date,
+                suppliers.c.name,
+            )
+            .join(suppliers, suppliers.c.id == certificates.c.supplier_id)
+            .where(certificates.c.renewal_requested_on.is_not(None))
+        ).mappings()
+        for row in rows:
+            reason = (
+                f"Renewal requested for certificate {row['cert_no']}; "
+                f"expiry {row['expiry_date'].isoformat()}."
+            )
+            candidates.setdefault((row["name"], reason), []).append(row["id"])
+        for row in legacy:
+            matches = candidates.get((row["supplier_name"], row["reason"]), [])
+            if len(matches) != 1:
+                raise ValueError(
+                    "Historical renewal request needs an explicit "
+                    "certificate_id; "
+                    "automatic association was not unambiguous"
+                )
+            connection.execute(
+                activity.update()
+                .where(activity.c.id == row["id"])
+                .values(certificate_id=matches[0])
+            )
+    index = next(
+        i
+        for i in activity.indexes
+        if i.name == "uq_activity_renewal_tenant_certificate"
+    )
+    index.create(connection, checkfirst=True)
+
+
 def _initialize_schema(connection: Connection) -> None:
     lock_startup(connection)
     Base.metadata.create_all(connection)
@@ -549,6 +681,8 @@ def _initialize_schema(connection: Connection) -> None:
     _upgrade_activity_actions(connection)
     _upgrade_renewal_review(connection)
     _upgrade_identity_hold(connection)
+    _upgrade_expiry_check(connection)
+    _upgrade_renewal_dedup(connection)
 
 
 def init_db(engine: Engine | Connection | None = None) -> None:

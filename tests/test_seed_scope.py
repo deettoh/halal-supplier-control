@@ -14,6 +14,12 @@ from backend.seed import SeedData
 SEED_PATH = Path(__file__).parents[1] / "src" / "seed" / "seed.json"
 
 
+def test_seed_does_not_invent_workflow_history() -> None:
+    seed = SeedData.model_validate_json(SEED_PATH.read_text())
+    assert seed.deliveries == []
+    assert seed.activity_log == []
+
+
 def test_seed_certificates_follow_api_schema() -> None:
     seed = SeedData.model_validate_json(SEED_PATH.read_text())
     for certificate in seed.certificates:

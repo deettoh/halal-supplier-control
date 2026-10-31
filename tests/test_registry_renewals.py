@@ -108,10 +108,15 @@ def test_reviewer_decision_updates_coverage_and_named_logs(
                 "certificate_renewed"
                 if decision == "verify"
                 else "certificate_rejected",
-                "Checked documents",
+                "Certificate SAMPLE-RENEWAL: Checked documents",
             ),
-            ("Hakim", "certificate_submitted", None),
+            (
+                "Hakim",
+                "certificate_submitted",
+                "Certificate SAMPLE-RENEWAL submitted for review.",
+            ),
         ]
+        assert all(renewal["cert_no"] in event["reason"] for event in events)
     assert (
         api_client.get("/api/registry/renewals", headers=REVIEWER).json() == []
     )

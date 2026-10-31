@@ -30,6 +30,7 @@ from starlette.types import Scope
 from backend import db, services
 from backend.db import dispose_db, get_session_factory
 from backend.schemas import (
+    CONTRACT_VERSION,
     ActivityResponse,
     CertificateCreateRequest,
     CertificateExtractRequest,
@@ -42,6 +43,7 @@ from backend.schemas import (
     DemoContext,
     DemoRole,
     ErrorResponse,
+    ExpiryCheckResponse,
     HealthResponse,
     MaterialResponse,
     NamedDemoContext,
@@ -85,7 +87,7 @@ async def lifespan(application: FastAPI) -> AsyncIterator[None]:
 app = FastAPI(
     lifespan=lifespan,
     title="Halal Supplier Control",
-    version="0.1.0",
+    version=CONTRACT_VERSION,
     description=(
         "Reports document coverage only, never a halal ruling. Demo headers "
         "simulate identity. Certificate extraction is a stretch feature."
@@ -327,6 +329,19 @@ def list_renewals(
 ) -> list[RenewalResponse]:
     """Pending renewals, oldest first, next to the active certificate."""
     return services.pending_renewals(session)
+
+
+@app.post(
+    "/api/registry/expiry-check",
+    response_model=ExpiryCheckResponse,
+    responses=ERRORS,
+    tags=["Registry"],
+)
+def run_expiry_check(
+    context: Reviewer, session: Database
+) -> ExpiryCheckResponse:
+    """Manually request renewal for certificates inside SME warning windows."""
+    return services.expiry_check(session, context)
 
 
 @app.post(

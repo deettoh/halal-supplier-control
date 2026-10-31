@@ -48,6 +48,7 @@ class CertificateSeed(SeedImage):
     expiry_date: date
     scope: list[CertificateScopeItem] = Field(min_length=1)
     status: CertificateStatus = "active"
+    renewal_requested_on: date | None = None
 
     @field_validator("scope", mode="before")
     @classmethod
@@ -131,6 +132,7 @@ class ActivitySeed(APIModel):
     role: DemoRole
     action: ActivityAction
     delivery_id: RecordId | None = None
+    certificate_id: RecordId | None = None
     reason: str | None = None
     created_at: AwareDatetime = Field(default_factory=db.utc_now)
 
