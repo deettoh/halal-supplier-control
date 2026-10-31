@@ -20,6 +20,7 @@ from backend.schemas import (
     DeliveryDecisionRequest,
     DeliveryResponse,
     DemoContext,
+    ExpiryCheckResponse,
     LabelExtraction,
     MaterialResponse,
     NamedDemoContext,
@@ -603,6 +604,76 @@ def pending_renewals(session: Session) -> list[RenewalResponse]:
             )
         )
     return result
+
+
+def expiry_check(
+    session: Session, context: NamedDemoContext
+) -> ExpiryCheckResponse:
+    """Record one supplier request per qualifying, unrequested certificate.
+
+    Each qualifying linked SME gets one activity entry in the same
+    transaction. Certificate row locks prevent concurrent reviewer clicks
+    from duplicating requests on PostgreSQL. No scheduler is installed.
+    """
+    today = db.business_today()
+    certificates = list(
+        session.scalars(
+            select(db.Certificate)
+            .where(db.Certificate.status == "active")
+            .order_by(db.Certificate.id)
+            .with_for_update()
+            .execution_options(populate_existing=True)
+        )
+    )
+    requests_created = 0
+    for certificate in certificates:
+        if certificate.renewal_requested_on is not None:
+            continue
+        days_remaining = (certificate.expiry_date - today).days
+        if days_remaining < 0:
+            continue
+        tenants = session.scalars(
+            select(db.Material.tenant)
+            .where(db.Material.supplier_id == certificate.supplier_id)
+            .distinct()
+            .order_by(db.Material.tenant)
+        )
+        qualifying = [
+            tenant
+            for tenant in tenants
+            if days_remaining
+            <= rule_settings(session, tenant).expiry_warning_days
+        ]
+        if not qualifying:
+            continue
+        supplier = session.get(db.Supplier, certificate.supplier_id)
+        assert supplier is not None
+        for tenant in qualifying:
+            session.add(
+                db.ActivityLog(
+                    tenant=tenant,
+                    actor=context.name,
+                    actor_title=context.title,
+                    role=context.role,
+                    action="renewal_requested",
+                    supplier_name=supplier.name,
+                    material_name=None,
+                    verdict=None,
+                    delivery_id=None,
+                    reason=(
+                        "Renewal requested for certificate "
+                        f"{certificate.cert_no}; "
+                        f"expiry {certificate.expiry_date.isoformat()}."
+                    ),
+                )
+            )
+        certificate.renewal_requested_on = today
+        requests_created += 1
+    session.commit()
+    return ExpiryCheckResponse(
+        certificates_checked=len(certificates),
+        requests_created=requests_created,
+    )
 
 
 def decide_renewal(

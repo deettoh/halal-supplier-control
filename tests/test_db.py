@@ -256,6 +256,7 @@ def test_renewal_log_can_have_no_delivery(session: Session) -> None:
         "accepted",
         "rejected",
         "certificate_renewed",
+        "renewal_requested",
         "invented",
         "cert_renewed",
         "delivery_checked",

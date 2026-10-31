@@ -47,7 +47,7 @@ BUSINESS_TIMEZONE = ZoneInfo("Asia/Kuala_Lumpur")
 ACTIVITY_ACTION_CHECK = (
     "action IN ('auto_accepted', 'pending_review', 'accepted', "
     "'rejected', 'certificate_renewed', 'certificate_submitted', "
-    "'certificate_rejected', 'on_hold')"
+    "'certificate_rejected', 'on_hold', 'renewal_requested')"
 )
 
 
@@ -151,6 +151,7 @@ class Certificate(Base):
     status: Mapped[str] = mapped_column(String(20), default="active")
     review_note: Mapped[str | None] = mapped_column(Text)
     reviewed_by: Mapped[str | None] = mapped_column(String(200))
+    renewal_requested_on: Mapped[date | None] = mapped_column(Date)
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), default=utc_now
     )
@@ -524,6 +525,50 @@ def _upgrade_identity_hold(connection: Connection) -> None:
         )
 
 
+def _upgrade_expiry_check(connection: Connection) -> None:
+    """Add the request marker, preserving existing certificates and history."""
+    schema = database_schema(connection)
+    present = {
+        c["name"]
+        for c in inspect(connection).get_columns("certificates", schema)
+    }
+    if "renewal_requested_on" not in present:
+        table = qualified_table_name(connection, "certificates")
+        definition = str(
+            CreateColumn(
+                Base.metadata.tables["certificates"].c.renewal_requested_on
+            ).compile(dialect=connection.dialect)
+        )
+        connection.execute(
+            text(f"ALTER TABLE {table} ADD COLUMN {definition}")
+        )
+    if connection.dialect.name != "postgresql":
+        return
+    existing = next(
+        (
+            c
+            for c in inspect(connection).get_check_constraints(
+                "activity_log", schema
+            )
+            if c["name"] == "ck_activity_action"
+        ),
+        None,
+    )
+    if existing is not None and "renewal_requested" in existing["sqltext"]:
+        return
+    table = qualified_table_name(connection, "activity_log")
+    if existing is not None:
+        connection.execute(
+            text(f"ALTER TABLE {table} DROP CONSTRAINT ck_activity_action")
+        )
+    connection.execute(
+        text(
+            f"ALTER TABLE {table} ADD CONSTRAINT ck_activity_action "
+            f"CHECK ({ACTIVITY_ACTION_CHECK})"
+        )
+    )
+
+
 def _initialize_schema(connection: Connection) -> None:
     lock_startup(connection)
     Base.metadata.create_all(connection)
@@ -549,6 +594,7 @@ def _initialize_schema(connection: Connection) -> None:
     _upgrade_activity_actions(connection)
     _upgrade_renewal_review(connection)
     _upgrade_identity_hold(connection)
+    _upgrade_expiry_check(connection)
 
 
 def init_db(engine: Engine | Connection | None = None) -> None:

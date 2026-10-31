@@ -73,6 +73,13 @@ With `DATABASE_URL` set, the app does this before serving requests:
 3. Fills missing certificate photos from the seed PNGs and converts any
    stored PNG photos to JPEG.
 
+The manual expiry-check upgrade also adds nullable
+`certificates.renewal_requested_on` and widens PostgreSQL's activity-action
+constraint to allow `renewal_requested`, without resetting existing data.
+The request date and each qualifying SME's activity entry are saved in one
+transaction. The certificate status does not change. Existing requests are
+skipped, including when another linked SME's window starts later.
+
 Startup holds a PostgreSQL advisory lock, so parallel workers don't seed
 twice. On any error, startup rolls the whole attempt back and stops with a
 message that has no credentials or seed contents.

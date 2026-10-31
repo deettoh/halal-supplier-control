@@ -12,7 +12,7 @@ export function createLiveGateway(options) {
       request(path, { context, roles, signal });
   return {
     mode: "live",
-    capabilities: { hold: false, expiry: false, certificateExtract: false },
+    capabilities: { hold: false, expiry: true, certificateExtract: false },
     listPeople: (options) => requestPublic("/api/people", options),
     readHealth: (options) => requestPublic("/api/health", options),
     listMaterials: read("/api/materials", ["staff", "supervisor"]),
@@ -25,10 +25,12 @@ export function createLiveGateway(options) {
         "Held deliveries are not available from the connected backend yet.",
       );
     },
-    async runExpiryCheck() {
-      throw new UnsupportedCapabilityError(
-        "Expiry checks are not available from the connected backend yet.",
-      );
+    runExpiryCheck(context) {
+      return request("/api/registry/expiry-check", {
+        context,
+        roles: ["reviewer"],
+        method: "POST",
+      });
     },
     decideRenewal(context, id, input) {
       if (!Number.isInteger(id) || id <= 0)

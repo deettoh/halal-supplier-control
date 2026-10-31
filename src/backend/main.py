@@ -42,6 +42,7 @@ from backend.schemas import (
     DemoContext,
     DemoRole,
     ErrorResponse,
+    ExpiryCheckResponse,
     HealthResponse,
     MaterialResponse,
     NamedDemoContext,
@@ -327,6 +328,19 @@ def list_renewals(
 ) -> list[RenewalResponse]:
     """Pending renewals, oldest first, next to the active certificate."""
     return services.pending_renewals(session)
+
+
+@app.post(
+    "/api/registry/expiry-check",
+    response_model=ExpiryCheckResponse,
+    responses=ERRORS,
+    tags=["Registry"],
+)
+def run_expiry_check(
+    context: Reviewer, session: Database
+) -> ExpiryCheckResponse:
+    """Manually request renewal for certificates inside SME warning windows."""
+    return services.expiry_check(session, context)
 
 
 @app.post(

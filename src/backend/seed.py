@@ -48,6 +48,7 @@ class CertificateSeed(SeedImage):
     expiry_date: date
     scope: list[CertificateScopeItem] = Field(min_length=1)
     status: CertificateStatus = "active"
+    renewal_requested_on: date | None = None
 
     @field_validator("scope", mode="before")
     @classmethod

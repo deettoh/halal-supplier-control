@@ -41,6 +41,7 @@ ActivityAction = Literal[
     "certificate_submitted",
     "certificate_rejected",
     "on_hold",
+    "renewal_requested",
 ]
 RuleName = Literal["R1", "R2", "R3", "R4", "R5", "R6"]
 RULE_ORDER: tuple[RuleName, ...] = get_args(RuleName)
@@ -223,6 +224,12 @@ class CertificateResponse(APIModel):
     status: CertificateStatus
     review_note: str | None = None
     reviewed_by: str | None = None
+    renewal_requested_on: date | None = None
+
+
+class ExpiryCheckResponse(APIModel):
+    certificates_checked: int = Field(ge=0)
+    requests_created: int = Field(ge=0)
 
 
 class RenewalResponse(APIModel):

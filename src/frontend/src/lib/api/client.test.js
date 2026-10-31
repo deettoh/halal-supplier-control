@@ -20,6 +20,32 @@ function transport(body, status = 200) {
 }
 
 describe("canonical live transport", () => {
+  it("runs the reviewer expiry check with identity headers and no body", async () => {
+    const fetchImpl = transport({
+      certificates_checked: 2,
+      requests_created: 0,
+    });
+    const gateway = createLiveGateway({
+      fetchImpl,
+      baseUrl: "https://api.example.test",
+    });
+    expect(gateway.capabilities.expiry).toBe(true);
+    await expect(gateway.runExpiryCheck(person(7))).resolves.toEqual({
+      certificates_checked: 2,
+      requests_created: 0,
+    });
+    const [url, init] = fetchImpl.mock.calls[0];
+    expect(url).toBe("https://api.example.test/api/registry/expiry-check");
+    expect(init.method).toBe("POST");
+    expect(init.body).toBeUndefined();
+    expect(init.headers.get("X-Demo-Person")).toBe("7");
+    expect(init.headers.get("X-Demo-Role")).toBe("reviewer");
+    expect(init.headers.get("X-Demo-Tenant")).toBe("registry");
+    await expect(gateway.runExpiryCheck(staff)).rejects.toMatchObject({
+      status: 403,
+    });
+    expect(fetchImpl).toHaveBeenCalledTimes(1);
+  });
   it("attaches demo headers to both teammate-confirmed image endpoints", async () => {
     const fetchImpl = vi.fn(
       async () =>

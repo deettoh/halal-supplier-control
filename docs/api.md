@@ -44,6 +44,7 @@ full v0.2 completion.
 | GET | `/api/deliveries/{id}/image` | staff, supervisor | - | 200, JPEG of the SME's delivery photo |
 | GET | `/api/certificates/{id}/image` | staff, supervisor, supplier, reviewer | - | 200, JPEG for the owning supplier, a linked SME or the registry reviewer |
 | GET | `/api/registry/renewals` | reviewer | - | 200, pending renewals, oldest first, each with the current certificate and the supplier name |
+| POST | `/api/registry/expiry-check` | reviewer | - | 200, `certificates_checked` and `requests_created` |
 | POST | `/api/registry/renewals/{id}/decision` | reviewer | JSON `decision` (`verify` or `reject`), nonblank `note` | 200, the updated certificate |
 
 To recount the routes, run `grep -cE '^@app\.(get|post)' src/backend/main.py`.
@@ -153,13 +154,58 @@ await fetch("/api/certificates", {
 
 Issuer and holder name allow 200 characters and the certificate number 100.
 
-## The activity log has seven actions
+## Manual expiry check
+
+`POST /api/registry/expiry-check` is called by the reviewer's existing
+"Run expiry check" button. It requires all three demo identity headers and
+no request body. This demo implementation runs only when clicked: no
+scheduler is installed, overriding the scheduled-execution portion of the
+original v0.2 plan at the user's request.
+
+It reads each active certificate and its linked SMEs' persisted
+`expiry_warning_days`. A certificate qualifies for an SME when its days
+remaining are between zero and that SME's window, inclusive. Certificates
+expiring today qualify; certificates that expired before today are skipped,
+even if their database status is still active. A renewal request does not
+make a certificate valid or change its coverage.
+
+The response is, for example:
+
+```json
+{"certificates_checked": 2, "requests_created": 1}
+```
+
+`certificates_checked` counts active certificates examined, including those
+already requested or outside the windows. `requests_created` counts shared
+certificate requests, not SME activity rows: one certificate qualifying for
+two SMEs creates one request and two log entries. Multiple materials within
+the same SME do not create duplicate entries.
+
+All qualifying SMEs receive `renewal_requested` activity rows with the
+reviewer's name/title and supplier name. Material, verdict and delivery ID
+are null; the reason identifies the certificate number and expiry date.
+The certificate's new `renewal_requested_on` date is set using the Malaysian
+calendar and returned by the certificate API for the supplier page.
+
+Requests and logs commit atomically. PostgreSQL certificate row locks prevent
+concurrent clicks from duplicating requests. A second run creates zero new
+requests for already marked certificates. As specified by the contract, the
+marker is shared per certificate: an SME whose warning window starts later
+does not get an additional log after the certificate was already requested.
+No request is created for an unlinked certificate. Missing or invalid SME
+settings return 503 and roll back the operation.
+
+This records requests only: it sends no email or external message, creates
+no replacement certificate, and does not activate or supersede certificates.
+A supplier still submits the renewal for the registry review workflow.
+
+## The activity log has nine actions
 
 Activity `action` is one of `auto_accepted`, `pending_review`, `accepted`,
 `rejected`, `certificate_submitted`, `certificate_renewed` or
-`certificate_rejected`. The API, the seed loader and a database constraint
-enforce this list. For a delivery event, the actor is `staff` or
-`supervisor`. A certificate event writes one row to each linked SME. The
+`certificate_rejected`, `on_hold` or `renewal_requested`. The API, seed loader
+and a database constraint enforce this list. For new events, actor and title
+identify the named person; legacy role-only history is retained. A certificate event writes one row to each linked SME. The
 actor is the supplier contact's name for a submission and the reviewer's name
 for a decision, and a decision row has the reviewer's note as its `reason`.
 
