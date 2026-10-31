@@ -21,7 +21,6 @@ const wrap = (gateway = createPreviewGateway(), who = identity) =>
   );
 
 const urgentHeading = { name: "1 certificate needs renewing" };
-const startButton = { name: "Start renewal for SAMPLE-GGS-2026-001" };
 async function requestedGateway(overrides = {}) {
   const g = createPreviewGateway();
   await g.runExpiryCheck(person(7));
@@ -73,25 +72,6 @@ it("says expired, not still valid, once the expiry date has passed", async () =>
   expect(within(banner).getByText("Expired 3 days ago")).toBeVisible();
   expect(within(banner).queryByText(/still valid/)).not.toBeInTheDocument();
 });
-it("takes the supplier to the renewal form from the banner", async () => {
-  const user = userEvent.setup();
-  wrap(await requestedGateway(), person(5));
-  await user.click(await screen.findByRole("button", startButton));
-  expect(
-    screen.getByRole("heading", { name: "Renew certificate" }),
-  ).toHaveFocus();
-});
-it("keeps a draft already started when the banner button is pressed", async () => {
-  const user = userEvent.setup();
-  wrap(await requestedGateway(), person(5));
-  const number = await screen.findByLabelText("Certificate number");
-  await user.clear(number);
-  await user.type(number, "SAMPLE-DRAFT");
-  await user.click(screen.getByRole("button", startButton));
-  expect(screen.getByLabelText("Certificate number")).toHaveValue(
-    "SAMPLE-DRAFT",
-  );
-});
 it("calms down after submitting, then clears once verified", async () => {
   const user = userEvent.setup(),
     g = await requestedGateway();
@@ -103,9 +83,6 @@ it("calms down after submitting, then clears once verified", async () => {
     name: "Your renewal is waiting for review",
   });
   expect(within(waiting).getByText("SAMPLE-GGS-2026-001")).toBeVisible();
-  expect(
-    screen.queryByRole("button", { name: /Start renewal/ }),
-  ).not.toBeInTheDocument();
   expect(container).not.toHaveTextContent(/notification|alert|\bsent\b/i);
   unmount();
   const pending = (await g.listCertificates(person(5))).find(
@@ -126,7 +103,7 @@ it("calms down after submitting, then clears once verified", async () => {
     }),
   ).not.toBeInTheDocument();
 });
-it("is urgent again after a rejection and opens the rejected renewal", async () => {
+it("is urgent again after a rejection and can prepare the correction", async () => {
   const user = userEvent.setup(),
     g = await requestedGateway();
   const { unmount } = wrap(g, person(5));
@@ -142,13 +119,12 @@ it("is urgent again after a rejection and opens the rejected renewal", async () 
   wrap(g, person(5));
   const banner = await screen.findByRole("region", urgentHeading);
   expect(within(banner).getByText(/last renewal was rejected/)).toBeVisible();
-  await user.click(within(banner).getByRole("button", startButton));
+  await user.click(
+    screen.getByRole("button", { name: "Prepare corrected renewal" }),
+  );
   expect(screen.getByLabelText("Certificate number")).toHaveValue(
     "SAMPLE-GGS-2027-PREVIEW",
   );
-  expect(
-    screen.getByRole("heading", { name: "Renew certificate" }),
-  ).toHaveFocus();
 });
 it("lists every certificate when more than one needs renewing", async () => {
   const [first] = data.certificates["1"];
@@ -175,11 +151,7 @@ it("lists every certificate when more than one needs renewing", async () => {
   });
   expect(within(banner).getByText("30 days left")).toBeVisible();
   expect(within(banner).getByText("1 day left")).toBeVisible();
-  expect(
-    within(banner).getByRole("button", {
-      name: "Start renewal for SAMPLE-SECOND",
-    }),
-  ).toBeVisible();
+  expect(within(banner).getByText("SAMPLE-SECOND")).toBeVisible();
 });
 it("pre-fills readable image fields, keeps unreadable values and waits for explicit submission", async () => {
   const user = userEvent.setup(),

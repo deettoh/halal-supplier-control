@@ -25,7 +25,7 @@ function urgentInstruction(certificates, today) {
     ? "It is still valid. " + action + " before it expires."
     : "They are still valid. " + action + " before they expire.";
 }
-function CertificateRow({ record, today, children }) {
+function CertificateRow({ record, today }) {
   return (
     <li className="renewal-banner-row">
       <div>
@@ -35,11 +35,10 @@ function CertificateRow({ record, today, children }) {
           {daysLeftText(daysUntil(record.expiry_date, today))}
         </strong>
       </div>
-      {children}
     </li>
   );
 }
-export function RenewalBanner({ state, today, onStart }) {
+export function RenewalBanner({ state, today }) {
   const headingId = useId();
   const isUrgent = state.kind === "urgent";
   const Icon = isUrgent ? TriangleAlert : Clock;
@@ -70,18 +69,7 @@ export function RenewalBanner({ state, today, onStart }) {
         )}
         <ul>
           {state.certificates.map((record) => (
-            <CertificateRow key={record.id} record={record} today={today}>
-              {isUrgent && (
-                <button
-                  type="button"
-                  className="button primary"
-                  aria-label={"Start renewal for " + record.cert_no}
-                  onClick={() => onStart(record)}
-                >
-                  Start renewal
-                </button>
-              )}
-            </CertificateRow>
+            <CertificateRow key={record.id} record={record} today={today} />
           ))}
         </ul>
       </div>
