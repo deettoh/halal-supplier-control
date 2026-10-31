@@ -146,15 +146,11 @@ export default function DemoEntry({ requestedPath }) {
             Enter workspace <ArrowRight size={18} aria-hidden="true" />
           </button>
           <p className="entry-note">
-            Demo identities. SAMPLE data. Document coverage only.
+            DISCLAIMER: all data shown are synthetic samples
           </p>
 
           {session.gateway.mode === "preview" && (
             <div className="entry-preview">
-              <p className="entry-note">
-                Prepared preview: examples in this tab. No model calls or
-                database saves.
-              </p>
               <button
                 type="button"
                 className="button quiet"
