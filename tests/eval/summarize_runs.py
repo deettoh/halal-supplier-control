@@ -18,15 +18,21 @@ def digest(path: Path) -> str:
 def latency(values: list[float]) -> dict[str, Any]:
     """Summarize seconds; p95 uses nearest rank."""
     if not values:
-        return dict(count=0, median=None, p95=None, min=None, max=None)
+        return {
+            "count": 0,
+            "median": None,
+            "p95": None,
+            "min": None,
+            "max": None,
+        }
     ordered = sorted(values)
-    return dict(
-        count=len(values),
-        median=median(values),
-        p95=ordered[math.ceil(0.95 * len(values)) - 1],
-        min=ordered[0],
-        max=ordered[-1],
-    )
+    return {
+        "count": len(values),
+        "median": median(values),
+        "p95": ordered[math.ceil(0.95 * len(values)) - 1],
+        "min": ordered[0],
+        "max": ordered[-1],
+    }
 
 
 def combine(expected_path: Path, paths: list[Path]) -> dict[str, Any]:
@@ -119,28 +125,28 @@ def combine(expected_path: Path, paths: list[Path]) -> dict[str, Any]:
             if row.get("rules_seconds") is not None:
                 rules_times.append(row["rules_seconds"])
         cases.append(
-            dict(
-                case_id=case_id,
-                scenario=truth["scenario"],
-                expected=truth["proposed_expected_extraction"],
-                observed=labels,
-                expected_verdict=truth["proposed_expected_verdict"],
-                verdicts=verdicts,
-                errors=[r.get("error") for r in observations],
-                incorrect_fields_by_run=mismatches,
-                verdict_correct_by_run=[
+            {
+                "case_id": case_id,
+                "scenario": truth["scenario"],
+                "expected": truth["proposed_expected_extraction"],
+                "observed": labels,
+                "expected_verdict": truth["proposed_expected_verdict"],
+                "verdicts": verdicts,
+                "errors": [r.get("error") for r in observations],
+                "incorrect_fields_by_run": mismatches,
+                "verdict_correct_by_run": [
                     s["verdict_correct"] is True for s in scored
                 ],
-                extraction_seconds=[
+                "extraction_seconds": [
                     r["extraction_seconds"] for r in observations
                 ],
-                literal_extraction_consistent=complete
+                "literal_extraction_consistent": complete
                 and labels[0] == labels[1] == labels[2],
-                normalized_extraction_consistent=complete
+                "normalized_extraction_consistent": complete
                 and canonical[0] == canonical[1] == canonical[2],
-                verdict_consistent=complete
+                "verdict_consistent": complete
                 and verdicts[0] == verdicts[1] == verdicts[2],
-            )
+            }
         )
     pooled = {}
     for name in reports[0]["metrics"]:
@@ -160,13 +166,13 @@ def combine(expected_path: Path, paths: list[Path]) -> dict[str, Any]:
             sum(sum(c["verdict_correct_by_run"]) for c in subset),
             3 * len(subset),
         )
-    return dict(
-        dataset_id=expected["dataset_id"],
-        unique_cases=len(gold),
-        attempts=3 * len(gold),
-        sample_counts=expected["sample_counts"],
-        expected_sha256=digest(expected_path),
-        settings={
+    return {
+        "dataset_id": expected["dataset_id"],
+        "unique_cases": len(gold),
+        "attempts": 3 * len(gold),
+        "sample_counts": expected["sample_counts"],
+        "expected_sha256": digest(expected_path),
+        "settings": {
             k: docs[0][k]
             for k in (
                 "model",
@@ -176,21 +182,21 @@ def combine(expected_path: Path, paths: list[Path]) -> dict[str, Any]:
                 "code_sha256",
             )
         },
-        runs=[
-            dict(
-                path=p.as_posix(),
-                sha256=digest(p),
-                run_id=d["run_id"],
-                started_at=d["started_at"],
-                completed_at=d["completed_at"],
-                counts=r["counts"],
-                metrics=r["metrics"],
-            )
+        "runs": [
+            {
+                "path": p.as_posix(),
+                "sha256": digest(p),
+                "run_id": d["run_id"],
+                "started_at": d["started_at"],
+                "completed_at": d["completed_at"],
+                "counts": r["counts"],
+                "metrics": r["metrics"],
+            }
             for p, d, r in zip(paths, docs, reports, strict=True)
         ],
-        pooled_attempt_metrics=pooled,
-        category_verdicts=categories,
-        consistency={
+        "pooled_attempt_metrics": pooled,
+        "category_verdicts": categories,
+        "consistency": {
             key: metric(sum(c[key] for c in cases), len(cases))
             for key in (
                 "literal_extraction_consistent",
@@ -198,31 +204,39 @@ def combine(expected_path: Path, paths: list[Path]) -> dict[str, Any]:
                 "verdict_consistent",
             )
         },
-        latency_seconds=dict(
-            successful_extractions=latency(successful),
-            failed_extractions=latency(failed),
-            offline_rules=latency(rules_times),
-        ),
-        target_revision="ef451fd",
-        null_target_policy=(
+        "latency_seconds": {
+            "successful_extractions": latency(successful),
+            "failed_extractions": latency(failed),
+            "offline_rules": latency(rules_times),
+        },
+        "target_revision": "ef451fd",
+        "null_target_policy": (
             "Per user revision, absent and hidden marks both target null. "
             "Legacy unreadable_abstention scores all null targets, including "
             "clearly absent marks. mark_accuracy covers present marks only."
         ),
-        timing_scope=docs[0]["timing_scope"],
-        cases=cases,
-        limitations=[
-            "Repeated synthetic cases are correlated; "
-            "not real delivery accuracy.",
-            "Saved live mode is not independently attested "
-            "by the offline scorer.",
-            "No full delivery API, supervisor workflow "
-            "or initial status measured.",
+        "timing_scope": docs[0]["timing_scope"],
+        "cases": cases,
+        "limitations": [
+            (
+                "Repeated synthetic cases are correlated; "
+                "not real delivery accuracy."
+            ),
+            (
+                "Saved live mode is not independently attested "
+                "by the offline scorer."
+            ),
+            (
+                "No full delivery API, supervisor workflow "
+                "or initial status measured."
+            ),
             "Targets were revised after observing a previous experiment.",
-            "These results are development/regression evidence, "
-            "not a holdout.",
+            (
+                "These results are development/regression evidence, "
+                "not a holdout."
+            ),
         ],
-    )
+    }
 
 
 def display(score: dict[str, Any]) -> str:
@@ -237,11 +251,16 @@ def markdown(s: dict[str, Any]) -> str:
     lines = [
         "# Finals three-run evaluation",
         "",
-        f"Dataset: `{s['dataset_id']}`. {s['unique_cases']} synthetic cases; "
-        f"{s['attempts']} attempts. Targets revised in commit ef451fd.",
+        (
+            f"Dataset: `{s['dataset_id']}`. "
+            f"{s['unique_cases']} synthetic cases; "
+            f"{s['attempts']} attempts. Targets revised in commit ef451fd."
+        ),
         "",
-        f"Model: `{s['settings']['model']}`; "
-        f"temperature {s['settings']['temperature']}.",
+        (
+            f"Model: `{s['settings']['model']}`; "
+            f"temperature {s['settings']['temperature']}."
+        ),
         "",
         "| Metric | Run 1 | Run 2 | Run 3 | Pooled attempts |",
         "| --- | --- | --- | --- | --- |",
@@ -256,8 +275,10 @@ def markdown(s: dict[str, Any]) -> str:
         "",
         s["null_target_policy"],
         "",
-        "`null_target_match` is the legacy scorer's "
-        "`unreadable_abstention` metric.",
+        (
+            "`null_target_match` is the legacy scorer's "
+            "`unreadable_abstention` metric."
+        ),
         "",
         "## Repeatability",
         "",
@@ -297,8 +318,10 @@ def markdown(s: dict[str, Any]) -> str:
             lines += [
                 f"### {c['case_id']} ({c['scenario']})",
                 "",
-                f"Expected: `{json.dumps(c['expected'])}`; "
-                f"verdict `{c['expected_verdict']}`.",
+                (
+                    f"Expected: `{json.dumps(c['expected'])}`; "
+                    f"verdict `{c['expected_verdict']}`."
+                ),
                 "",
             ]
             for i in range(3):
@@ -311,12 +334,16 @@ def markdown(s: dict[str, Any]) -> str:
         "## Provenance and limitations",
         "",
         f"Expected input SHA-256: `{s['expected_sha256']}`.",
-        f"Code base: `{s['settings']['code_revision']}`; "
-        "working-file hashes in JSON.",
+        (
+            f"Code base: `{s['settings']['code_revision']}`; "
+            "working-file hashes in JSON."
+        ),
         f"Prompt SHA-256: `{s['settings']['prompt_sha256']}`.",
         "",
-        "See execution-notes.md for approval "
-        "and the revised null-mark policy.",
+        (
+            "See execution-notes.md for approval "
+            "and the revised null-mark policy."
+        ),
         "",
         *[f"- {item}" for item in s["limitations"]],
         "",
