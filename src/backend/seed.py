@@ -53,7 +53,7 @@ class CertificateSeed(SeedImage):
     @field_validator("scope", mode="before")
     @classmethod
     def normalize_product_scope(cls, value: Any) -> Any:
-        """Keep the merged seed's product lists compatible with API scope."""
+        """Convert plain product names to API scope objects."""
         if not isinstance(value, list):
             return value
         return [
@@ -192,7 +192,7 @@ def _read_seed_png(
 
 
 def upgrade_stored_photos(session: Session) -> None:
-    """Convert legacy PNG photo bytes in place; never re-encode JPEG rows."""
+    """Convert non-JPEG stored photo bytes to JPEG in place."""
     for model in (db.Certificate, db.Delivery):
         rows = session.scalars(
             select(model)
@@ -277,14 +277,22 @@ def seed_empty_tables(
     *,
     require_images: bool = False,
 ) -> dict[str, int]:
-    """Insert empty tables, then fill missing certificate photos only.
+    """Seed empty tables, missing policies and missing photos.
 
-    Caller owns the transaction and startup lock. Counts report new rows.
-    Startup tolerates missing files; a reset requires referenced images.
+    Args:
+        session: Session with the transaction and startup lock held.
+        seed: Validated seed rows.
+        base: Folder for relative image paths.
+        require_images: True to fail on a missing image file.
+
+    Returns:
+        New row counts by table.
+
+    Raises:
+        ValueError: If a seed image is invalid or required but missing.
     """
     counts: dict[str, int] = {}
-    # Existing policies are retained; newly seeded SMEs are backfilled even
-    # when another SME already has a policy in this database.
+    # add policies for new SMEs even when other SMEs have one
     counts["sme_settings"] = 0
     for policy in seed.sme_settings:
         if (

@@ -1,4 +1,4 @@
-"""Verify FastAPI lifespan starts the database before serving requests."""
+"""Verify FastAPI lifespan bootstraps the database before serving."""
 
 import pytest
 from fastapi.testclient import TestClient

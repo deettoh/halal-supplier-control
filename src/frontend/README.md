@@ -42,33 +42,41 @@ don't.
 | Route | Role | Purpose |
 |---|---|---|
 | `/` | any | Introduction for visitors and judges |
-| `/demo` | any | Role and organisation picker |
+| `/demo` | any | Picker of SAMPLE people, each with a role and an organisation |
 | `/check` | staff | Material picker, label photo upload, verdict and rule checklist |
-| `/review` | supervisor | Pending queue, photo and field comparison, decision with a required reason |
+| `/review` | supervisor | Pending and on-hold queues, photo and field comparison, decision with a required reason |
 | `/masterlist` | staff, supervisor | The SME's materials with coverage status and filters |
 | `/activity` | supervisor | The SME's activity log with decision reasons |
-| `/certificates` | supplier | Current and previous certificates and the renewal form |
+| `/certificates` | supplier | Current and previous certificates, and the renewal form with pre-fill from a photo |
+| `/registry` | reviewer | Pending renewals next to the current certificate, verify or reject with a note, and the expiry check |
 
-Staff and supervisors pick Sunrise Bakery SAMPLE or Crescent Caterer SAMPLE.
-Suppliers pick Golden Grain Supplies SAMPLE or Silver Valley Ingredients
-SAMPLE. The picker sets the `X-Demo-Role` and `X-Demo-Tenant` headers, which
-simulate login and aren't production authentication.
+Staff and supervisors belong to Sunrise Bakery SAMPLE or Crescent Caterer
+SAMPLE. Supplier contacts belong to Golden Grain Supplies SAMPLE or Silver
+Valley Ingredients SAMPLE. The picker sets the `X-Demo-Role`, `X-Demo-Tenant`
+and `X-Demo-Person` headers, which simulate login and aren't production
+authentication.
 
 ## All API requests are made in `src/lib/api/`
 
-Each request carries the demo headers of the workspace that was open when it
-was sent, and query caches are keyed by mode, role and organisation.
+Each request except the public `/api/people` and `/api/health` carries the demo
+headers of the workspace that was open when it was sent, and query caches are
+keyed by mode, role, organisation and person.
 Protected photos are fetched with the headers and shown through object URLs.
 
 | UI action | Request |
 |---|---|
+| Person picker | `GET /api/people` |
 | Materials and coverage | `GET /api/materials` |
 | Staff upload | `POST /api/deliveries`, multipart `material_id` and the original `image` |
-| Supervisor queue | `GET /api/deliveries?status=pending_review` |
-| Supervisor decision | `POST /api/deliveries/{id}/decision`, JSON `decision` and `reason` |
+| Supervisor queues | `GET /api/deliveries?status=pending_review` and `?status=on_hold` |
+| Supervisor decision | `POST /api/deliveries/{id}/decision`, JSON `decision` and `reason`, plus `next_step` for a hold |
 | SME activity | `GET /api/activity` |
 | Supplier certificates | `GET /api/certificates` |
 | Supplier renewal | `POST /api/certificates`, multipart fields with JSON-encoded `scope` |
+| Renewal pre-fill | `POST /api/certificates/extract`, multipart `image` |
+| Reviewer queue | `GET /api/registry/renewals` |
+| Reviewer decision | `POST /api/registry/renewals/{id}/decision`, JSON `decision` and `note` |
+| Expiry check | `POST /api/registry/expiry-check` |
 | Stored photos | `GET /api/deliveries/{id}/image`, `GET /api/certificates/{id}/image` |
 
 The browser uploads the original photo without resizing it. Both upload forms
@@ -79,10 +87,9 @@ The app has these known gaps:
 
 - No staff delivery history or decided-deliveries view exists, because the
   API has no such query. The result of the current visit stays on screen.
-- The renewal form has no certificate pre-fill, since
-  `POST /api/certificates/extract` returns 501.
+- Preview mode has no certificate pre-fill, which needs the backend.
 - Delivery responses don't say whether a reading came from the model or the
-  stored demo readings, so the app shows "Inference source unreported".
+  stored demo readings.
 
 ## Run the checks before a pull request
 
@@ -101,5 +108,5 @@ PYTHONPATH=src uv run python tests/frontend/generate_preview.py
 ```
 
 The photos in `public/media/` are fictional SAMPLE labels generated with an
-AI image tool, and their EXIF descriptions say so. Design tokens are in
+AI image tool. Design tokens are in
 `src/styles/`.

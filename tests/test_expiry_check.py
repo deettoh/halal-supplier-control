@@ -180,8 +180,7 @@ def test_each_sme_gets_its_request_when_its_window_starts(
         == 1
     )
     assert {r[0] for r in logs(api_engine)} == {BAKERY}
-    # Advancing five days moves from 50 to 45 days remaining without changing
-    # either SME's policy. Crescent now qualifies and Sunrise is not repeated.
+    # at 45 days remaining Crescent qualifies and Sunrise won't repeat
     monkeypatch.setattr(
         db, "utc_now", lambda: datetime(2026, 10, 27, tzinfo=UTC)
     )
@@ -222,8 +221,7 @@ def test_option_a_counts_certificates_not_sme_entries(
         "certificates_checked": 2,
         "requests_created": 2,
     }
-    # Both suppliers have two linked SMEs. Four SME entries still mean only
-    # two certificates gained new requests in this run.
+    # two SMEs per supplier give four log rows for two certificates
     assert len(logs(api_engine)) == 4
     assert (
         api_client.post(ENDPOINT, headers=REVIEWER).json()["requests_created"]

@@ -1,4 +1,4 @@
-"""JPEG storage encoding; certificate source assets remain PNG files."""
+"""JPEG encoding for stored photos."""
 
 import io
 import warnings

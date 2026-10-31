@@ -1,8 +1,4 @@
-"""Shared API contract. Routes in main.py expose these models through /docs.
-
-Models describe wire data only: no database, rules, or model-server imports.
-Nullable extraction fields are still required keys in the model output.
-"""
+"""Shared API contract exposed through /docs."""
 
 from datetime import date
 from typing import Annotated, Literal, get_args
@@ -56,7 +52,7 @@ class APIModel(BaseModel):
 
 
 class LabelExtraction(APIModel):
-    """Model output: all four keys required; unreadable values are null."""
+    """Label fields from the model with four required nullable keys."""
 
     model_config = ConfigDict(extra="forbid", frozen=True)
 
@@ -71,11 +67,11 @@ class LabelExtraction(APIModel):
 
 
 class DemoContext(APIModel):
-    """Parsed demo headers. This is simulated identity, not authentication."""
+    """Demo headers for simulated identity without authentication."""
 
     role: DemoRole
     tenant: NonEmptyText = Field(
-        description="SME identifier; for supplier role, the supplier ID"
+        description="SME name, supplier ID or registry"
     )
 
 
@@ -122,7 +118,7 @@ class DeliveryDecisionRequest(APIModel):
     next_step: (
         Literal["request_certificate", "request_product_details"] | None
     ) = None
-    reason: NonEmptyText = Field(description="Required for both decisions")
+    reason: NonEmptyText = Field(description="Reason for the decision")
 
     @model_validator(mode="after")
     def validate_next_step(self) -> "DeliveryDecisionRequest":
@@ -137,7 +133,7 @@ class RuleResult(APIModel):
     rule: RuleName
     passed: bool | None = Field(
         strict=True,
-        description="true=pass, false=fail, null=not evaluated; explain why",
+        description="true for pass, false for fail, null if not evaluated",
     )
     detail: NonEmptyText
 
@@ -150,19 +146,17 @@ class MaterialResponse(APIModel):
     approved_brand: NonEmptyText
     approved_manufacturer: NonEmptyText
     coverage_status: Coverage = Field(
-        description="Computed from the supplier's active certificate"
+        description="Coverage computed from the supplier's active certificate"
     )
     certificate_expiry_date: date | None = Field(
-        description="null if no active certificate exists"
+        description="Expiry date of the active certificate, null if none"
     )
 
 
 class DeliveryResponse(APIModel):
     id: RecordId
     material_id: RecordId
-    image: NonEmptyText = Field(
-        description="Image URL/path served with appropriate access checks"
-    )
+    image: NonEmptyText = Field(description="API path of the stored photo")
     extracted: LabelExtraction | None
     rule_results: Annotated[
         list[RuleResult],
@@ -188,14 +182,14 @@ class DeliveryResponse(APIModel):
 
 
 class CertificateScopeItem(APIModel):
-    """One documented product; null brand means no brand restriction."""
+    """Documented product with a null brand for no brand restriction."""
 
     product_name: NonEmptyText
     brand: NonEmptyText | None = None
 
 
 class CertificateCreateRequest(APIModel):
-    """multipart fields; scope is a JSON-encoded list, not repeated fields."""
+    """Multipart fields with scope as one JSON-encoded list."""
 
     issuer: NonEmptyText = Field(max_length=200)
     cert_no: NonEmptyText = Field(max_length=100)
@@ -209,7 +203,7 @@ class CertificateCreateRequest(APIModel):
     )
     image: UploadFile | None = Field(
         default=None,
-        description="Optional certificate PNG or JPEG; stored as JPEG",
+        description="Optional certificate PNG or JPEG for storage as JPEG",
     )
 
 
@@ -233,8 +227,8 @@ class ExpiryCheckResponse(APIModel):
     requests_created: int = Field(
         ge=0,
         description=(
-            "Number of distinct certificates gaining at least one new SME "
-            "request entry in this run, not the number of SME log rows."
+            "Count of distinct certificates with a new SME request entry "
+            "in this run"
         ),
     )
 
@@ -251,7 +245,7 @@ class RenewalDecisionRequest(APIModel):
 
 
 class CertificateExtractRequest(APIModel):
-    """Stretch endpoint: multipart certificate image upload."""
+    """Multipart certificate image upload."""
 
     image: UploadFile
 
@@ -286,7 +280,10 @@ class ActivityResponse(APIModel):
     actor: NonEmptyText
     role: DemoRole
     action: ActivityAction = Field(
-        description="Delivery status event or certificate submission/review"
+        description=(
+            "Delivery status event or certificate submission, review or "
+            "renewal request"
+        )
     )
     delivery_id: RecordId | None
     reason: str | None

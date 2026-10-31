@@ -1,4 +1,4 @@
-"""Exercise the published contract without a database or model endpoint."""
+"""Exercise the contract on in-memory SQLite with no model endpoint."""
 
 from collections.abc import Generator
 from datetime import UTC, datetime
@@ -99,7 +99,7 @@ def test_openapi_lists_supported_activity_actions() -> None:
 
 @pytest.fixture(autouse=True)
 def contract_database() -> Generator[None, None, None]:
-    """Validation/OpenAPI tests need no configured production database."""
+    """Run validation and OpenAPI tests on in-memory SQLite."""
     engine = create_engine(
         "sqlite://",
         connect_args={"check_same_thread": False},
@@ -239,7 +239,7 @@ def test_upload_accepts_flat_multipart_fields() -> None:
         data={"material_id": "1"},
         files={"image": ("label.png", PNG, "image/png")},
     )
-    assert response.status_code == 404  # Valid form; unknown material.
+    assert response.status_code == 404  # valid form but unknown material
 
 
 @pytest.mark.parametrize("material_id", ["0", "-1", "abc"])
@@ -287,7 +287,7 @@ def test_certificate_form_accepts_json_scope_and_optional_image(
         data=certificate_form(),
         files=files,
     )
-    assert response.status_code == 404  # Valid form; unknown supplier.
+    assert response.status_code == 404  # valid form but unknown supplier
 
 
 @pytest.mark.parametrize("scope", ["not JSON", "[]", '[{"brand":"Only"}]'])

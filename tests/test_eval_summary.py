@@ -28,33 +28,35 @@ def runs(tmp_path: Path) -> tuple[Path, list[Path]]:
     expected_path.write_text(json.dumps(expected), encoding="utf-8")
     paths = []
     for index in range(3):
-        doc = dict(
-            mode="live",
-            model="test",
-            temperature=0,
-            run_id=str(index),
-            prompt_sha256="test",
-            code_revision="test",
-            code_sha256={"rules": "test"},
-            started_at="test",
-            completed_at="test",
-            timing_scope="test",
-            expected_sha256=hashlib.sha256(
+        doc = {
+            "mode": "live",
+            "model": "test",
+            "temperature": 0,
+            "run_id": str(index),
+            "prompt_sha256": "test",
+            "code_revision": "test",
+            "code_sha256": {"rules": "test"},
+            "started_at": "test",
+            "completed_at": "test",
+            "timing_scope": "test",
+            "expected_sha256": hashlib.sha256(
                 expected_path.read_bytes()
             ).hexdigest(),
-            predictions=[
-                dict(
-                    case_id=c["case_id"],
-                    image_sha256=c["image_sha256"],
-                    extracted=copy.deepcopy(c["proposed_expected_extraction"]),
-                    verdict=c["proposed_expected_verdict"],
-                    error=None,
-                    extraction_seconds=float(index + 1),
-                    rules_seconds=0.001,
-                )
+            "predictions": [
+                {
+                    "case_id": c["case_id"],
+                    "image_sha256": c["image_sha256"],
+                    "extracted": copy.deepcopy(
+                        c["proposed_expected_extraction"]
+                    ),
+                    "verdict": c["proposed_expected_verdict"],
+                    "error": None,
+                    "extraction_seconds": float(index + 1),
+                    "rules_seconds": 0.001,
+                }
                 for c in expected["cases"]
             ],
-        )
+        }
         path = tmp_path / f"run-{index}.json"
         path.write_text(json.dumps(doc), encoding="utf-8")
         paths.append(path)

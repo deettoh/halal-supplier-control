@@ -109,7 +109,7 @@ def fake_client(
 
 
 def sent_request(image: bytes = IMAGE) -> RequestBody:
-    """Return the JSON body extract_label sends for image."""
+    """Return the JSON body sent by extract_label for image."""
     client, requests = fake_client(json.dumps(LABEL))
     extract_label(image, client=client)
     body: RequestBody = json.loads(requests[0].content)
@@ -128,7 +128,7 @@ def image_urls(body: RequestBody) -> list[str]:
 
 
 def sent_image(image: bytes) -> Image.Image:
-    """Return the image extract_label sends for image."""
+    """Return the image sent by extract_label for image."""
     data = image_urls(sent_request(image))[0].split(",", 1)[1]
     return Image.open(io.BytesIO(base64.b64decode(data)))
 

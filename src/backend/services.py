@@ -33,16 +33,14 @@ from backend.settings import RuleSettings
 logger = logging.getLogger(__name__)
 
 MAX_IMAGE_BYTES = 10 * 1024 * 1024
-# Internal marker while the durable evidence is being extracted. The row is
-# hidden from review until extraction finishes or its deadline passes. After
-# a crashed worker, the stored fallback is still reviewable at that deadline.
+# placeholder error during extraction, reviewable after its deadline
 INCOMPLETE_EXTRACTION = (
     "Extraction did not complete before its deadline; human review required."
 )
 
 
 def read_photo(upload: UploadFile) -> bytes:
-    """Bound uploads; preserve source bytes for main's demo-cache hashes."""
+    """Return upload bytes unchanged for the demo-cache hash."""
     payload = upload.file.read(MAX_IMAGE_BYTES + 1)
     if len(payload) > MAX_IMAGE_BYTES:
         raise HTTPException(413, "Photo must be at most 10 MiB")
@@ -65,7 +63,7 @@ def _processing_cutoff() -> datetime:
 
 
 def _aware(value: datetime) -> datetime:
-    # PostgreSQL retains timezone information; SQLite test storage does not.
+    # SQLite test storage drops timezone information
     return value if value.tzinfo is not None else value.replace(tzinfo=UTC)
 
 
@@ -286,10 +284,10 @@ def _extract_label(
     try:
         return extract.extract_label(payload), None
     except extract.ExtractionError as error:
-        # The extractor explicitly guarantees these messages are safe.
+        # extractor messages hold no secrets or input values
         return None, str(error)
     except ValidationError:
-        # Configuration validation errors can include secret input values.
+        # config validation errors can include secret input values
         return None, "Invalid extraction configuration; human review required."
     except ValueError:
         return (
@@ -373,7 +371,7 @@ def create_delivery(
     item.image = f"/api/deliveries/{item.id}/image"
     item_id = item.id
     started_at = _aware(item.created_at)
-    # Persist JPEG evidence, then release the connection for the model call.
+    # persist JPEG evidence, then release the connection for the call
     session.commit()
     extracted, error = _extract_label(payload)
     if started_at <= _processing_cutoff() and (
@@ -402,8 +400,7 @@ def create_delivery(
         db.Delivery, item_id, populate_existing=True, with_for_update=True
     )
     assert saved is not None
-    # A timed-out fallback may already have been reviewed. Preserve the
-    # supervisor's decision and the exact evidence they reviewed.
+    # a supervisor may have decided a timed-out fallback already
     if saved.status in {"accepted", "rejected", "on_hold"}:
         return delivery_response(saved)
     saved.extracted = extracted.model_dump() if extracted is not None else None
@@ -463,7 +460,7 @@ def decide_delivery(
     ):
         raise HTTPException(409, "Label extraction is still in progress")
     if row.error == INCOMPLETE_EXTRACTION and row.status == "pending_review":
-        # Recovery for evidence left by a terminated extraction worker.
+        # recovery for evidence left by a terminated extraction worker
         session.add(
             db.ActivityLog(
                 tenant=context.tenant,
@@ -627,11 +624,18 @@ def expiry_check(
 ) -> ExpiryCheckResponse:
     """Record each SME's first request for a qualifying certificate.
 
-    Each qualifying linked SME gets one activity entry in the same
-    transaction. Certificate row locks prevent concurrent reviewer clicks
-    from duplicating requests on PostgreSQL. No scheduler is installed.
+    Args:
+        session: Open session.
+        context: Reviewer identity.
+
+    Returns:
+        Counts of checked certificates and those with new entries.
+
+    Raises:
+        HTTPException: 503 if a linked SME policy is missing or invalid.
     """
     today = db.business_today()
+    # row locks stop concurrent reviewer clicks duplicating requests
     certificates = list(
         session.scalars(
             select(db.Certificate)
@@ -694,8 +698,7 @@ def expiry_check(
             )
         if certificate.renewal_requested_on is None:
             certificate.renewal_requested_on = today
-        # Option A: count this certificate once for this run, even if several
-        # SMEs gained entries or its first supplier request predates this run.
+        # one count per certificate however many SMEs gained entries
         requests_created += 1
     session.commit()
     return ExpiryCheckResponse(
@@ -710,8 +713,7 @@ def decide_renewal(
     renewal_id: int,
     request: RenewalDecisionRequest,
 ) -> CertificateResponse:
-    # Supplier locking matches submission: one lock order serializes competing
-    # submissions/decisions and preserves the single active certificate.
+    # same supplier lock as submission keeps one active certificate
     owner = session.scalar(
         select(db.Certificate.supplier_id).where(
             db.Certificate.id == renewal_id

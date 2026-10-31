@@ -6,8 +6,8 @@ people. The certificate images in `certificates/` are AI-generated PNGs
 marked SAMPLE.
 
 `deliveries` and `activity_log` are intentionally empty. Startup and demo
-reset must not invent completed checks or activity. Workflow tests use the
-normal seed loader without deleting seeded history afterward.
+reset must not invent completed checks or activity. Workflow tests load
+the seed through `bootstrap_database`.
 
 To recount the rows, run:
 
@@ -72,9 +72,9 @@ fields are rejected. Dates use `YYYY-MM-DD`, and timestamps need a timezone.
   six ordered `rule_results`, `verdict`, `status` and an image. A decided
   delivery needs `decided_by` and a `reason`.
 - Activity rows need `tenant`, `actor`, `role` and `action`. The action is
-  one of `auto_accepted`, `pending_review`, `accepted`, `rejected`,
-  `certificate_submitted`, `certificate_renewed` or `certificate_rejected`. A
-  row without `created_at` gets the startup time in UTC.
+  one of `auto_accepted`, `pending_review`, `accepted`, `rejected`, `on_hold`,
+  `certificate_submitted`, `certificate_renewed`, `certificate_rejected` or
+  `renewal_requested`. A row without `created_at` gets the startup time in UTC.
 
 ## Startup loads rows once and fills missing photos
 
@@ -85,12 +85,12 @@ fields are rejected. Dates use `YYYY-MM-DD`, and timestamps need a timezone.
   SME policies by tenant, retaining existing policies and database edits.
 - On every startup, a certificate with no stored photo gets its PNG when the
   seed ID, supplier ID and certificate number all match.
-- Startup advances the PostgreSQL ID sequences past the seeded IDs, so new
-  uploads get fresh IDs.
-- Startup rolls back the whole load on a missing parent, an unreadable PNG or
-  a failed constraint.
+- The PostgreSQL ID sequences advance past the seeded IDs, so new uploads get
+  fresh IDs.
+- A missing parent, an unreadable PNG or a failed constraint rolls back the
+  whole load.
 
-## Per-SME rule settings (Task 5.4)
+## Each SME has its own rule settings
 
 | SME | Recognised issuers | Match threshold | Expiry warning days |
 | --- | --- | --- | --- |
@@ -104,7 +104,7 @@ warning window. Product matching, rule priority and R6 are unchanged.
 Masterlist coverage still excludes the delivery-photo mark check.
 
 Changing seed JSON does not overwrite a policy already in the database.
-Startup backfills missing policies; an explicit demo reset restores seed
+Startup backfills missing policies, and a demo reset restores the seed
 policies. Missing or invalid policies return 503 instead of silently using
 another SME's settings. Existing delivery verdicts remain historical results.
 
@@ -114,12 +114,11 @@ tenant's policy from this seed file. There is no global policy fallback.
 The new policy module and seed are included in future evaluation source
 hashes. Previously recorded evaluation artifacts are not rewritten.
 
-Policy storage is separate from the manual expiry check described in
-[the API guide](../../docs/api.md#manual-expiry-check). There is no settings
-editor or scheduler.
+The manual expiry check in
+[the API guide](../../docs/api.md#the-reviewer-runs-the-expiry-check-by-hand) reads each linked SME's
+warning window from the `sme_settings` database table.
 
 Certificate seed rows may omit `renewal_requested_on` (defaults to null) or
 set an ISO date for a historical request. Activity rows may use
 `renewal_requested` with the reviewer name/title, supplier name and an
-internal `certificate_id`, leaving delivery ID, material and verdict null. The existing seed records are not
-changed or pre-marked by the expiry implementation.
+internal `certificate_id`, leaving delivery ID, material and verdict null.

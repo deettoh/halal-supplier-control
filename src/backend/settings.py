@@ -1,4 +1,4 @@
-"""Validated SME rule policies; seed lookup is for offline evaluation only."""
+"""SME rule policies and the offline seed lookup."""
 
 import json
 from pathlib import Path
@@ -15,10 +15,16 @@ class RuleSettings(APIModel):
 
 
 def seed_rule_settings(tenant: str) -> RuleSettings:
-    """Read one SME's seed policy for callers without a database session.
+    """Read one SME's rule policy from the seed file.
 
-    Live requests pass their persisted database policy to evaluate instead.
-    Missing or unknown tenants never inherit another SME's policy.
+    Args:
+        tenant: SME name in the seed file.
+
+    Returns:
+        Validated policy of that SME.
+
+    Raises:
+        ValueError: If the seed lacks exactly one row for tenant.
     """
     path = Path(__file__).resolve().parents[1] / "seed" / "seed.json"
     data = json.loads(path.read_text(encoding="utf-8-sig"))

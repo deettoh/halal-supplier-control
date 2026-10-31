@@ -1,10 +1,19 @@
 # Label evaluation
 
-Finals additions: [24 edited label cases and review gallery](finals/README.md).
-The historical eight-image results below are preserved separately.
-
 Eight synthetic label photos with expected answers, the scripts that collect
 live model predictions and score them, and the results of the live run.
+[The finals set](finals/README.md) adds 24 edited label cases scored with the
+same scripts.
+
+## The finals set got every verdict right in three runs
+
+Three live runs on the 24 finals cases (L09 to L32) with the current
+extraction prompt each matched 24 of 24 expected verdicts, and every case
+gave the same fields and verdict in all three runs. Extraction took a median
+of 3.14 s, with a nearest-rank p95 of 3.50 s. The cases are correlated edits
+of 11 source images, so these runs check for regressions and don't measure
+accuracy on delivered goods. The full report is
+[`finals/results/manufacturer-prompt/summary.md`](finals/results/manufacturer-prompt/summary.md).
 
 ## The live run got every verdict right
 
@@ -28,8 +37,8 @@ endpoint with these settings:
 | Verdicts matching the expected verdict | 8 | 8 | 100 |
 
 The miss was on L04, where the model answered `false` instead of `null` for
-the hidden halal mark. The verdict was still `needs_human` (Reading
-incomplete), because the other fields were blank and rule R1 failed. The full
+the hidden halal mark. The verdict was still `needs_human` (Needs review),
+because the other fields were blank and rule R1 failed. The full
 report is [`results/live-report.json`](results/live-report.json).
 
 These numbers come from eight AI-generated photos and don't establish

@@ -1,4 +1,4 @@
-"""Exercise the saved-prediction evaluator through its real CLI."""
+"""Exercise the saved-prediction evaluator through its CLI."""
 
 import json
 import subprocess
@@ -76,7 +76,7 @@ def run_cli(
 def test_cli_scores_normalized_text_separately_from_literal_text(
     tmp_path: Path,
 ) -> None:
-    # Collapsing exact and normalized scoring would hide these differences.
+    # separate scores show how exact and normalized matching differ
     result, report = run_cli(
         tmp_path,
         [case()],
@@ -107,7 +107,7 @@ def test_cli_scores_normalized_text_separately_from_literal_text(
 
 
 def test_missing_predictions_stay_in_denominators(tmp_path: Path) -> None:
-    # Dropping the absent C02 would inflate both field and verdict accuracy.
+    # dropping the absent C02 would inflate both accuracies
     result, report = run_cli(
         tmp_path,
         [case(), case("C02")],

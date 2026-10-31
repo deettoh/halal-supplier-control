@@ -1,4 +1,4 @@
-"""Named identity, audit context and Hold, with isolated databases."""
+"""Named identity, audit context and Hold on isolated databases."""
 
 from pathlib import Path
 

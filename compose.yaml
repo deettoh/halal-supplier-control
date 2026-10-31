@@ -1,4 +1,4 @@
-# Local development only. Replit uses its own DATABASE_URL, not this service.
+# This service is for local development. Replit uses its own DATABASE_URL.
 name: halal-supplier-control
 
 services:

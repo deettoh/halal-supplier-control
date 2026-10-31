@@ -93,7 +93,7 @@ def test_seed_evaluation_cases(
         )
         == first_failure
     )
-    # First-failure priority remains R2 even when the brand also fails R3.
+    # first failure stays R2 even when the brand also fails R3
     if case_id == "L02":
         assert result["rule_results"][2]["passed"] is False
     elif case_id == "L03":

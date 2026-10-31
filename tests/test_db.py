@@ -57,7 +57,7 @@ def engine(request: pytest.FixtureRequest) -> Generator[Engine, None, None]:
     if not url:
         pytest.fail("--run-db requires an explicit TEST_DATABASE_URL")
     admin = db.create_db_engine(url)
-    # A unique namespace, never public or any existing business schema.
+    # unique schema so public and business schemas stay untouched
     schema = f"halal_test_{uuid4().hex}"
     with admin.begin() as connection:
         connection.execute(CreateSchema(schema))
@@ -180,7 +180,7 @@ def test_shared_registry_updates_both_smes(session: Session) -> None:
     session.add(old)
     session.flush()
     old.status = "superseded"
-    session.flush()  # Release active slot before inserting the renewal.
+    session.flush()  # release active slot before inserting the renewal
     renewed = certificate(supplier.id, cert_no="SAMPLE-002")
     session.add(renewed)
     session.commit()
@@ -475,7 +475,7 @@ def test_binary_photos_survive_new_session(engine: Engine) -> None:
         saved_cert = session.get(Certificate, ids[0])
         saved_delivery = session.get(Delivery, ids[1])
         assert saved_cert is not None and saved_delivery is not None
-        # Bulk list queries do not eagerly retrieve photo payloads.
+        # image_bytes stays unloaded until accessed
         assert "image_bytes" in inspect(saved_delivery).unloaded
         assert saved_delivery.image_bytes == payload
         assert saved_cert.image_bytes == payload
@@ -489,7 +489,7 @@ def test_legacy_image_column_upgrade_preserves_records(engine: Engine) -> None:
         session.add(delivery(material.id))
         session.add(certificate(supplier.id))
         session.commit()
-    # Simulate the previous committed schema in this test-only database/schema.
+    # simulate the schema without image_bytes in this test database
     with engine.begin() as connection:
         for table in ("certificates", "deliveries"):
             name = db.qualified_table_name(connection, table)
@@ -552,7 +552,7 @@ def test_invalid_legacy_photo_rolls_back_conversion(
 def test_bootstrap_creates_empty_database(
     engine: Engine, tmp_path: Path
 ) -> None:
-    # Only the isolated fixture's own tables are dropped here.
+    # drops only the isolated fixture's tables
     db.Base.metadata.drop_all(engine)
     assert bootstrap_database(engine, tmp_path / "missing.json") == {}
     with Session(engine) as session:
@@ -632,7 +632,7 @@ def test_seed_photos_are_copied_into_postgresql(
         ],
     )
     bootstrap_database(engine, path)
-    photo.unlink()  # Only a disposable test fixture; storage must stand alone.
+    photo.unlink()  # stored bytes must not depend on the source file
     with Session(engine) as session:
         saved = session.get(Certificate, 20)
         assert saved is not None
@@ -678,7 +678,7 @@ def test_missing_seed_image_is_filled_on_later_startup(
         assert saved.image_bytes == images.as_jpeg(payload)
         assert saved.image == "/api/certificates/20/image"
         assert saved.holder_name == "Keep edited holder"
-    # Never replace a stored photo, even when the file changes or disappears.
+    # a stored photo stays when the file changes or disappears
     photo.write_bytes(b"different file contents")
     bootstrap_database(engine, path)
     photo.unlink()

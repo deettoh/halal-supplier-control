@@ -138,13 +138,13 @@ def _compressed(image: bytes) -> bytes:
     """Return image as an upright, downscaled JPEG.
 
     Args:
-        image: Label or certificate photo readable by Pillow.
+        image: PNG or JPEG label or certificate photo.
 
     Returns:
         JPEG bytes with the longest side at most MAX_IMAGE_SIDE.
 
     Raises:
-        ValueError: If Pillow cannot identify image as a picture.
+        ValueError: If image is not a readable PNG or JPEG.
     """
     try:
         return as_jpeg(image, max_side=MAX_IMAGE_SIDE)

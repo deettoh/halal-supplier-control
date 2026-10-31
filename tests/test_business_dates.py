@@ -1,4 +1,4 @@
-"""Use the Malaysian calendar for expiry checks, retaining UTC audit times."""
+"""Use the Malaysian calendar for expiry and UTC for audit times."""
 
 from datetime import UTC, date, datetime
 from pathlib import Path
@@ -80,6 +80,6 @@ def test_reads_and_delivery_rules_share_malaysian_date(
         row = session.get(db.Delivery, response.json()["id"])
         assert row is not None
         stamp = row.created_at
-        if stamp.tzinfo is None:  # SQLite drops timezone metadata.
+        if stamp.tzinfo is None:  # SQLite drops timezone metadata
             stamp = stamp.replace(tzinfo=UTC)
         assert stamp == instant

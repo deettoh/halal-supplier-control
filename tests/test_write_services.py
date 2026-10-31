@@ -1,4 +1,4 @@
-"""Integration tests for writes; model calls are mocked, never live RunPod."""
+"""Integration tests for writes with mocked model calls."""
 
 import hashlib
 import json
