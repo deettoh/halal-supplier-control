@@ -62,12 +62,6 @@ export function createLiveGateway(options) {
       });
     },
     decide(context, id, input) {
-      if (input.decision === "hold")
-        return Promise.reject(
-          new UnsupportedCapabilityError(
-            "Hold is not available from the connected backend yet.",
-          ),
-        );
       if (!Number.isInteger(id) || id <= 0)
         return Promise.reject(new ApiError(404, "Delivery not found."));
       return request("/api/deliveries/" + id + "/decision", {
@@ -76,6 +70,28 @@ export function createLiveGateway(options) {
         method: "POST",
         body: input,
       });
+    },
+    async extractCertificate(context, { image }, { signal } = {}) {
+      if (!image)
+        return Promise.reject(new ApiError(422, "Choose a certificate image."));
+      const body = new FormData();
+      body.set("image", image);
+      try {
+        return await request("/api/certificates/extract", {
+          context,
+          roles: ["supplier"],
+          method: "POST",
+          body,
+          signal,
+        });
+      } catch (error) {
+        if (error.status === 0)
+          throw new ApiError(
+            0,
+            "The image could not be read. Your draft is unchanged. Try again or enter the details manually.",
+          );
+        throw error;
+      }
     },
     renewCertificate(context, input) {
       const body = new FormData();
