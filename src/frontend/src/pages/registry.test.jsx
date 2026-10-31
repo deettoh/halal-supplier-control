@@ -27,7 +27,7 @@ it("requires a note before a reviewer can activate the submitted renewal", async
   );
   await user.click(screen.getByRole("button", { name: "Verify renewal" }));
   expect(
-    await screen.findByRole("heading", { name: "Renewal verified." }),
+    await screen.findByRole("heading", { name: "Renewal verified" }),
   ).toBeInTheDocument();
   expect(
     (await g.listCertificates(person(5))).filter((c) => c.status === "active"),
@@ -84,6 +84,6 @@ it("refetches a conflicted queue while preserving the selected evidence and note
   expect(screen.getByRole("button", { name: "Verify renewal" })).toBeDisabled();
   expect(screen.getByText(renewal.cert_no)).toBeInTheDocument();
   expect(
-    screen.queryByRole("heading", { name: "Renewal verified." }),
+    screen.queryByRole("heading", { name: "Renewal verified" }),
   ).not.toBeInTheDocument();
 });

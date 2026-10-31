@@ -40,7 +40,7 @@ export default function App() {
     return (
       <Shell>
         <div className="page">
-          <h1>This workspace can't open that view.</h1>
+          <h1>This workspace can't open that view</h1>
           <AppLink
             className="button primary"
             href={homeForRole(session.identity.role)}

@@ -30,7 +30,9 @@ def test_prepared_examples_validate_and_keep_three_state_checks() -> None:
     for records in data["deliveries"].values():
         for row in records:
             DeliveryResponse.model_validate(row)
-    partial = data["deliveries"]["Sunrise Bakery SAMPLE"][1]
+    partial = next(c for c in data["cases"] if c["id"] == "partial")[
+        "responses"
+    ]["6"]
     assert [r["passed"] for r in partial["rule_results"]] == [
         False,
         None,

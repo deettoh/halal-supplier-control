@@ -17,15 +17,17 @@ it("keeps the evidence readable without WebGL and lets visitors compare each ret
   const user = userEvent.setup();
   open();
   await user.click(
-    screen.getByRole("button", { name: /Product.*Cocoa Powder/ }),
+    screen.getByRole("button", { name: /Product.*Wheat Flour/ }),
   );
   expect(
-    screen.getByRole("button", { name: /Product.*Cocoa Powder/ }),
+    screen.getByRole("button", { name: /Product.*Wheat Flour/ }),
   ).toHaveAttribute("aria-pressed", "true");
   expect(screen.getByText("Approved product")).toBeVisible();
-  expect(screen.getByText(/No live model call/)).toBeVisible();
+  expect(
+    screen.getByText(/Landing illustrations use prepared SAMPLE data/),
+  ).toBeVisible();
   await user.click(
-    screen.getByRole("button", { name: /Manufacturer.*Silver Valley Foods/ }),
+    screen.getByRole("button", { name: /Manufacturer.*Meadow Forge Foods/ }),
   );
   expect(screen.getByText("Approved manufacturer")).toBeVisible();
   expect(screen.getByRole("heading", { name: "The checks" })).toBeVisible();
@@ -49,8 +51,8 @@ it("keeps all motion-off content available and scrolls stage controls without an
     });
     expect(scroll.mock.instances.at(-1)).toHaveClass("rules-plane");
     expect(
-      screen.getByRole("button", { name: "Play walkthrough" }),
-    ).toBeDisabled();
+      screen.queryByRole("button", { name: "Play walkthrough" }),
+    ).toBeNull();
     expect(
       screen.getByRole("button", { name: "Preview Hold" }).closest("[inert]"),
     ).toBeNull();
@@ -58,6 +60,33 @@ it("keeps all motion-off content available and scrolls stage controls without an
     expect(screen.getByText(/nothing was saved/)).toBeVisible();
   } finally {
     Element.prototype.scrollIntoView = original;
+    vi.unstubAllGlobals();
+  }
+});
+
+it("keeps the scene scroll-led without playback buttons or floating help captions", () => {
+  sessionStorage.setItem("hsc-less-motion", "1");
+  vi.stubGlobal("matchMedia", () => ({ matches: false }));
+  try {
+    open();
+    for (const name of [
+      /Watch the idea/,
+      /Play walkthrough/,
+      /Less motion/,
+      /Motion off/,
+    ])
+      expect(screen.queryByRole("button", { name })).toBeNull();
+    expect(document.querySelector(".stage-help")).toBeNull();
+    expect(document.querySelector(".scene-disclosure")).toBeNull();
+    expect(document.querySelector(".sc-playback")).toBeNull();
+    expect(document.documentElement.dataset.motion).toBe("full");
+    expect(
+      screen.getByRole("heading", { name: "Open the evidence" }),
+    ).toBeInTheDocument();
+    for (const heading of screen.getAllByRole("heading"))
+      expect(heading.textContent.trim()).not.toMatch(/\.$/);
+  } finally {
+    sessionStorage.removeItem("hsc-less-motion");
     vi.unstubAllGlobals();
   }
 });

@@ -94,8 +94,12 @@ describe("isolated prepared-example gateway", () => {
     });
   });
   it("preserves null checks as not evaluated", async () => {
-    const rows = await g.listPending(supervisor, {});
-    expect(rows[1].rule_results.map((r) => r.passed)).toEqual([
+    const c = previewCases.find((c) => c.id === "partial");
+    const saved = await g.createDelivery(staff, {
+      material_id: 6,
+      image: photo(c.image),
+    });
+    expect(saved.rule_results.map((r) => r.passed)).toEqual([
       false,
       null,
       null,

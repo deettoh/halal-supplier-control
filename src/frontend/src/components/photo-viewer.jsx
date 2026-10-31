@@ -39,7 +39,7 @@ export function PhotoViewer({
   const objectUrl = useObjectUrl(file || query.data);
   const source =
     session.gateway.mode === "preview" &&
-    reference === "/media/label-alt-brand.jpg"
+    reference === "/media/label-alt-brand-flour.jpg"
       ? reference
       : objectUrl;
   return (

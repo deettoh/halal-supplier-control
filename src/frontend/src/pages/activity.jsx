@@ -73,8 +73,8 @@ export default function Activity() {
           <div className="empty-state">
             <h2>
               {query.data?.length
-                ? "No matching activity."
-                : "No activity recorded yet."}
+                ? "No matching activity"
+                : "No activity recorded yet"}
             </h2>
             <p>
               {query.data?.length

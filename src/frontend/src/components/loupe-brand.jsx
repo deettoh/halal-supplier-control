@@ -11,7 +11,7 @@ const lowerCrease =
 const front =
   "M0 143Q0 121 22 113Q37 107 54 108Q73 108 88 123L148 156Q162 164 162 177Q162 192 146 192H49Q0 192 0 143Z";
 
-function RibbonDrawing({ part, monochrome }) {
+function RibbonDrawing({ part }) {
   const id = useId();
   return (
     <>
@@ -26,38 +26,27 @@ function RibbonDrawing({ part, monochrome }) {
         >
           <rect x="-4" y="-4" width="172" height="204" fill="white" />
           <circle cx="54" cy="143" r="35" fill="black" />
-          {monochrome && (
-            <g fill="none" stroke="black" strokeWidth="2.5">
-              <path d="M0 94L104 65" />
-              <path d="M55 108Q73 105 89 114L151 148" />
-            </g>
-          )}
         </mask>
       </defs>
       <g mask={`url(#${id})`} stroke="none">
         {(!part || part === "back") && (
           <g>
-            <path d={back} fill={monochrome ? "currentColor" : "#f06423"} />
-            <path d={crease} fill={monochrome ? "currentColor" : "#b93c08"} />
+            <path d={back} fill="#f06423" />
+            <path d={crease} fill="#b93c08" />
           </g>
         )}
         {(!part || part === "middle") && (
           <g>
-            <path d={middle} fill={monochrome ? "currentColor" : "#f06423"} />
-            <path
-              d={lowerCrease}
-              fill={monochrome ? "currentColor" : "#b93c08"}
-            />
+            <path d={middle} fill="#f06423" />
+            <path d={lowerCrease} fill="#b93c08" />
           </g>
         )}
-        {(!part || part === "front") && (
-          <path d={front} fill={monochrome ? "currentColor" : "#f06423"} />
-        )}
+        {(!part || part === "front") && <path d={front} fill="#f06423" />}
       </g>
     </>
   );
 }
-export function LoupeMark({ className = "", monochrome = false, part }) {
+export function LoupeMark({ className = "", part }) {
   return (
     <svg
       className={`loupe-mark ${className}`}
@@ -66,7 +55,7 @@ export function LoupeMark({ className = "", monochrome = false, part }) {
       aria-hidden="true"
       focusable="false"
     >
-      <RibbonDrawing part={part} monochrome={monochrome} />
+      <RibbonDrawing part={part} />
     </svg>
   );
 }
@@ -87,14 +76,10 @@ export function LoupeWordmark({ className = "" }) {
     </svg>
   );
 }
-export function LoupeBrand({ monochrome = false }) {
+export function LoupeBrand() {
   return (
-    <span
-      className={`loupe-brand${monochrome ? " loupe-monochrome" : ""}`}
-      role="img"
-      aria-label="Loupe"
-    >
-      <LoupeMark monochrome={monochrome} />
+    <span className="loupe-brand" role="img" aria-label="Loupe">
+      <LoupeMark />
       <LoupeWordmark />
     </span>
   );

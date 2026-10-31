@@ -25,7 +25,7 @@ export function DecisionForm({
   if (delivery.status === "auto_accepted")
     return (
       <section className="decision-panel">
-        <h2>Automatically accepted.</h2>
+        <h2>Automatically accepted</h2>
         <p>The recorded checks did not require a supervisor decision.</p>
         <p className="muted">
           The original coverage result remains on the delivery record.
@@ -46,7 +46,7 @@ export function DecisionForm({
       <h2 id={id + "heading"}>Record a decision</h2>
       {resolved ? (
         <div className="decision-confirmation" role="status">
-          <strong>Decision recorded.</strong>
+          <strong>Decision recorded</strong>
           <p>
             {delivery.status === "accepted" ? "Accepted" : "Rejected"} by{" "}
             {delivery.decided_by}.

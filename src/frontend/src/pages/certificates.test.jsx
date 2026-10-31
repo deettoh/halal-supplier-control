@@ -148,14 +148,14 @@ it("shows a pending receipt only after the service confirms, keeping the active 
     screen.getByRole("button", { name: "Submit renewal for review" }),
   );
   expect(
-    screen.queryByRole("heading", { name: "Renewal submitted." }),
+    screen.queryByRole("heading", { name: "Renewal submitted" }),
   ).not.toBeInTheDocument();
   expect(
     screen.getByRole("button", { name: "Submitting renewal…" }),
   ).toBeDisabled();
   await act(async () => release());
   const receipt = (
-    await screen.findByRole("heading", { name: "Renewal submitted." })
+    await screen.findByRole("heading", { name: "Renewal submitted" })
   ).closest("section");
   expect(screen.getByText("SAMPLE-GGS-2026-001")).toBeVisible();
   expect(
@@ -265,7 +265,7 @@ it("submits the prepared renewal and updates both buyers only after reviewer ver
   await user.click(
     screen.getByRole("button", { name: "Submit renewal for review" }),
   );
-  await screen.findByText("Renewal submitted.");
+  await screen.findByText("Renewal submitted");
   const pending = (await g.listCertificates(person(5))).find(
     (c) => c.status === "pending",
   );
@@ -372,7 +372,7 @@ it("ignores an old supplier save after switching identities", async () => {
     screen.getByRole("button", { name: "Switch supplier test" }),
   );
   await act(async () => resolve({ ...data.certificates["2"][0], id: 999 }));
-  expect(screen.queryByText("Renewal submitted.")).not.toBeInTheDocument();
+  expect(screen.queryByText("Renewal submitted")).not.toBeInTheDocument();
   expect(
     await screen.findByRole("textbox", { name: "Product 10" }),
   ).toHaveValue("Potato Starch");

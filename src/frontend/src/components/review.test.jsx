@@ -48,9 +48,9 @@ it("links the selected comparison field using touch-equivalent clicks and keyboa
   render(
     <Comparison
       material={{
-        name: "Cocoa Powder",
-        approved_brand: "SilverCocoa",
-        approved_manufacturer: "Silver Valley Foods",
+        name: "Wheat Flour",
+        approved_brand: "GoldenMill",
+        approved_manufacturer: "Golden Grain Foods",
       }}
       delivery={delivery}
     />,
@@ -58,8 +58,8 @@ it("links the selected comparison field using touch-equivalent clicks and keyboa
   const brand = screen.getByRole("button", { name: "Brand", exact: true });
   await user.click(brand);
   expect(brand).toHaveAttribute("aria-pressed", "true");
-  expect(screen.getByText("SilverCocoa")).toBeVisible();
-  expect(screen.getByText("ALT SAMPLE BRAND")).toBeVisible();
+  expect(screen.getByText("GoldenMill")).toBeVisible();
+  expect(screen.getByText("HarvestStone")).toBeVisible();
   await user.tab();
   await user.keyboard("{Enter}");
   expect(
@@ -91,7 +91,7 @@ it.each(["saved", "conflict"])(
         }),
     });
     await screen.findByRole("heading", {
-      name: "Cocoa Powder · Delivery #102",
+      name: "Wheat Flour · Delivery #102",
     });
     await user.click(screen.getByLabelText("Reject delivery"));
     await user.type(
@@ -100,23 +100,23 @@ it.each(["saved", "conflict"])(
     );
     await user.click(screen.getByRole("button", { name: "Record decision" }));
     const other = screen.getByRole("button", {
-      name: /#104.*Pending review.*Cocoa Powder.*Needs review/,
+      name: /#104.*Pending review.*Wheat Flour.*Needs review/,
     });
     await user.click(other);
     expect(
-      screen.getByRole("heading", { name: "Cocoa Powder · Delivery #102" }),
+      screen.getByRole("heading", { name: "Wheat Flour · Delivery #102" }),
     ).toBeInTheDocument();
     expect(other).toBeDisabled();
     await act(async () => release());
-    if (outcome === "saved") await screen.findByText("Decision recorded.");
+    if (outcome === "saved") await screen.findByText("Decision recorded");
     else await screen.findByRole("alert");
     await user.click(
       screen.getByRole("button", {
-        name: /#104.*Pending review.*Cocoa Powder.*Needs review/,
+        name: /#104.*Pending review.*Wheat Flour.*Needs review/,
       }),
     );
     expect(
-      screen.getByRole("heading", { name: "Cocoa Powder · Delivery #104" }),
+      screen.getByRole("heading", { name: "Wheat Flour · Delivery #104" }),
     ).toBeInTheDocument();
     expect(screen.getByLabelText("Reason (required)")).toHaveValue("");
     expect(
@@ -137,9 +137,9 @@ it("describes automatic acceptance without inventing a supervisor rejection", ()
       }}
     />,
   );
-  expect(screen.getByText("Automatically accepted.")).toBeInTheDocument();
+  expect(screen.getByText("Automatically accepted")).toBeInTheDocument();
   expect(screen.queryByText(/Rejected by/)).not.toBeInTheDocument();
-  expect(screen.queryByText("Decision recorded.")).not.toBeInTheDocument();
+  expect(screen.queryByText("Decision recorded")).not.toBeInTheDocument();
 });
 it("does not describe a manufacturer mismatch as a changed brand", async () => {
   const base = createPreviewGateway();
@@ -148,7 +148,7 @@ it("does not describe a manufacturer mismatch as a changed brand", async () => {
     ...original,
     extracted: {
       ...original.extracted,
-      brand: "SilverCocoa",
+      brand: "GoldenMill",
       manufacturer: "Different SAMPLE Foods",
     },
     rule_results: original.rule_results.map((r) =>
@@ -164,7 +164,7 @@ it("does not describe a manufacturer mismatch as a changed brand", async () => {
     ),
   };
   wrap(<Review />, { ...base, listPending: async () => [row] });
-  await screen.findByRole("heading", { name: "Cocoa Powder · Delivery #102" });
+  await screen.findByRole("heading", { name: "Wheat Flour · Delivery #102" });
   expect(
     screen.getAllByText("Manufacturer score 42.0 is below 90.")[0],
   ).toBeInTheDocument();
@@ -220,14 +220,14 @@ it("keeps unchecked rules distinct from a failed rule", () => {
 it("records actual supervisor result without changing the coverage verdict", async () => {
   const user = userEvent.setup();
   wrap(<Review />);
-  await screen.findByRole("heading", { name: "Cocoa Powder · Delivery #102" });
+  await screen.findByRole("heading", { name: "Wheat Flour · Delivery #102" });
   await user.click(screen.getByLabelText("Reject delivery"));
   await user.type(
     screen.getByLabelText("Reason (required)"),
     "Return changed brand to supplier.",
   );
   await user.click(screen.getByRole("button", { name: "Record decision" }));
-  await screen.findByText("Decision recorded.");
+  await screen.findByText("Decision recorded");
   expect(screen.getAllByText("Substitution").length).toBeGreaterThan(0);
   expect(
     screen.getByText("Return changed brand to supplier."),
@@ -245,7 +245,7 @@ it("refetches the queue and blocks stale decisions after 409", async () => {
     },
   };
   wrap(<Review />, gateway);
-  await screen.findByRole("heading", { name: "Cocoa Powder · Delivery #102" });
+  await screen.findByRole("heading", { name: "Wheat Flour · Delivery #102" });
   await user.click(screen.getByLabelText("Accept delivery"));
   await user.type(screen.getByLabelText("Reason (required)"), "Inspected.");
   await user.click(screen.getByRole("button", { name: "Record decision" }));
@@ -254,7 +254,7 @@ it("refetches the queue and blocks stale decisions after 409", async () => {
   expect(
     screen.getByRole("button", { name: "Record decision" }),
   ).toBeDisabled();
-  expect(screen.queryByText("Decision recorded.")).not.toBeInTheDocument();
+  expect(screen.queryByText("Decision recorded")).not.toBeInTheDocument();
 });
 it("keeps a conflict visible when the resolved row leaves the queue and clears it on refresh", async () => {
   const user = userEvent.setup();
@@ -272,7 +272,7 @@ it("keeps a conflict visible when the resolved row leaves the queue and clears i
       );
     },
   });
-  await screen.findByRole("heading", { name: "Cocoa Powder · Delivery #102" });
+  await screen.findByRole("heading", { name: "Wheat Flour · Delivery #102" });
   await user.click(screen.getByLabelText("Accept delivery"));
   await user.type(screen.getByLabelText("Reason (required)"), "Inspected.");
   await user.click(screen.getByRole("button", { name: "Record decision" }));
@@ -282,7 +282,7 @@ it("keeps a conflict visible when the resolved row leaves the queue and clears i
     ).toBeInTheDocument(),
   );
   expect(
-    screen.getByRole("heading", { name: "Cocoa Powder · Delivery #102" }),
+    screen.getByRole("heading", { name: "Wheat Flour · Delivery #102" }),
   ).toBeInTheDocument();
   expect(screen.getByLabelText("Reason (required)")).toHaveValue("Inspected.");
   expect(

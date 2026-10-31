@@ -26,7 +26,7 @@ export function MaterialPicker({ materials, value, onChange, disabled }) {
         </Button>
       </div>
       <Popover className="material-popover">
-        <ListBox renderEmptyState={() => "No matching materials."}>
+        <ListBox renderEmptyState={() => "No matching materials"}>
           {(m) => (
             <ListBoxItem
               id={m.id}

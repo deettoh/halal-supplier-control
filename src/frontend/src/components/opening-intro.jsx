@@ -19,11 +19,7 @@ const motionQuery = "(prefers-reduced-motion: reduce)";
 function motionAllowed() {
   const preference = window.matchMedia?.(motionQuery);
   if (!preference || preference.matches) return false;
-  try {
-    return sessionStorage.getItem("hsc-less-motion") !== "1";
-  } catch {
-    return true;
-  }
+  return true;
 }
 function shouldPlay() {
   if (!motionAllowed() || window.location.hash) return false;

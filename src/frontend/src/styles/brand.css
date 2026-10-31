@@ -22,9 +22,6 @@
   fill: currentColor;
   stroke: none;
 }
-.loupe-monochrome {
-  color: inherit;
-}
 .site-header .brand {
   padding-block: 10px;
 }

@@ -13,12 +13,10 @@ export function createSceneController({
   layoutRef = { current: {} },
   invalidate,
   onStageChange,
-  onPlaybackChange,
   reducedMotion,
 }) {
   let destroyed = false,
     lastStage = -1,
-    tour,
     move,
     timeline,
     trigger;
@@ -37,13 +35,15 @@ export function createSceneController({
       root.closest(".signal-landing")?.querySelector(".site-header")
         ?.offsetHeight || (mobile ? 64 : 76);
     const heading = root.querySelector(".scene-heading");
+    const hero = root.querySelector(".hero-copy");
     layoutRef.current = {
       heading,
       headingHeight: heading.offsetHeight || 80,
-      controlsTop: root.querySelector(".scene-controls")?.offsetTop || h * 0.72,
+      heroBottom: hero.offsetTop + hero.offsetHeight,
+      controlsTop: root.querySelector(".scene-controls")?.offsetTop || h * 0.88,
       drawerHeight: root.querySelector(".decision-drawer")?.offsetHeight || 0,
     };
-    // Anchor the decision above the complete control group, including its note.
+    // Anchor the decision above the stage tabs.
     // A percentage alone overlaps controls as their copy wraps or viewport shrinks.
     const drawer = root.querySelector(".decision-drawer");
     if (drawer)
@@ -100,14 +100,14 @@ export function createSceneController({
       : Math.min((w * 0.515) / 960, (h * 0.63) / 540);
     const full = mobile
       ? Math.min((w * 0.84) / 960, (h * 0.53) / 540)
-      : Math.min((w * 0.92) / 960, (h * 0.68) / 540);
+      : Math.min((w * 0.94) / 960, (h * 0.76) / 540);
     let scale =
       (compact + (full - compact) * pose.expand) *
-      (1 - pose.open * 0.24) *
+      (1 - pose.open * 0.18) *
       (1 - pose.decision * 0.2);
     if (mobile)
       scale =
-        Math.min((w * 0.77) / 300, (h * 0.43) / 438) *
+        Math.min((w * 0.8) / 300, (h * (0.43 + 0.05 * pose.copyAway)) / 438) *
         (1 - pose.decision * 0.12) *
         // Reserve the hero actions above the compact photo on shorter phones.
         (h < 650 ? 0.65 + 0.35 * pose.copyAway : 1);
@@ -120,15 +120,16 @@ export function createSceneController({
         h * 0.005 * pose.expand -
         pose.open * h * 0.1 -
         pose.decision * h * 0.07;
-    if (pose.heading > 0) {
+    if (mobile || pose.heading > 0) {
       const bounds = fallbackSceneBounds(pose, { h, scale, y, mobile });
       const layout = layoutRef.current;
-      const fit = fitSceneBounds(bounds, sceneSpace(layout, pose));
-      const amount = 1 + (fit.scale - 1) * pose.heading;
+      const fit = fitSceneBounds(bounds, sceneSpace(layout, pose, { mobile }));
+      const weight = mobile ? 1 : pose.heading;
+      const amount = 1 + (fit.scale - 1) * weight;
       const origin = h * (mobile ? 0.53 : 0.51) + y;
       y +=
         ((bounds.top + bounds.bottom) / 2 - origin) * (1 - amount) +
-        fit.shift * pose.heading;
+        fit.shift * weight;
       scale *= amount;
       const fitted = fallbackSceneBounds(pose, { h, scale, y, mobile });
       heading.style.transform = `translate3d(0,${Math.max(12, fitted.top - layout.headingHeight - 24)}px,0)`;
@@ -189,9 +190,8 @@ export function createSceneController({
     trigger = timeline.scrollTrigger;
   }
   function pause() {
-    tour?.kill();
-    tour = null;
-    onPlaybackChange(false);
+    move?.kill();
+    move = null;
   }
   function interrupt(event) {
     if (event.type === "click" && !event.target?.closest?.('a[href^="#"]'))
@@ -266,43 +266,6 @@ export function createSceneController({
   function drawer() {
     return root.querySelector(".decision-drawer");
   }
-  function play() {
-    pause();
-    if (!canScroll) return;
-    move?.kill();
-    seek(topFor(0));
-    onPlaybackChange(true);
-    tour = gsap.timeline({
-      onComplete: () => {
-        tour = null;
-        onPlaybackChange(false);
-      },
-    });
-    tour
-      .to(window, {
-        scrollTo: { y: topFor(0.29), autoKill: false },
-        duration: 4.3,
-        ease: "power2.inOut",
-      })
-      .to({}, { duration: 4.7 })
-      .to(window, {
-        scrollTo: { y: topFor(0.53), autoKill: false },
-        duration: 3.4,
-        ease: "power2.inOut",
-      })
-      .to({}, { duration: 4.6 })
-      .to(window, {
-        scrollTo: { y: topFor(0.86), autoKill: false },
-        duration: 3,
-        ease: "power2.inOut",
-      })
-      .to({}, { duration: 5.3 })
-      .to(window, {
-        scrollTo: { y: topFor(1), autoKill: false },
-        duration: 2.7,
-        ease: "power2.inOut",
-      });
-  }
   function hidden() {
     if (document.hidden) {
       pause();
@@ -322,6 +285,7 @@ export function createSceneController({
         });
   [
     stage,
+    root.querySelector(".hero-copy"),
     root.querySelector(".scene-heading"),
     root.querySelector(".scene-controls"),
     root.querySelector(".decision-drawer"),
@@ -332,7 +296,6 @@ export function createSceneController({
   return {
     goToStage,
     jumpToSection,
-    play,
     pause,
     destroy() {
       destroyed = true;

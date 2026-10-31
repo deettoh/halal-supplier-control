@@ -7,7 +7,7 @@ import { AppLink } from "../lib/navigation.jsx";
 import { transitionUpdate } from "../lib/motion.js";
 import { LoupeBrand } from "../components/loupe-brand.jsx";
 
-import { ArrowRight, RefreshCw } from "lucide-react";
+import { ArrowLeft, ArrowRight, RefreshCw } from "lucide-react";
 
 import { useQueryClient } from "@tanstack/react-query";
 
@@ -60,7 +60,10 @@ export default function DemoEntry({ requestedPath }) {
         <AppLink className="wordmark" href="/">
           <LoupeBrand />
         </AppLink>
-        <AppLink href="/">Back to introduction</AppLink>
+        <AppLink className="button primary" href="/">
+          <ArrowLeft size={18} aria-hidden="true" />
+          Back to introduction
+        </AppLink>
       </header>
 
       <main className="entry-page route-arrival">
@@ -68,7 +71,7 @@ export default function DemoEntry({ requestedPath }) {
           <h1>
             Choose your
             <br />
-            workspace.
+            workspace
           </h1>
           <p>
             Pick a SAMPLE person. Their role and organisation come with them.
@@ -90,7 +93,7 @@ export default function DemoEntry({ requestedPath }) {
 
           {session.people.status === "error" && (
             <div className="request-error" role="alert">
-              <h2>Demo people are unavailable.</h2>
+              <h2>Demo people are unavailable</h2>
               <p>
                 {session.people.error?.status === 404
                   ? "The connected backend has not added named demo entry yet. Use the prepared preview to review the design, or retry after the team updates it."
@@ -143,15 +146,11 @@ export default function DemoEntry({ requestedPath }) {
             Enter workspace <ArrowRight size={18} aria-hidden="true" />
           </button>
           <p className="entry-note">
-            Demo identities. SAMPLE data. Document coverage only.
+            DISCLAIMER: all data shown are synthetic samples
           </p>
 
           {session.gateway.mode === "preview" && (
             <div className="entry-preview">
-              <p className="entry-note">
-                Prepared preview: examples in this tab. No model calls or
-                database saves.
-              </p>
               <button
                 type="button"
                 className="button quiet"

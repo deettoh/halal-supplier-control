@@ -384,7 +384,7 @@
 }
 .decision-panel form {
   display: grid;
-  grid-template-columns: 29.65% 42.4% 27.95%;
+  grid-template-columns: minmax(0, 29.65fr) minmax(0, 42.4fr) minmax(0, 27.95fr);
   align-items: start;
 }
 .decision-panel fieldset {

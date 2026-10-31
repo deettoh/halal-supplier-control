@@ -797,11 +797,6 @@ button:disabled {
 .scene-tabs > button:not([aria-pressed="true"]):hover {
   background: #f0f3ef;
 }
-.stage-help {
-  font-size: 11px;
-  color: var(--muted);
-  text-align: center;
-}
 .registry-section {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -1301,10 +1296,6 @@ button:disabled {
   .scene-controls {
     bottom: 9%;
     gap: 10px;
-  }
-  .stage-help {
-    font-size: 11px;
-    max-width: 90vw;
   }
   .decision-drawer {
     bottom: 19%;

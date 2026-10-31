@@ -24,16 +24,16 @@ export function ErrorMessage({ error, onRetry }) {
   if (!error) return null;
   const heading =
     error.status === 501
-      ? "This action isn't available in the demo yet."
+      ? "This action isn't available in the demo yet"
       : error.status === 422
-        ? "Check these fields."
+        ? "Check these fields"
         : error.status === 503
-          ? "The service is temporarily unavailable."
+          ? "The service is temporarily unavailable"
           : error.status === 403
-            ? "This workspace can't open that view."
+            ? "This workspace can't open that view"
             : error.name === "UnsupportedCapabilityError"
-              ? error.message
-              : "We couldn't complete this request.";
+              ? error.message.replace(/\.$/, "")
+              : "We couldn't complete this request";
   return (
     <div className="request-error" role="alert" tabIndex={-1}>
       <strong>{heading}</strong>

@@ -1,9 +1,9 @@
 import React from "react";
 import { Camera, FileText, ListChecks, ChevronRight } from "lucide-react";
 import data from "../../lib/preview/data.json";
-export const sampleCase = data.cases.find((c) => c.id === "alt-brand");
-export const sampleDelivery = sampleCase.responses["6"];
-const material = data.source_materials["6"];
+export const sampleCase = data.cases.find((c) => c.id === "alt-manufacturer");
+export const sampleDelivery = sampleCase.responses["9"];
+const material = data.source_materials["9"];
 const fields = {
   product: ["Product", "product_name", material.name],
   brand: ["Brand", "brand", material.approved_brand],
@@ -67,14 +67,14 @@ export function EvidencePlane({
           <div className="photo-well">
             <img
               src={sampleCase.image}
-              width="1246"
-              height="1262"
-              alt="Fictional SAMPLE cocoa label, ALT SAMPLE BRAND, Silver Valley Foods"
+              width="788"
+              height="1400"
+              alt="Fictional SAMPLE flour label, GoldenMill Wheat Flour, manufactured by Meadow Forge Foods"
             />
             <div className="scan-strip" aria-hidden="true" />
           </div>
           <div className="photo-caption">
-            <span>Cocoa Powder</span>
+            <span>Wheat Flour</span>
             <span>Label photo</span>
           </div>
         </>
@@ -106,11 +106,11 @@ export function EvidencePlane({
             <span>Approved {selected[0].toLowerCase()}</span>
             <strong>{selected[2]}</strong>
             <p>
-              {selectedField === "brand"
-                ? "A different brand needs a supervisor's review."
+              {selectedField === "manufacturer"
+                ? "A different manufacturer needs a supervisor's review."
                 : selectedField === "product"
                   ? "The product name matches the approved material."
-                  : "The manufacturer matches. The brand still differs."}
+                  : "The brand matches. The manufacturer still differs."}
             </p>
           </div>
         </>

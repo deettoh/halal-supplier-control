@@ -1,9 +1,13 @@
-import { afterEach, it, expect, vi } from "vitest";
-const mocks = vi.hoisted(() => ({ timelines: [] }));
+import { afterEach, beforeEach, it, expect, vi } from "vitest";
+const mocks = vi.hoisted(() => ({ timelines: [], moves: [] }));
 vi.mock("gsap", () => ({
   default: {
     registerPlugin: vi.fn(),
-    to: vi.fn(() => ({ kill: vi.fn() })),
+    to: vi.fn(() => {
+      const move = { kill: vi.fn() };
+      mocks.moves.push(move);
+      return move;
+    }),
     timeline: vi.fn((options) => {
       const line = {
         scrollTrigger: options?.scrollTrigger
@@ -23,6 +27,10 @@ vi.mock("gsap/ScrollTrigger", () => ({ ScrollTrigger: {} }));
 vi.mock("gsap/ScrollToPlugin", () => ({ ScrollToPlugin: {} }));
 import { createSceneController } from "./scene-controller.js";
 let controller, root;
+beforeEach(() => {
+  mocks.timelines.length = 0;
+  mocks.moves.length = 0;
+});
 afterEach(() => {
   controller?.destroy();
   root?.remove();
@@ -40,38 +48,38 @@ function mount(initialProgress = 0, { reducedMotion = false } = {}) {
   Object.defineProperty(root.querySelector(".scene-stage"), "clientHeight", {
     value: 740,
   });
-  const playback = vi.fn();
   controller = createSceneController({
     root,
     progressRef: { current: { value: initialProgress } },
     invalidate: vi.fn(),
     onStageChange: vi.fn(),
-    onPlaybackChange: playback,
     reducedMotion,
   });
-  return playback;
 }
-it("stops guided playback when a visitor chooses another same-page destination", () => {
-  const playback = mount();
-  controller.play();
-  expect(playback).toHaveBeenLastCalledWith(true);
+it("stops a selected-stage move when a visitor chooses another same-page destination", () => {
+  mount();
+  controller.goToStage(1);
+  const move = mocks.moves.at(-1);
+  expect(move.kill).not.toHaveBeenCalled();
   root.querySelector('a[href="#registry"]').click();
-  expect(playback).toHaveBeenLastCalledWith(false);
+  expect(move.kill).toHaveBeenCalled();
 });
 it("gives keyboard, wheel and hidden-page navigation control back to the visitor", () => {
-  const playback = mount();
+  mount();
   for (const event of [
     new KeyboardEvent("keydown", { key: "PageDown" }),
     new Event("wheel"),
   ]) {
-    controller.play();
+    controller.goToStage(1);
+    const move = mocks.moves.at(-1);
     window.dispatchEvent(event);
-    expect(playback).toHaveBeenLastCalledWith(false);
+    expect(move.kill).toHaveBeenCalled();
   }
-  controller.play();
+  controller.goToStage(1);
+  const move = mocks.moves.at(-1);
   vi.spyOn(document, "hidden", "get").mockReturnValue(true);
   document.dispatchEvent(new Event("visibilitychange"));
-  expect(playback).toHaveBeenLastCalledWith(false);
+  expect(move.kill).toHaveBeenCalled();
 });
 
 it("restores the opening composition after leaving a selected static stage", () => {
@@ -101,13 +109,12 @@ it("clears the scan in the static alternative", () => {
   mount(0.22, { reducedMotion: true });
   expect(root.style.getPropertyValue("--scan-opacity")).toBe("0");
 });
-it("starts the tour with movement rather than an unexplained opening wait", () => {
-  const playback = mount();
-  controller.play();
-  const tour = mocks.timelines.at(-1);
-  expect(tour.to.mock.calls[0][0]).toBe(window);
-  expect(tour.to.mock.calls[0][1].scrollTo.y).toBeGreaterThan(0);
-  expect(playback).toHaveBeenLastCalledWith(true);
+it("creates only the scroll-linked timeline, never an autoplay tour", () => {
+  mount();
+  expect(mocks.timelines).toHaveLength(1);
+  expect(mocks.timelines[0].scrollTrigger).not.toBeNull();
+  expect(mocks.moves).toHaveLength(0);
+  expect(controller.play).toBeUndefined();
 });
 it("seeks directly to a section instead of replaying intermediate scroll poses", () => {
   mount();

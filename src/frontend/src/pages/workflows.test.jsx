@@ -92,7 +92,7 @@ it("keeps receiving staff out of the supervisor route without a queue request", 
   wrap(<App />, { ...base, listPending }, staff);
   expect(
     screen.getByRole("heading", {
-      name: "This workspace can't open that view.",
+      name: "This workspace can't open that view",
     }),
   ).toBeInTheDocument();
   expect(listPending).not.toHaveBeenCalled();
@@ -116,7 +116,8 @@ it("submits the original photo and treats saved extraction failure as a saved re
       return new Response(JSON.stringify(data.materials["00"][staff.tenant]));
     submitted = init.body.get("image");
     const saved = {
-      ...data.deliveries[staff.tenant][1],
+      ...data.cases.find((c) => c.id === "partial").responses["6"],
+      id: 104,
       extracted: null,
       error: "The label could not be read.",
     };
@@ -169,7 +170,7 @@ it("filters only authorised materials and can clear a no-match search", async ()
     screen.getByRole("searchbox", { name: "Search materials" }),
     "does not exist",
   );
-  expect(screen.getByText("No matching materials.")).toBeInTheDocument();
+  expect(screen.getByText("No matching materials")).toBeInTheDocument();
   await user.click(screen.getByRole("button", { name: "Clear search" }));
   expect(
     within(screen.getByRole("table", { name: "Approved materials" })).getByText(
