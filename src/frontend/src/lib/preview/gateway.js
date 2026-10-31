@@ -82,6 +82,7 @@ export function createPreviewGateway() {
   return {
     mode: "preview",
     capabilities: { hold: true, expiry: true, certificateExtract: false },
+    today: () => data.date,
     async listPeople({ signal } = {}) {
       signal?.throwIfAborted();
       return copy(data.people);

@@ -136,7 +136,8 @@
   color: #a31616;
 }
 .status-pending_review,
-.status-expiring {
+.status-expiring,
+.renewal-urgent {
   background: #fce9ca;
   color: #844500;
 }

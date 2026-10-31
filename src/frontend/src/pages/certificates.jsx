@@ -8,13 +8,25 @@ import { Status } from "../components/status.jsx";
 import { RequestState, ErrorMessage } from "../components/request-state.jsx";
 import { ScopeEditor } from "../components/scope-editor.jsx";
 import { PhotoViewer } from "../components/photo-viewer.jsx";
-function CertificateRecord({ record }) {
+import {
+  CertificateRenewalState,
+  RenewalBanner,
+} from "../components/renewal-banner.jsx";
+import { renewalState } from "../lib/renewal.js";
+function CertificateRecord({ record, renewalKind, today }) {
   return (
     <article className="certificate-record">
       <div className="certificate-record-top">
         <h2>{record.cert_no}</h2>
         <Status value={record.status} />
       </div>
+      {renewalKind && (
+        <CertificateRenewalState
+          kind={renewalKind}
+          record={record}
+          today={today}
+        />
+      )}
       <p>{record.issuer}</p>
       <dl className="certificate-details">
         <div>
@@ -48,11 +60,6 @@ function CertificateRecord({ record }) {
           <p>{record.review_note}</p>
         </div>
       )}
-      {record.renewal_requested_on && (
-        <p className="capability-note">
-          Renewal requested on {formatDate(record.renewal_requested_on)}.
-        </p>
-      )}
       {record.image && (
         <PhotoViewer
           reference={record.image}
@@ -82,6 +89,7 @@ function RenewalForm({
   onChanged,
   onConflict,
   pendingReview = false,
+  headingRef,
 }) {
   const session = useSession();
   const [draft, setDraft] = useState(() =>
@@ -259,7 +267,9 @@ function RenewalForm({
   }
   return (
     <section className="renewal-form-section">
-      <h2>{current ? "Renew certificate" : "Add a certificate"}</h2>
+      <h2 ref={headingRef} tabIndex={-1} className="renewal-form-heading">
+        {current ? "Renew certificate" : "Add a certificate"}
+      </h2>
       <p className="muted">
         Review the fields and keep every product and brand restriction you
         intend to cover.
@@ -414,9 +424,25 @@ export default function Certificates() {
     current = records.find((c) => c.status === "active"),
     pending = records.find((c) => c.status === "pending");
   const receiptRecord = records.find((c) => c.id === saved?.id) || saved;
+  const renewal = renewalState(records);
+  const formHeading = useRef(null);
+  const [formFocusRequest, setFormFocusRequest] = useState(0);
   useEffect(() => {
     if (saved) receipt.current?.focus();
   }, [saved]);
+  useEffect(() => {
+    if (formFocusRequest) formHeading.current?.focus();
+  }, [formFocusRequest]);
+  function startRenewal(record) {
+    const base = renewal.rejected || record;
+    if ((draftBase || current)?.id !== base.id) {
+      if (!session.confirmDiscard()) return;
+      setDraftBase(base);
+      setHasDraft(true);
+      setSaved(null);
+    }
+    setFormFocusRequest((request) => request + 1);
+  }
   function changed() {
     setHasDraft(true);
     setDraftBase((base) => base || current);
@@ -440,11 +466,29 @@ export default function Certificates() {
         </button>
       </div>
       <RequestState query={query} noun="certificates">
+        {renewal.kind && (
+          <RenewalBanner
+            state={renewal}
+            today={session.gateway.today()}
+            onStart={startRenewal}
+          />
+        )}
         <div className="registry-layout">
           <section aria-label="Certificate records">
             <h2>Current certificate</h2>
             {current ? (
-              <CertificateRecord record={current} />
+              records
+                .filter((c) => c.status === "active")
+                .map((c) => (
+                  <CertificateRecord
+                    key={c.id}
+                    record={c}
+                    renewalKind={
+                      renewal.certificates.includes(c) ? renewal.kind : null
+                    }
+                    today={renewal.kind ? session.gateway.today() : null}
+                  />
+                ))
             ) : (
               <p className="muted">No active certificate is on file.</p>
             )}
@@ -552,6 +596,7 @@ export default function Certificates() {
                   current={draftBase || current}
                   onChanged={changed}
                   pendingReview={!!pending}
+                  headingRef={formHeading}
                   onConflict={() => query.refetch()}
                   onSaved={(record) => {
                     setSaved(record);

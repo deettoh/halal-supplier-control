@@ -630,6 +630,107 @@ body.less-motion .signal-landing .decision-drawer {
   margin-top: 17px;
   font-size: 12px;
 }
+.renewal-banner {
+  display: flex;
+  gap: 18px;
+  margin-bottom: 28px;
+  padding: 22px 24px;
+  border: 2px solid currentColor;
+  border-radius: var(--radius);
+}
+.renewal-banner.renewal-waiting {
+  border: 1px solid var(--line);
+  background: var(--paper);
+}
+.renewal-banner-icon {
+  flex: none;
+  width: 40px;
+  height: 40px;
+}
+.renewal-banner-body {
+  flex: 1;
+  min-width: 0;
+}
+.renewal-banner h2 {
+  font-size: 28px;
+  line-height: 34px;
+}
+.renewal-banner.renewal-waiting h2 {
+  font-size: 20px;
+  line-height: 26px;
+}
+.renewal-banner p {
+  margin-top: 8px;
+  color: var(--ink);
+  font-size: 16px;
+}
+.renewal-banner ul {
+  margin: 14px 0 0;
+  padding: 0;
+  list-style: none;
+}
+.renewal-banner-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding-top: 12px;
+  border-top: 1px solid currentColor;
+}
+.renewal-banner.renewal-waiting .renewal-banner-row {
+  border-top-color: var(--line);
+}
+.renewal-banner-row > div {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 4px 18px;
+  color: var(--ink);
+  font-size: 16px;
+  overflow-wrap: anywhere;
+}
+.renewal-banner.renewal-urgent .renewal-days {
+  font-size: 20px;
+}
+.certificate-renewal-state {
+  display: flex;
+  gap: 10px;
+  margin: 14px 0;
+  font-size: 14px;
+}
+.certificate-renewal-state.renewal-urgent {
+  padding: 14px;
+  border: 2px solid currentColor;
+  border-radius: var(--radius);
+}
+.certificate-renewal-state.renewal-urgent .status {
+  background: var(--paper);
+}
+.certificate-renewal-state.renewal-urgent p {
+  margin-top: 6px;
+  color: var(--ink);
+}
+.certificate-renewal-state svg {
+  flex: none;
+}
+.renewal-form-heading {
+  scroll-margin-top: 24px;
+}
+@media (max-width: 760px) {
+  .renewal-banner {
+    flex-direction: column;
+    gap: 10px;
+    padding: 18px 16px;
+  }
+  .renewal-banner h2 {
+    font-size: 24px;
+    line-height: 30px;
+  }
+  .renewal-banner-row .button {
+    width: 100%;
+  }
+}
 .review-result-detail {
   margin: 20px 0;
   padding: 15px 18px;
