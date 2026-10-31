@@ -127,7 +127,7 @@ export default function Registry() {
           onClick={refresh}
         >
           <RefreshCw size={17} aria-hidden="true" />
-          Refresh queue
+          <span className="icon-label">Refresh queue</span>
         </button>
       </div>
       <div className="registry-workbench">

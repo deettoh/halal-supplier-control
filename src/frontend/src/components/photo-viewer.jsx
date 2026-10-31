@@ -49,7 +49,7 @@ export function PhotoViewer({
           <img src={source} alt={alt} />
           <Button className="button open-photo">
             <ExternalLink size={16} aria-hidden="true" />
-            Open photo
+            <span className="icon-label">Open photo</span>
           </Button>
           <ModalOverlay className="modal-overlay" isDismissable>
             <Modal className="photo-modal">

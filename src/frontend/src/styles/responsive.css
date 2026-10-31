@@ -341,6 +341,30 @@
   }
 }
 @media (max-width: 720px) {
+  .icon-label {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+  }
+  .rule-status {
+    padding: 4px;
+  }
+  .rule-status svg {
+    width: 16px;
+    height: 16px;
+  }
+  .evidence-photo .open-photo,
+  .signal-shell .workspace-header .workspace-switch,
+  .registry-page-heading .button,
+  .review-detail .queue-back {
+    justify-content: center;
+    min-width: 44px;
+    min-height: 44px;
+    padding: 0;
+  }
   .materials-table {
     display: none;
   }

@@ -65,7 +65,7 @@ export function Shell({ children }) {
           </div>
           <AppLink href="/demo" className="button workspace-switch">
             <ArrowLeftRight size={22} aria-hidden="true" />
-            Switch workspace
+            <span className="icon-label">Switch workspace</span>
             <ChevronDown size={18} aria-hidden="true" />
           </AppLink>
         </header>
