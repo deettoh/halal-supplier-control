@@ -178,6 +178,11 @@ it("pre-fills readable image fields, keeps unreadable values and waits for expli
     image,
   );
   await user.click(screen.getByRole("button", { name: "Pre-fill from image" }));
+  expect(
+    screen.getByText("AI may make mistakes. This might take a while."),
+  ).toBeVisible();
+  expect(screen.getByRole("status")).toHaveTextContent(/^Reading the image\.$/);
+  expect(screen.queryByText(/Replaces readable/)).not.toBeInTheDocument();
   expect(screen.getByLabelText("Issuer")).toBeDisabled();
   expect(
     screen.getByRole("button", { name: "Submit renewal for review" }),

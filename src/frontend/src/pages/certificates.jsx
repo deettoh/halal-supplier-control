@@ -373,15 +373,11 @@ function RenewalForm({
                   : "Pre-fill from image"}
               </button>
               <p className="muted">
-                Replaces readable draft fields; unreadable fields stay
-                unchanged. Review every field and product before submitting.
-                Reading does not verify the certificate.
+                AI may make mistakes. This might take a while.
               </p>
               {extraction.isPending && (
                 <>
-                  <p role="status">
-                    Reading the image. This may take up to 3 minutes.
-                  </p>
+                  <p role="status">Reading the image.</p>
                   <button
                     type="button"
                     className="button quiet"
