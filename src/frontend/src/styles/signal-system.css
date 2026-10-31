@@ -670,11 +670,6 @@ body.less-motion .signal-landing .decision-drawer {
   list-style: none;
 }
 .renewal-banner-row {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
   padding-top: 12px;
   border-top: 1px solid currentColor;
 }
@@ -714,9 +709,6 @@ body.less-motion .signal-landing .decision-drawer {
 .certificate-renewal-state svg {
   flex: none;
 }
-.renewal-form-heading {
-  scroll-margin-top: 24px;
-}
 @media (max-width: 760px) {
   .renewal-banner {
     flex-direction: column;
@@ -726,9 +718,6 @@ body.less-motion .signal-landing .decision-drawer {
   .renewal-banner h2 {
     font-size: 24px;
     line-height: 30px;
-  }
-  .renewal-banner-row .button {
-    width: 100%;
   }
 }
 .review-result-detail {

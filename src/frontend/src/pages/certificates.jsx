@@ -89,7 +89,6 @@ function RenewalForm({
   onChanged,
   onConflict,
   pendingReview = false,
-  headingRef,
 }) {
   const session = useSession();
   const [draft, setDraft] = useState(() =>
@@ -267,9 +266,7 @@ function RenewalForm({
   }
   return (
     <section className="renewal-form-section">
-      <h2 ref={headingRef} tabIndex={-1} className="renewal-form-heading">
-        {current ? "Renew certificate" : "Add a certificate"}
-      </h2>
+      <h2>{current ? "Renew certificate" : "Add a certificate"}</h2>
       <p className="muted">
         Review the fields and keep every product and brand restriction you
         intend to cover.
@@ -376,15 +373,11 @@ function RenewalForm({
                   : "Pre-fill from image"}
               </button>
               <p className="muted">
-                Replaces readable draft fields; unreadable fields stay
-                unchanged. Review every field and product before submitting.
-                Reading does not verify the certificate.
+                AI may make mistakes. This might take a while.
               </p>
               {extraction.isPending && (
                 <>
-                  <p role="status">
-                    Reading the image. This may take up to 3 minutes.
-                  </p>
+                  <p role="status">Reading the image.</p>
                   <button
                     type="button"
                     className="button quiet"
@@ -425,24 +418,9 @@ export default function Certificates() {
     pending = records.find((c) => c.status === "pending");
   const receiptRecord = records.find((c) => c.id === saved?.id) || saved;
   const renewal = renewalState(records);
-  const formHeading = useRef(null);
-  const [formFocusRequest, setFormFocusRequest] = useState(0);
   useEffect(() => {
     if (saved) receipt.current?.focus();
   }, [saved]);
-  useEffect(() => {
-    if (formFocusRequest) formHeading.current?.focus();
-  }, [formFocusRequest]);
-  function startRenewal(record) {
-    const base = renewal.rejected || record;
-    if ((draftBase || current)?.id !== base.id) {
-      if (!session.confirmDiscard()) return;
-      setDraftBase(base);
-      setHasDraft(true);
-      setSaved(null);
-    }
-    setFormFocusRequest((request) => request + 1);
-  }
   function changed() {
     setHasDraft(true);
     setDraftBase((base) => base || current);
@@ -467,11 +445,7 @@ export default function Certificates() {
       </div>
       <RequestState query={query} noun="certificates">
         {renewal.kind && (
-          <RenewalBanner
-            state={renewal}
-            today={session.gateway.today()}
-            onStart={startRenewal}
-          />
+          <RenewalBanner state={renewal} today={session.gateway.today()} />
         )}
         <div className="registry-layout">
           <section aria-label="Certificate records">
@@ -596,7 +570,6 @@ export default function Certificates() {
                   current={draftBase || current}
                   onChanged={changed}
                   pendingReview={!!pending}
-                  headingRef={formHeading}
                   onConflict={() => query.refetch()}
                   onSaved={(record) => {
                     setSaved(record);

@@ -25,11 +25,13 @@ export function RuleStatus({ passed }) {
       ) : (
         <Minus size={13} aria-hidden="true" />
       )}
-      {passed === true
-        ? "Passed"
-        : passed === false
-          ? "Failed"
-          : "Not evaluated"}
+      <span className="icon-label">
+        {passed === true
+          ? "Passed"
+          : passed === false
+            ? "Failed"
+            : "Not evaluated"}
+      </span>
     </span>
   );
 }

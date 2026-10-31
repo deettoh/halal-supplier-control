@@ -341,6 +341,30 @@
   }
 }
 @media (max-width: 720px) {
+  .icon-label {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+  }
+  .rule-status {
+    padding: 4px;
+  }
+  .rule-status svg {
+    width: 16px;
+    height: 16px;
+  }
+  .evidence-photo .open-photo,
+  .signal-shell .workspace-header .workspace-switch,
+  .registry-page-heading .button,
+  .review-detail .queue-back {
+    justify-content: center;
+    min-width: 44px;
+    min-height: 44px;
+    padding: 0;
+  }
   .materials-table {
     display: none;
   }
@@ -502,5 +526,47 @@
     transition-duration: 0.01ms !important;
     animation-duration: 0.01ms !important;
     animation-iteration-count: 1 !important;
+  }
+}
+.mobile-evidence-disclosure,
+.mobile-evidence-content {
+  display: contents;
+}
+.mobile-evidence-toggle {
+  display: none;
+}
+@media (max-width: 760px) {
+  .check-page .mobile-evidence-disclosure {
+    display: block;
+    margin-top: 12px;
+  }
+  .check-page .mobile-evidence-toggle {
+    display: flex;
+    justify-content: space-between;
+    width: 100%;
+    min-height: 44px;
+  }
+  .check-page .mobile-evidence-content {
+    display: block;
+    margin-top: 12px;
+  }
+  .check-page
+    .mobile-evidence-disclosure[data-expanded="false"]
+    > .mobile-evidence-content {
+    display: none;
+  }
+  .check-page
+    .mobile-evidence-disclosure[data-expanded="true"]
+    > .mobile-evidence-toggle
+    svg {
+    transform: rotate(180deg);
+  }
+  .check-page > .page-intro > p,
+  .check-page .comparison-hint,
+  .check-page .check-instruction,
+  .check-page .photo-input > label > svg,
+  .check-page .selected-photo > .button > svg,
+  .check-page .next-delivery > svg {
+    display: none;
   }
 }

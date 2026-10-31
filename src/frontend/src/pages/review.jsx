@@ -206,7 +206,7 @@ export default function Review() {
           }}
         >
           <ArrowLeft size={18} aria-hidden="true" />
-          Back to queue
+          <span className="icon-label">Back to queue</span>
         </button>
         {selected ? (
           <>
