@@ -22,6 +22,7 @@ from pydantic import (
 NonEmptyText = Annotated[
     str, StringConstraints(strip_whitespace=True, min_length=1)
 ]
+CONTRACT_VERSION = "0.2.0"
 RecordId = Annotated[int, Field(gt=0)]
 DemoRole = Literal["staff", "supervisor", "supplier", "reviewer"]
 Coverage = Literal["covered", "expiring", "not_covered"]
@@ -306,4 +307,4 @@ class ValidationErrorResponse(APIModel):
 
 class HealthResponse(APIModel):
     status: Literal["ok"] = "ok"
-    contract_version: str = "0.1.0"
+    contract_version: str = CONTRACT_VERSION

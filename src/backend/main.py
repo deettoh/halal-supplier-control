@@ -30,6 +30,7 @@ from starlette.types import Scope
 from backend import db, services
 from backend.db import dispose_db, get_session_factory
 from backend.schemas import (
+    CONTRACT_VERSION,
     ActivityResponse,
     CertificateCreateRequest,
     CertificateExtractRequest,
@@ -86,7 +87,7 @@ async def lifespan(application: FastAPI) -> AsyncIterator[None]:
 app = FastAPI(
     lifespan=lifespan,
     title="Halal Supplier Control",
-    version="0.1.0",
+    version=CONTRACT_VERSION,
     description=(
         "Reports document coverage only, never a halal ruling. Demo headers "
         "simulate identity. Certificate extraction is a stretch feature."

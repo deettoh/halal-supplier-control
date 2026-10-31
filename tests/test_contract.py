@@ -446,6 +446,7 @@ def test_openapi_documents_business_and_registry_routes() -> None:
     response = client.get("/openapi.json")
     assert response.status_code == 200
     spec = response.json()
+    assert spec["info"]["version"] == "0.2.0"
     expected = {
         ("/api/materials", "get"),
         ("/api/deliveries", "post"),
@@ -490,5 +491,5 @@ def test_openapi_documents_business_and_registry_routes() -> None:
     assert client.get("/docs").status_code == 200
     assert client.get("/api/health").json() == {
         "status": "ok",
-        "contract_version": "0.1.0",
+        "contract_version": "0.2.0",
     }

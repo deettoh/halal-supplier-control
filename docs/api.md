@@ -22,9 +22,12 @@ also requires `X-Demo-Person`, a positive ID from the `people` table. The
 backend validates that person against both role and tenant; mismatch gives
 403. `GET /api/people` is public for the picker, as is `/api/health`.
 
-This branch implements named identities, enriched logs and Hold only. Expiry
-checking remains deferred and contract/OpenAPI versions stay 0.1.0 pending
-full v0.2 completion.
+The backend implements contract v0.2: six-rule evaluation, named identities,
+enriched logs, registry renewal review, Hold with a next step and the manual
+expiry check. `/api/health` and OpenAPI advertise `0.2.0`. The versioned
+[contract](api-contract2.md) includes the current pack-size normalization,
+per-SME policies and the approved manual-only expiry behaviour. Frontend
+integration is owned and verified separately.
 
 
 ## Routes under `/api`
@@ -107,19 +110,28 @@ because the label couldn't be read. `detail` gives the reason.
 | Rule | Check | Verdict if it fails |
 |---|---|---|
 | R1 | Product, brand and manufacturer read from the label | `needs_human` |
-| R2 | The product matches the material name after case folding, whitespace collapsing and dropping a trailing pack size such as `200 G`. The brand and the manufacturer each match the masterlist (rapidfuzz score of 90 or more) | `substitution` |
+| R2 | The product matches the material name after case folding, whitespace collapsing and dropping a trailing pack size such as `200 G`. The brand and manufacturer each meet the SME's configured rapidfuzz threshold (90 in the current seed) | `substitution` |
 | R3 | The certificate scope covers the product and brand, with the product matched the same way as in R2 | `not_covered` |
 | R4 | The certificate hasn't expired | `not_covered` |
 | R5 | The issuer is on the recognised list | `not_covered` |
 | R6 | The label shows a halal mark | `needs_human` |
 
 The first failing rule sets the verdict. When all six pass and the certificate
-expires within 60 days, the verdict is `expiring`.
+expires within the requesting SME's configured warning window, the verdict
+is `expiring` (60 days for Sunrise Bakery, 45 for Crescent Caterer in the
+current seed). R5 also reads that SME's recognised-issuer list. Masterlist
+coverage uses the same policy but excludes the delivery-photo R6 check.
 
 ## Decisions and renewals commit with their activity rows
 
-A decision needs `accept` or `reject` and a nonblank reason. The delivery row
-is locked, and the decision and its activity row commit together.
+A decision needs `accept`, `reject` or `hold` and a nonblank reason. Hold also
+requires `next_step` equal to `request_certificate` or
+`request_product_details`. Other decisions must omit `next_step`. Pending
+deliveries can be accepted, rejected or held; held deliveries can only be
+accepted or rejected. Repeating Hold or deciding an already resolved
+delivery returns 409. The delivery row is locked, and the decision and its
+activity row commit together. Its original verdict and rule results remain
+the check result, rather than being replaced by the supervisor's decision.
 
 A supplier submission locks the supplier, saves the renewal as `pending` and
 writes a `certificate_submitted` row to each linked SME's log. Coverage stays
