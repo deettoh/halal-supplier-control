@@ -92,6 +92,9 @@ function RenewalForm({
   const imageInput = useRef(null);
   const [validation, setValidation] = useState(null);
   const [dirty, setDirty] = useState(false);
+  const [readStatus, setReadStatus] = useState("");
+  const [readError, setReadError] = useState(null);
+  const readAbort = useRef(null);
   const summary = useRef(null);
   const mutation = useScopedMutation(
     (ctx, input) => session.gateway.renewCertificate(ctx, input),
@@ -102,10 +105,91 @@ function RenewalForm({
       },
     },
   );
-  useDraft(dirty || mutation.isPending);
+  const extraction = useScopedMutation(
+    async (ctx, file) => {
+      const controller = new AbortController();
+      readAbort.current = controller;
+      try {
+        const result = await session.gateway.extractCertificate(
+          ctx,
+          { image: file },
+          { signal: controller.signal },
+        );
+        if (controller.signal.aborted)
+          throw new DOMException("Reading cancelled", "AbortError");
+        return result;
+      } finally {
+        if (readAbort.current === controller) readAbort.current = null;
+      }
+    },
+    {
+      onSuccess: (result) => {
+        if (result.error || !result.extracted) {
+          setReadError(
+            new ApiError(
+              422,
+              result.error ||
+                "No fields could be read. Enter the details manually.",
+            ),
+          );
+          return;
+        }
+        const fields = {};
+        const missing = [];
+        for (const key of ["issuer", "cert_no", "holder_name", "expiry_date"]) {
+          const value = result.extracted[key];
+          if (typeof value === "string" && value.trim())
+            fields[key] = value.trim();
+          else missing.push(key);
+        }
+        if (result.extracted.scope?.length) {
+          fields.scope = result.extracted.scope.map((row) => ({
+            ...row,
+            brand: row.brand || "",
+            row_id: crypto.randomUUID(),
+          }));
+        } else missing.push("scope");
+        if (!Object.keys(fields).length) {
+          setReadError(
+            new ApiError(
+              422,
+              "No fields could be read. Enter the details manually or try another image.",
+            ),
+          );
+          return;
+        }
+        setDraft((previous) => ({ ...previous, ...fields }));
+        setDirty(true);
+        setValidation(null);
+        mutation.reset();
+        onChanged?.();
+        setReadStatus(
+          missing.length
+            ? "Readable fields added. Unreadable fields were left unchanged. Check every field, product and brand restriction against the image before submitting."
+            : "Fields added from the image. Review and edit every field, product and brand restriction before submitting.",
+        );
+      },
+      onError: (error) => {
+        if (error.name === "AbortError")
+          setReadStatus("Reading cancelled. Your draft is unchanged.");
+      },
+    },
+  );
+  const busy = mutation.isPending || extraction.isPending;
+  const extractionError =
+    extraction.error?.name === "AbortError" ? null : extraction.error;
+  const formError =
+    validation || mutation.error || extractionError || readError;
+  useDraft(dirty || busy);
+  useEffect(() => () => readAbort.current?.abort(), []);
   useEffect(() => {
-    if (validation || mutation.error) summary.current?.focus();
-  }, [validation, mutation.error]);
+    if (formError) summary.current?.focus();
+  }, [formError]);
+  function clearReading() {
+    extraction.reset();
+    setReadError(null);
+    setReadStatus("");
+  }
   function update(key, value) {
     setDraft((previous) => ({ ...previous, [key]: value }));
     setDirty(true);
@@ -122,9 +206,11 @@ function RenewalForm({
     onChanged?.();
     setValidation(null);
     mutation.reset();
+    clearReading();
   }
   function chooseImage(file) {
     if (!file) return;
+    clearReading();
     if (
       !["image/png", "image/jpeg"].includes(file.type) ||
       file.size > 10 * 1024 * 1024
@@ -146,6 +232,7 @@ function RenewalForm({
   }
   function submit(event) {
     event.preventDefault();
+    if (busy || pendingReview) return;
     const issues = {};
     if (imageError) issues.image = imageError;
     const input = {};
@@ -186,7 +273,7 @@ function RenewalForm({
           <button
             type="button"
             className="button quiet"
-            disabled={mutation.isPending}
+            disabled={busy}
             onClick={usePrepared}
           >
             Use prepared renewal
@@ -195,11 +282,9 @@ function RenewalForm({
       )}
       <form onSubmit={submit} noValidate className="renewal-form">
         <div ref={summary} tabIndex={-1}>
-          {(validation || mutation.error) && (
-            <ErrorMessage error={validation || mutation.error} />
-          )}
+          {formError && <ErrorMessage error={formError} />}
         </div>
-        <fieldset disabled={mutation.isPending} className="certificate-fields">
+        <fieldset disabled={busy} className="certificate-fields">
           {[
             ["issuer", "Issuer", "text", 200],
             ["cert_no", "Certificate number", "text", 100],
@@ -222,7 +307,7 @@ function RenewalForm({
         <ScopeEditor
           rows={draft.scope}
           onChange={(value) => update("scope", value)}
-          disabled={mutation.isPending}
+          disabled={busy}
         />
         <div className="field certificate-image-input">
           <label htmlFor="certificate-image">
@@ -233,7 +318,7 @@ function RenewalForm({
             ref={imageInput}
             type="file"
             accept="image/png,image/jpeg"
-            disabled={mutation.isPending}
+            disabled={busy}
             onChange={(e) => chooseImage(e.target.files?.[0])}
           />
           <small>PNG or JPEG, up to 10 MiB.</small>
@@ -241,11 +326,12 @@ function RenewalForm({
             <button
               type="button"
               className="button quiet"
-              disabled={mutation.isPending}
+              disabled={busy}
               onClick={() => {
                 setImage(null);
                 setImageError(null);
                 setValidation(null);
+                clearReading();
                 setDirty(true);
                 onChanged?.();
                 if (imageInput.current) imageInput.current.value = "";
@@ -264,14 +350,48 @@ function RenewalForm({
               />
             </>
           )}
+          {session.gateway.capabilities?.certificateExtract && (
+            <div className="prepared-renewal">
+              <button
+                type="button"
+                className="button quiet"
+                disabled={!image || busy || pendingReview}
+                onClick={() => {
+                  clearReading();
+                  extraction.mutate(image);
+                }}
+              >
+                {extraction.isPending
+                  ? "Reading certificate…"
+                  : "Pre-fill from image"}
+              </button>
+              <p className="muted">
+                Replaces readable draft fields; unreadable fields stay
+                unchanged. Review every field and product before submitting.
+                Reading does not verify the certificate.
+              </p>
+              {extraction.isPending && (
+                <>
+                  <p role="status">
+                    Reading the image. This may take up to 3 minutes.
+                  </p>
+                  <button
+                    type="button"
+                    className="button quiet"
+                    onClick={() => readAbort.current?.abort()}
+                  >
+                    Cancel reading
+                  </button>
+                </>
+              )}
+              {readStatus && <p role="status">{readStatus}</p>}
+            </div>
+          )}
         </div>
         <p className="renewal-submit-note">
           Your current certificate stays active while this renewal is reviewed.
         </p>
-        <button
-          className="button primary"
-          disabled={mutation.isPending || pendingReview}
-        >
+        <button className="button primary" disabled={busy || pendingReview}>
           {mutation.isPending
             ? "Submitting renewal…"
             : "Submit renewal for review"}
