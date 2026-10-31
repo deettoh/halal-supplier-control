@@ -1,12 +1,14 @@
 import { person } from "../test/people.js";
 import React from "react";
-import { it, expect, vi } from "vitest";
+import { it, expect, vi, afterEach } from "vitest";
 import { render, screen, waitFor, act } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { SessionProvider } from "./session.jsx";
 import { createPreviewGateway } from "./preview/gateway.js";
 import App from "../App.jsx";
 import { AppLink } from "./navigation.jsx";
+
+afterEach(() => vi.restoreAllMocks());
 
 it("allows cancelling browser Back without losing the supplier draft, then permits confirmed Back and Forward", async () => {
   window.history.replaceState(null, "", "/demo");
@@ -53,7 +55,8 @@ it("allows cancelling browser Back without losing the supplier draft, then permi
   await screen.findByRole("group", { name: "Choose a demo person" });
   expect(confirm).toHaveBeenCalledTimes(4);
   confirm.mockRestore();
-});
+  // This integration test includes lazy routes, typing and five real traversals.
+}, 10000);
 
 it("commits an ordinary internal link inside the browser snapshot update", async () => {
   window.history.replaceState(null, "", "/");

@@ -19,6 +19,112 @@ const wrap = (gateway = createPreviewGateway(), who = identity) =>
       <Certificates />
     </SessionProvider>,
   );
+
+it("pre-fills readable image fields, keeps unreadable values and waits for explicit submission", async () => {
+  const user = userEvent.setup(),
+    base = createPreviewGateway();
+  let finish;
+  const extractCertificate = vi.fn(
+    () =>
+      new Promise((resolve) => {
+        finish = resolve;
+      }),
+  );
+  const renewCertificate = vi.fn();
+  wrap({
+    ...base,
+    capabilities: { ...base.capabilities, certificateExtract: true },
+    extractCertificate,
+    renewCertificate,
+  });
+  await screen.findByLabelText("Issuer");
+  const issuer = screen.getByLabelText("Issuer").value;
+  const image = new File(["photo"], "certificate.png", { type: "image/png" });
+  await user.upload(
+    screen.getByLabelText("Certificate image (optional)"),
+    image,
+  );
+  await user.click(screen.getByRole("button", { name: "Pre-fill from image" }));
+  expect(screen.getByLabelText("Issuer")).toBeDisabled();
+  expect(
+    screen.getByRole("button", { name: "Submit renewal for review" }),
+  ).toBeDisabled();
+  await act(async () =>
+    finish({
+      extracted: {
+        issuer: null,
+        cert_no: "SAMPLE-READ-2027",
+        holder_name: "SAMPLE Holder",
+        expiry_date: "2027-12-31",
+        scope: [{ product_name: "New Cocoa", brand: null }],
+      },
+      error: null,
+    }),
+  );
+  expect(screen.getByLabelText("Issuer")).toHaveValue(issuer);
+  expect(screen.getByLabelText("Certificate number")).toHaveValue(
+    "SAMPLE-READ-2027",
+  );
+  expect(screen.getByRole("textbox", { name: "Product 1" })).toHaveValue(
+    "New Cocoa",
+  );
+  expect(
+    screen.getByRole("textbox", { name: "Brand restriction 1 (optional)" }),
+  ).toHaveValue("");
+  expect(
+    screen.getByText(/Unreadable fields were left unchanged/),
+  ).toBeInTheDocument();
+  expect(renewCertificate).not.toHaveBeenCalled();
+  await user.clear(screen.getByLabelText("Certificate number"));
+  await user.type(
+    screen.getByLabelText("Certificate number"),
+    "SAMPLE-CORRECTED",
+  );
+  await user.click(
+    screen.getByRole("button", { name: "Submit renewal for review" }),
+  );
+  await waitFor(() => expect(renewCertificate).toHaveBeenCalled());
+  expect(renewCertificate.mock.calls[0][1]).toMatchObject({
+    cert_no: "SAMPLE-CORRECTED",
+    image,
+  });
+});
+
+it.each(["unreadable", "network"])(
+  "keeps the manual draft after an extraction %s failure",
+  async (failure) => {
+    const user = userEvent.setup(),
+      base = createPreviewGateway();
+    const extractCertificate = vi.fn(async () => {
+      if (failure === "network")
+        throw new ApiError(0, "Service unavailable. Try again.");
+      return {
+        extracted: null,
+        error: "Unreadable certificate. Try another image.",
+      };
+    });
+    wrap({
+      ...base,
+      capabilities: { ...base.capabilities, certificateExtract: true },
+      extractCertificate,
+    });
+    const number = await screen.findByLabelText("Certificate number");
+    await user.clear(number);
+    await user.type(number, "MANUAL-SAMPLE");
+    await user.upload(
+      screen.getByLabelText("Certificate image (optional)"),
+      new File(["photo"], "certificate.jpg", { type: "image/jpeg" }),
+    );
+    await user.click(
+      screen.getByRole("button", { name: "Pre-fill from image" }),
+    );
+    await screen.findByRole("alert");
+    expect(number).toHaveValue("MANUAL-SAMPLE");
+    expect(
+      screen.getByRole("button", { name: "Pre-fill from image" }),
+    ).toBeEnabled();
+  },
+);
 it("shows a pending receipt only after the service confirms, keeping the active record", async () => {
   const user = userEvent.setup();
   const base = createPreviewGateway();
@@ -185,6 +291,61 @@ function SwitchSupplier() {
     </button>
   );
 }
+
+it.each([false, true])(
+  "ignores late extraction after cancellation or workspace change (switch=%s)",
+  async (switchWorkspace) => {
+    const user = userEvent.setup(),
+      base = createPreviewGateway();
+    let finish, signal;
+    const gateway = {
+      ...base,
+      capabilities: { ...base.capabilities, certificateExtract: true },
+      extractCertificate: (ctx, input, options) =>
+        new Promise((resolve) => {
+          finish = resolve;
+          signal = options.signal;
+        }),
+    };
+    render(
+      <SessionProvider gateway={gateway} initialIdentity={identity}>
+        <SwitchSupplier />
+        <Certificates />
+      </SessionProvider>,
+    );
+    const number = await screen.findByLabelText("Certificate number");
+    const original = number.value;
+    await user.upload(
+      screen.getByLabelText("Certificate image (optional)"),
+      new File(["photo"], "certificate.jpg", { type: "image/jpeg" }),
+    );
+    await user.click(
+      screen.getByRole("button", { name: "Pre-fill from image" }),
+    );
+    await user.click(
+      screen.getByRole("button", {
+        name: switchWorkspace ? "Switch supplier test" : "Cancel reading",
+      }),
+    );
+    expect(signal.aborted).toBe(true);
+    await act(async () =>
+      finish({ extracted: { cert_no: "STALE-SAMPLE" }, error: null }),
+    );
+    expect(screen.getByLabelText("Certificate number")).not.toHaveValue(
+      "STALE-SAMPLE",
+    );
+    if (!switchWorkspace) {
+      expect(screen.getByLabelText("Certificate number")).toHaveValue(original);
+      expect(
+        screen.getByText("Reading cancelled. Your draft is unchanged."),
+      ).toBeInTheDocument();
+    } else {
+      expect(
+        await screen.findByRole("textbox", { name: "Product 10" }),
+      ).toHaveValue("Potato Starch");
+    }
+  },
+);
 it("ignores an old supplier save after switching identities", async () => {
   const user = userEvent.setup();
   let resolve;
