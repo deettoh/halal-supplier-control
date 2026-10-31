@@ -41,6 +41,7 @@ PNG = (Path(__file__).parent / "fixtures/synthetic_label.png").read_bytes()
         "certificate_submitted",
         "certificate_rejected",
         "on_hold",
+        "renewal_requested",
         "cert_renewed",
         "delivery_checked",
         "invented",
@@ -65,6 +66,7 @@ def test_activity_action_contract_and_seed(action: str) -> None:
         "certificate_submitted",
         "certificate_rejected",
         "on_hold",
+        "renewal_requested",
     }
     for model, values in (
         (ActivityResponse, payload),
@@ -91,6 +93,7 @@ def test_openapi_lists_supported_activity_actions() -> None:
         "certificate_submitted",
         "certificate_rejected",
         "on_hold",
+        "renewal_requested",
     }
 
 
@@ -443,6 +446,7 @@ def test_openapi_documents_business_and_registry_routes() -> None:
     response = client.get("/openapi.json")
     assert response.status_code == 200
     spec = response.json()
+    assert spec["info"]["version"] == "0.2.0"
     expected = {
         ("/api/materials", "get"),
         ("/api/deliveries", "post"),
@@ -453,6 +457,7 @@ def test_openapi_documents_business_and_registry_routes() -> None:
         ("/api/certificates", "post"),
         ("/api/certificates/extract", "post"),
         ("/api/registry/renewals", "get"),
+        ("/api/registry/expiry-check", "post"),
         ("/api/registry/renewals/{id}/decision", "post"),
     }
     actual = {
@@ -486,5 +491,5 @@ def test_openapi_documents_business_and_registry_routes() -> None:
     assert client.get("/docs").status_code == 200
     assert client.get("/api/health").json() == {
         "status": "ok",
-        "contract_version": "0.1.0",
+        "contract_version": "0.2.0",
     }

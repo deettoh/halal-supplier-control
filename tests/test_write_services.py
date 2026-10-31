@@ -122,6 +122,45 @@ def test_upload_stores_photo_checks_and_audit(
         log = session.scalar(select(db.ActivityLog))
         assert log is not None and log.action == "auto_accepted"
         assert log.delivery_id == row.id and log.tenant == BAKERY
+        assert log.reason is None
+
+
+@pytest.mark.parametrize("rule", ["R1", "R2", "R3", "R4", "R5", "R6"])
+def test_flagged_check_log_identifies_first_failed_rule(
+    api_client: TestClient,
+    api_engine: Engine,
+    monkeypatch: pytest.MonkeyPatch,
+    rule: str,
+) -> None:
+    extracted = label()
+    if rule == "R1":
+        extracted = extracted.model_copy(update={"manufacturer": None})
+    elif rule == "R2":
+        extracted = label("Other brand")
+    elif rule == "R6":
+        extracted = extracted.model_copy(update={"halal_mark_present": False})
+    with Session(api_engine) as session:
+        certificate = session.get(db.Certificate, 1)
+        assert certificate is not None
+        if rule == "R3":
+            certificate.scope = [{"product_name": "Rice Flour", "brand": None}]
+        elif rule == "R4":
+            certificate.expiry_date = db.business_today() - timedelta(days=1)
+        elif rule == "R5":
+            certificate.issuer = "Unknown SAMPLE issuer"
+        session.commit()
+    monkeypatch.setattr(extract, "extract_label", lambda _: extracted)
+    response = upload(api_client)
+    assert response.status_code == 201
+    result = response.json()
+    assert result["status"] == "pending_review"
+    failed = next(c for c in result["rule_results"] if c["passed"] is False)
+    assert failed["rule"] == rule
+    events = api_client.get(
+        "/api/activity", headers=headers("supervisor")
+    ).json()
+    assert len(events) == 1
+    assert events[0]["reason"] == f"{rule}: {failed['detail']}"
 
 
 def test_jpeg_delivery_upload_is_stored_as_jpeg(
@@ -310,6 +349,12 @@ def test_deadline_releases_fallback_and_late_reply_cannot_undo_decision(
     assert result["reason"] == "Could not verify"
     assert result["extracted"] is None
     assert counts(api_engine) == (1, 2)
+    with Session(api_engine) as session:
+        original = session.scalar(
+            select(db.ActivityLog).order_by(db.ActivityLog.id)
+        )
+        assert original is not None
+        assert original.reason == f"R1: {services.INCOMPLETE_EXTRACTION}"
 
 
 @pytest.mark.parametrize("decision", ["accept", "reject"])

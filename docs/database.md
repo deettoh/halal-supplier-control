@@ -73,6 +73,21 @@ With `DATABASE_URL` set, the app does this before serving requests:
 3. Fills missing certificate photos from the seed PNGs and converts any
    stored PNG photos to JPEG.
 
+The manual expiry-check upgrade also adds nullable
+`certificates.renewal_requested_on` and widens PostgreSQL's activity-action
+constraint to allow `renewal_requested`, without resetting existing data.
+The request date and each qualifying SME's activity entry are saved in one
+transaction. The certificate status does not change. Deduplication uses
+`activity_log.tenant` and its internal `certificate_id`, protected by a partial
+unique index for `renewal_requested` events. A later SME can receive its own
+entry without changing the certificate's first `renewal_requested_on` date.
+
+Startup links older expiry logs only when their supplier name and exact
+generated certificate-number/expiry reason identify one certificate. It
+preserves the original actor, timestamps and first request date. Ambiguous
+or unmatched old expiry history requires an explicit certificate mapping;
+startup fails rather than guessing or silently duplicating history.
+
 Startup holds a PostgreSQL advisory lock, so parallel workers don't seed
 twice. On any error, startup rolls the whole attempt back and stops with a
 message that has no credentials or seed contents.

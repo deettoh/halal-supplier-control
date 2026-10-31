@@ -22,9 +22,12 @@ also requires `X-Demo-Person`, a positive ID from the `people` table. The
 backend validates that person against both role and tenant; mismatch gives
 403. `GET /api/people` is public for the picker, as is `/api/health`.
 
-This branch implements named identities, enriched logs and Hold only. Expiry
-checking remains deferred and contract/OpenAPI versions stay 0.1.0 pending
-full v0.2 completion.
+The backend implements contract v0.2: six-rule evaluation, named identities,
+enriched logs, registry renewal review, Hold with a next step and the manual
+expiry check. `/api/health` and OpenAPI advertise `0.2.0`. The versioned
+[contract](api-contract2.md) includes the current pack-size normalization,
+per-SME policies and the approved manual-only expiry behaviour. Frontend
+integration is owned and verified separately.
 
 
 ## Routes under `/api`
@@ -44,6 +47,7 @@ full v0.2 completion.
 | GET | `/api/deliveries/{id}/image` | staff, supervisor | - | 200, JPEG of the SME's delivery photo |
 | GET | `/api/certificates/{id}/image` | staff, supervisor, supplier, reviewer | - | 200, JPEG for the owning supplier, a linked SME or the registry reviewer |
 | GET | `/api/registry/renewals` | reviewer | - | 200, pending renewals, oldest first, each with the current certificate and the supplier name |
+| POST | `/api/registry/expiry-check` | reviewer | - | 200, `certificates_checked` and `requests_created` |
 | POST | `/api/registry/renewals/{id}/decision` | reviewer | JSON `decision` (`verify` or `reject`), nonblank `note` | 200, the updated certificate |
 
 To recount the routes, run `grep -cE '^@app\.(get|post)' src/backend/main.py`.
@@ -106,19 +110,28 @@ because the label couldn't be read. `detail` gives the reason.
 | Rule | Check | Verdict if it fails |
 |---|---|---|
 | R1 | Product, brand and manufacturer read from the label | `needs_human` |
-| R2 | The product matches the material name after case folding, whitespace collapsing and dropping a trailing pack size such as `200 G`. The brand and the manufacturer each match the masterlist (rapidfuzz score of 90 or more) | `substitution` |
+| R2 | The product matches the material name after case folding, whitespace collapsing and dropping a trailing pack size such as `200 G`. The brand and manufacturer each meet the SME's configured rapidfuzz threshold (90 in the current seed) | `substitution` |
 | R3 | The certificate scope covers the product and brand, with the product matched the same way as in R2 | `not_covered` |
 | R4 | The certificate hasn't expired | `not_covered` |
 | R5 | The issuer is on the recognised list | `not_covered` |
 | R6 | The label shows a halal mark | `needs_human` |
 
 The first failing rule sets the verdict. When all six pass and the certificate
-expires within 60 days, the verdict is `expiring`.
+expires within the requesting SME's configured warning window, the verdict
+is `expiring` (60 days for Sunrise Bakery, 45 for Crescent Caterer in the
+current seed). R5 also reads that SME's recognised-issuer list. Masterlist
+coverage uses the same policy but excludes the delivery-photo R6 check.
 
 ## Decisions and renewals commit with their activity rows
 
-A decision needs `accept` or `reject` and a nonblank reason. The delivery row
-is locked, and the decision and its activity row commit together.
+A decision needs `accept`, `reject` or `hold` and a nonblank reason. Hold also
+requires `next_step` equal to `request_certificate` or
+`request_product_details`. Other decisions must omit `next_step`. Pending
+deliveries can be accepted, rejected or held; held deliveries can only be
+accepted or rejected. Repeating Hold or deciding an already resolved
+delivery returns 409. The delivery row is locked, and the decision and its
+activity row commit together. Its original verdict and rule results remain
+the check result, rather than being replaced by the supervisor's decision.
 
 A supplier submission locks the supplier, saves the renewal as `pending` and
 writes a `certificate_submitted` row to each linked SME's log. Coverage stays
@@ -153,15 +166,77 @@ await fetch("/api/certificates", {
 
 Issuer and holder name allow 200 characters and the certificate number 100.
 
-## The activity log has seven actions
+## Manual expiry check
+
+`POST /api/registry/expiry-check` is called by the reviewer's existing
+"Run expiry check" button. It requires all three demo identity headers and
+no request body. This demo implementation runs only when clicked: no
+scheduler is installed, overriding the scheduled-execution portion of the
+original v0.2 plan at the user's request.
+
+It reads each active certificate and its linked SMEs' persisted
+`expiry_warning_days`. A certificate qualifies for an SME when its days
+remaining are between zero and that SME's window, inclusive. Certificates
+expiring today qualify; certificates that expired before today are skipped,
+even if their database status is still active. A renewal request does not
+make a certificate valid or change its coverage.
+
+The response is, for example:
+
+```json
+{"certificates_checked": 2, "requests_created": 1}
+```
+
+`certificates_checked` counts active certificates examined, including those
+already requested or outside the windows. `requests_created` counts distinct
+certificates that gained at least one new SME request entry in this run,
+not the number of SME log rows. One certificate qualifying for two SMEs
+returns 1 and creates two entries. If another SME qualifies in a later run,
+that run also returns 1 for the certificate; an unchanged repeat returns 0.
+Multiple materials within the same SME do not create duplicate entries.
+
+All qualifying SMEs receive `renewal_requested` activity rows with the
+reviewer's name/title and supplier name. Material, verdict and delivery ID
+are null; the reason identifies the certificate number and expiry date.
+The certificate's new `renewal_requested_on` date is set using the Malaysian
+calendar and returned by the certificate API for the supplier page.
+
+Requests and logs commit atomically. PostgreSQL certificate row locks and a
+partial unique index prevent concurrent duplicates for the same SME and
+certificate. Each log stores an internal `certificate_id`; this does not
+change the activity API response. A second run with no newly eligible SME
+creates zero entries. An SME whose own window starts later receives its
+entry then, even if another SME already received a request for that certificate.
+`renewal_requested_on` remains the first supplier request date and is never
+moved forward when a later SME becomes eligible.
+No request is created for an unlinked certificate. Missing or invalid SME
+settings return 503 and roll back the operation.
+
+This records requests only: it sends no email or external message, creates
+no replacement certificate, and does not activate or supersede certificates.
+A supplier still submits the renewal for the registry review workflow.
+
+## The activity log has nine actions
 
 Activity `action` is one of `auto_accepted`, `pending_review`, `accepted`,
 `rejected`, `certificate_submitted`, `certificate_renewed` or
-`certificate_rejected`. The API, the seed loader and a database constraint
-enforce this list. For a delivery event, the actor is `staff` or
-`supervisor`. A certificate event writes one row to each linked SME. The
+`certificate_rejected`, `on_hold` or `renewal_requested`. The API, seed loader
+and a database constraint enforce this list. For new events, actor and title
+identify the named person; legacy role-only history is retained. A certificate event writes one row to each linked SME. The
 actor is the supplier contact's name for a submission and the reviewer's name
-for a decision, and a decision row has the reviewer's note as its `reason`.
+for a decision. New flagged-check rows record the first failed rule ID and
+its detail in `reason`; successful automatic checks leave it null. This also
+applies to delayed extraction recovery rows.
+
+New certificate submission reasons identify the certificate number, for
+example `Certificate SAMPLE-RENEWAL submitted for review.` Verification and
+rejection reasons include both the number and the reviewer's note, for
+example `Certificate SAMPLE-RENEWAL: Checked documents`. The certificate's
+`review_note` remains the note alone. These events also retain an internal
+`certificate_id`. Existing historical rows are not rewritten.
+
+The default seed has no deliveries or activity rows. Test fixtures use the
+same normal startup seeding without deleting history to hide synthetic data.
 
 ## Photos are stored and served as JPEG
 

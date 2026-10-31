@@ -22,6 +22,7 @@ from pydantic import (
 NonEmptyText = Annotated[
     str, StringConstraints(strip_whitespace=True, min_length=1)
 ]
+CONTRACT_VERSION = "0.2.0"
 RecordId = Annotated[int, Field(gt=0)]
 DemoRole = Literal["staff", "supervisor", "supplier", "reviewer"]
 Coverage = Literal["covered", "expiring", "not_covered"]
@@ -41,6 +42,7 @@ ActivityAction = Literal[
     "certificate_submitted",
     "certificate_rejected",
     "on_hold",
+    "renewal_requested",
 ]
 RuleName = Literal["R1", "R2", "R3", "R4", "R5", "R6"]
 RULE_ORDER: tuple[RuleName, ...] = get_args(RuleName)
@@ -223,6 +225,18 @@ class CertificateResponse(APIModel):
     status: CertificateStatus
     review_note: str | None = None
     reviewed_by: str | None = None
+    renewal_requested_on: date | None = None
+
+
+class ExpiryCheckResponse(APIModel):
+    certificates_checked: int = Field(ge=0)
+    requests_created: int = Field(
+        ge=0,
+        description=(
+            "Number of distinct certificates gaining at least one new SME "
+            "request entry in this run, not the number of SME log rows."
+        ),
+    )
 
 
 class RenewalResponse(APIModel):
@@ -299,4 +313,4 @@ class ValidationErrorResponse(APIModel):
 
 class HealthResponse(APIModel):
     status: Literal["ok"] = "ok"
-    contract_version: str = "0.1.0"
+    contract_version: str = CONTRACT_VERSION

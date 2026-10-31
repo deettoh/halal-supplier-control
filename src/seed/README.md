@@ -5,6 +5,10 @@ materials across Sunrise Bakery SAMPLE and Crescent Caterer SAMPLE, and 7
 people. The certificate images in `certificates/` are AI-generated PNGs
 marked SAMPLE.
 
+`deliveries` and `activity_log` are intentionally empty. Startup and demo
+reset must not invent completed checks or activity. Workflow tests use the
+normal seed loader without deleting seeded history afterward.
+
 To recount the rows, run:
 
 ```bash
@@ -110,5 +114,12 @@ tenant's policy from this seed file. There is no global policy fallback.
 The new policy module and seed are included in future evaluation source
 hashes. Previously recorded evaluation artifacts are not rewritten.
 
-This task adds policy storage and use only: no settings editor, renewal
-request action, expiry job, scheduler or expiry-check route is introduced.
+Policy storage is separate from the manual expiry check described in
+[the API guide](../../docs/api.md#manual-expiry-check). There is no settings
+editor or scheduler.
+
+Certificate seed rows may omit `renewal_requested_on` (defaults to null) or
+set an ISO date for a historical request. Activity rows may use
+`renewal_requested` with the reviewer name/title, supplier name and an
+internal `certificate_id`, leaving delivery ID, material and verdict null. The existing seed records are not
+changed or pre-marked by the expiry implementation.
