@@ -69,7 +69,8 @@ With `DATABASE_URL` set, the app does this before serving requests:
 2. Loads `src/seed/seed.json` into tables that are still empty. The format is
    in [the seed README](../src/seed/README.md).
    For `sme_settings`, it inserts only missing tenant policies, even if the
-   table already has other SMEs. Existing policy values are never overwritten.
+   table already has other SMEs. Startup doesn't overwrite existing policy
+   values.
 3. Fills missing certificate photos from the seed PNGs and converts any
    stored PNG photos to JPEG.
 
@@ -85,8 +86,8 @@ entry without changing the certificate's first `renewal_requested_on` date.
 Startup links older expiry logs only when their supplier name and exact
 generated certificate-number/expiry reason identify one certificate. It
 preserves the original actor, timestamps and first request date. Ambiguous
-or unmatched old expiry history requires an explicit certificate mapping;
-startup fails rather than guessing or silently duplicating history.
+or unmatched old expiry history needs an explicit certificate mapping, and
+startup stops until it has one.
 
 Startup holds a PostgreSQL advisory lock, so parallel workers don't seed
 twice. On any error, startup rolls the whole attempt back and stops with a
@@ -117,19 +118,9 @@ statuses depend on the day it runs.
 
 ## Use a session in a route
 
-```python
-from typing import Annotated
-
-from fastapi import Depends
-from sqlalchemy.orm import Session
-
-from backend.db import get_db
-
-DatabaseSession = Annotated[Session, Depends(get_db)]
-```
-
-Each request gets its own session. Write routes call `session.commit()`, and
-the dependency rolls back anything uncommitted when the session closes.
+Routes take the `Database` dependency in `src/backend/main.py`, which opens one
+session per request. Services call `session.commit()`, and closing the session
+rolls back anything uncommitted.
 
 ## Tests run on SQLite, and also on PostgreSQL with `--run-db`
 

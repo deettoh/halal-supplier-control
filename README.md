@@ -52,7 +52,7 @@ At receiving, staff photograph the delivered item's label. A vision model
 reads the product name, brand, manufacturer and halal mark. Six rules then
 check that reading against the masterlist and the supplier's certificate. A
 Covered or Expiring delivery is accepted automatically. Anything else waits
-for the Halal Supervisor, who accepts or rejects it with a reason. The app
+for the Halal Supervisor, who accepts, rejects or holds it with a reason. The app
 flags substitutions and expired certificates at receiving instead of at the
 audit. Once a registry reviewer verifies a supplier's renewal, every SME that
 buys from that supplier sees the new coverage.
@@ -62,7 +62,7 @@ buys from that supplier sees the new coverage.
 | Trigger | A delivery arrives and staff photograph its label |
 | Data | The SME's masterlist and the shared supplier certificate registry |
 | Decision | The model reads the label, and rules R1 to R6 give the verdict |
-| Approval | Only the Halal Supervisor can accept or reject a flagged delivery with a required reason |
+| Approval | Only the Halal Supervisor can accept, reject or hold a flagged delivery with a required reason |
 | Outcome | Verdict with a rule checklist, delivery status, masterlist coverage and an activity log row |
 
 The app reports whether the documents on file cover an item. It doesn't rule
@@ -70,16 +70,17 @@ on whether anything is halal.
 
 ### Key features
 
-- **Verdict with a rule checklist.** Rules R1 to R6 compare the label fields
-  with the masterlist and the supplier's active certificate, and the checklist
-  shows which rules failed.
-- **Supervisor review.** Only the Halal Supervisor can accept or reject a
-  flagged delivery, and each decision needs a reason.
+- **Verdict with a rule checklist.** R1 and R6 check that the label is
+  readable and shows a halal mark. R2 compares the label with the masterlist
+  item and R3 with the certificate scope, and R4 and R5 check the
+  certificate's expiry and issuer. The checklist shows which rules failed.
+- **Supervisor review.** Only the Halal Supervisor can accept, reject or hold
+  a flagged delivery, and each decision needs a reason.
 - **One certificate registry for every SME.** When a registry reviewer
   verifies a supplier's renewal, every SME that buys from that supplier sees
   the new coverage on its own items.
-- **Activity log.** Every check, decision and renewal is logged with the role,
-  action and time.
+- **Activity log.** Every check, decision and renewal is logged with the
+  person's name, the action and the time.
 - **Review when the model fails.** After a timeout or endpoint error on a
   photo with no cached label, the backend saves the delivery for the
   supervisor with the error recorded.
@@ -139,7 +140,7 @@ as JSON, and Python rules decide the verdict.
 
 ```mermaid
 flowchart LR
-    browser[Browser: staff, supervisor, supplier]
+    browser[Browser: staff, supervisor, supplier, reviewer]
     subgraph replit[Replit Autoscale]
         api[FastAPI: React build and /api]
         rules[Rules R1 to R6]
@@ -151,7 +152,7 @@ flowchart LR
     browser -->|HTTPS| api
     api --> rules
     api <--> db
-    api -->|label photo| model
+    api -->|label or certificate photo| model
     model -->|fields as JSON| api
 ```
 
@@ -194,7 +195,7 @@ pnpm --dir src/frontend install --frozen-lockfile
 pnpm --dir src/frontend dev
 ```
 
-Without the RunPod variables, uploads are saved as Reading incomplete
+Without the RunPod variables, uploads are saved as Needs review
 (`needs_human`). The API docs are at http://127.0.0.1:8000/docs.
 
 Python dependencies are declared in `pyproject.toml` and pinned in `uv.lock`,
@@ -211,9 +212,9 @@ pnpm --dir src/frontend test --run && pnpm --dir src/frontend lint
 ```
 
 CI runs the backend and frontend checks on every pull request and on `main`.
-At this commit, `uv run pytest -q` reports 328 passed and 141 skipped, where
+At this commit, `uv run pytest -q` reports 387 passed and 191 skipped, where
 the skipped tests need PostgreSQL (`--run-db`) or the live endpoint
-(`--run-live`). `pnpm --dir src/frontend test --run` reports 81 passed.
+(`--run-live`). `pnpm --dir src/frontend test --run` reports 166 passed.
 
 ---
 
@@ -236,7 +237,8 @@ Proof of use: [`submission/SDC2026_READMElater_Replit_POU.pdf`](submission/SDC20
 ## How we use RunPod
 
 - **Workload.** Qwen3-VL-8B-Instruct reads the product name, brand,
-  manufacturer and halal mark from each delivery's label photo.
+  manufacturer and halal mark from each delivery's label photo, and pre-fills
+  the renewal form from a certificate photo.
 - **Setup.** A RunPod Serverless endpoint runs the stock vLLM worker, so the
   repo has no `handler.py`. The endpoint's settings are in
   [`runpod/endpoint.json`](runpod/endpoint.json), and
@@ -267,8 +269,17 @@ Proof of use: [`submission/SDC2026_READMElater_Runpod_POU.pdf`](submission/SDC20
 - **Cold starts.** With no worker running, the first request waits for a
   worker to start, and in testing that wait took 2.5 minutes or more, close to
   the request timeout set in `TIMEOUT_SECONDS`. The team warms one worker
-  before each dry run, and seven of the eight evaluation photos have a cached
-  label that is served if the endpoint call fails.
+  before each dry run, and seven of the eight original evaluation photos have
+  a cached label that is served if the endpoint call fails. To recount them,
+  run:
+
+  ```bash
+  python3 -c 'import hashlib, json, pathlib
+  cache = json.load(open("src/backend/demo_cache.json"))
+  photos = pathlib.Path("tests/eval/images").glob("*.png")
+  print(sum(hashlib.sha256(p.read_bytes()).hexdigest() in cache
+            for p in photos))'
+  ```
 - **TLS on Replit.** The certificate directory in Replit's environment lacked
   the root certificate for RunPod's API, so the client verifies TLS against
   the certifi bundle.
@@ -277,19 +288,19 @@ Proof of use: [`submission/SDC2026_READMElater_Runpod_POU.pdf`](submission/SDC20
   SAMPLE sticker as the product. The team kept the first prompt and later
   added one sentence that keeps a "Supplied to" name out of the manufacturer
   field.
-- **Lesson.** Scoring every prompt change against the same eight cases caught
-  both regressions before deployment.
+- **Lesson.** Scoring both rewordings against the same eight cases caught the
+  regressions before deployment.
+- **Finals check.** On 24 more edited label cases, three live runs with the
+  current prompt each matched 24 of 24 expected verdicts, with a median
+  extraction time of 3.14 s. The [evaluation README](tests/eval/README.md)
+  has the details.
 
 ## Future improvements
 
-- Pre-fill the renewal form from a certificate photo. The route
-  `POST /api/certificates/extract` reads the photo, but the form doesn't
-  call it yet.
 - Take certificates from suppliers and label photos from staff through
   WhatsApp with the Meta Cloud API.
 - Check each certificate against Verify Halal or MYeHALAL.
-- Run a scheduled sweep that marks expiring certificates and sends renewal
-  reminders to suppliers.
+- Run the expiry check on a schedule and send renewal reminders to suppliers.
 - Pilot the module with one certified premise and time the in-app check
   against the [82-second manual baseline](tests/eval/README.md) on a larger
   set of labels.

@@ -6,7 +6,7 @@ the vision model. Only the model call leaves Replit.
 
 ```mermaid
 flowchart LR
-    browser[Browser: staff, supervisor, supplier]
+    browser[Browser: staff, supervisor, supplier, reviewer]
     subgraph replit[Replit Autoscale]
         api[FastAPI: React build and /api]
         rules[Rules R1 to R6]
@@ -20,7 +20,7 @@ flowchart LR
     api --> rules
     api <--> db
     secrets -.-> api
-    api -->|label photo over HTTPS| model
+    api -->|label or certificate photo over HTTPS| model
     model -->|fields as JSON| api
 ```
 
@@ -37,8 +37,8 @@ flowchart LR
 | Hosting | Replit Autoscale and Replit Secrets |
 
 Instead of an agent framework, the app makes one model call per delivery with
-a 180-second timeout, then runs Python rules and saves a status on the
-delivery.
+the timeout in `TIMEOUT_SECONDS` (`src/backend/extract.py`), then runs Python
+rules and saves a status on the delivery.
 
 ## A delivery check, step by step
 
@@ -50,7 +50,7 @@ sequenceDiagram
     participant M as RunPod model
     S->>A: POST /api/deliveries with material and photo
     A->>D: save photo, hidden from the queue
-    A->>M: photo and prompt, 180 s timeout
+    A->>M: photo and prompt, TIMEOUT_SECONDS timeout
     M-->>A: product, brand, manufacturer, halal mark
     A->>A: rules R1 to R6 give the verdict
     A->>D: save verdict, status and activity row
@@ -58,10 +58,10 @@ sequenceDiagram
 ```
 
 A Covered or Expiring delivery is accepted automatically. Substitution, Not
-covered and Reading incomplete wait in the review queue, and the supervisor
-accepts or rejects with a reason. When R1 to R5 pass and the label has no
-visible halal mark, R6 fails and the verdict is Reading incomplete. The rule
-table and the API routes are in [the API reference](api.md).
+covered and Needs review wait in the review queue, and the supervisor
+accepts, rejects or holds with a reason. When R1 to R5 pass and the label has
+no visible halal mark, R6 fails and the verdict is Needs review. The
+rule table and the API routes are in [the API reference](api.md).
 
 ## SMEs share one supplier registry
 
@@ -80,10 +80,10 @@ other's materials or deliveries.
 
 Extraction is the only feature that depends on RunPod. After the endpoint
 idles, the first request waits while a worker loads the model, and in testing
-that wait took 2.5 minutes or more. When the call fails or runs past the
-180-second timeout, the backend uses the stored reading in
+that wait took 2.5 minutes or more. When the call fails or runs past
+`TIMEOUT_SECONDS`, the backend uses the stored reading in
 `src/backend/demo_cache.json` if the photo is a prepared demo photo. For any
-other photo, it saves the delivery as Reading incomplete for the supervisor.
+other photo, it saves the delivery as Needs review for the supervisor.
 Before a demo, set one active worker as described in [the RunPod
 guide](../runpod/README.md).
 
@@ -92,14 +92,18 @@ guide](../runpod/README.md).
 The app is built as an Orbyte module and simulates two Orbyte platform
 services:
 
-- Login and organisations come from the `X-Demo-Role` and `X-Demo-Tenant`
-  headers set by the workspace picker.
+- Login and organisations come from the `X-Demo-Role`, `X-Demo-Tenant` and
+  `X-Demo-Person` headers set by the workspace picker.
 - Supplier records are the seeded `suppliers` table.
 
 ## Where each part of the code is
 
-To list these folders, run
-`ls -d runpod src/backend src/frontend src/seed tests tests/eval submission docs`.
+To list these folders, run:
+
+```bash
+ls -d runpod src/backend src/frontend src/seed tests tests/eval \
+  submission docs
+```
 
 ```text
 runpod/       RunPod endpoint settings and warm-up steps

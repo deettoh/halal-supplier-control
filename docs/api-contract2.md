@@ -1,11 +1,10 @@
 # API contract v0.2 (finals)
 
-The API changes for the finals, agreed by the whole team on 29 Oct 2026. This file is the source of truth: build the backend to it, and keep the frontend preview data in `src/frontend/src/lib/preview/` matching it.
+The API changes for the finals, agreed by the whole team on 29 Oct 2026. This file is the source of truth. Build the backend to it, and keep the frontend preview data in `src/frontend/src/lib/preview/` matching it.
 
 - **Changing it:** ask Member 1 first. Member 1 updates this file and posts the change in the group chat, and the owner of that part tells Member 2.
-- **What changes for existing callers:** `rule_results` grows from 5 items to 6, `actor` and `decided_by` hold names instead of roles, every request needs the `X-Demo-Person` header, and a supplier renewal now waits as `pending`. Everything else in v0.2 adds to v0.1.
-- **Version:** `contract_version` in `/api/health` becomes `0.2.0` once every part is merged.
-- **First deploy:** the live database holds deliveries saved with 5 rule results, which the v0.2 response model rejects, and log rows that name roles instead of people. Member 1 runs the demo reset after the first deploy.
+- **What changes for existing callers:** `rule_results` grows from 5 items to 6, `actor` and `decided_by` hold names instead of roles, every request except `/api/health` and `/api/people` needs the `X-Demo-Person` header, and a supplier renewal now waits as `pending`. Everything else in v0.2 adds to v0.1.
+- **Version:** `contract_version` in `/api/health` is `0.2.0`.
 
 | Part | Backend | Screens | Built |
 | --- | --- | --- | --- |
@@ -34,11 +33,10 @@ The API changes for the finals, agreed by the whole team on 29 Oct 2026. This fi
  "detail": "Product mismatch: label says \"Semolina\", approved material is \"Wheat Flour\"."}
 ```
 
-**Current product matching (31 Oct amendment):** R2 and R3 case-fold text,
+**Product matching:** R2 and R3 case-fold text,
 collapse whitespace and remove a trailing pack size, such as `200 G`, `1 kg`
 or `500 ml`, before comparing product names. For example, `Cocoa Powder 200 G`
-matches `Cocoa Powder`; `Semolina` still does not match `Wheat Flour`. This
-records the already merged product-matching behaviour, not a new rule change.
+matches `Cocoa Powder`. `Semolina` doesn't match `Wheat Flour`.
 
 **Per-SME policy:** the backend reads `recognised_issuers`, `match_threshold`
 and `expiry_warning_days` from the requesting SME's persisted settings.
@@ -46,7 +44,7 @@ R2 applies the threshold to brand/manufacturer, R5 uses the issuer list, and
 an otherwise covered certificate is `expiring` inside that SME's warning
 window. The seed uses threshold 90 for both SMEs, with 60 days for Sunrise
 Bakery and 45 for Crescent Caterer. Product matching and rule priority do
-not become fuzzy. The delivery verdict is stored; current material coverage
+not become fuzzy. The delivery verdict is stored. Current material coverage
 is recomputed on reads and does not fail R6 because no label photo exists.
 
 The brand and manufacturer failures keep their scores, for example `"Brand score 62.0 is below 90."`. If more than one part fails, the detail lists each one.
@@ -114,7 +112,7 @@ The backend checks that the person exists and that their role and tenant match t
 [{"id": 1, "name": "Aina", "title": "Receiving staff", "role": "staff", "tenant": "Sunrise Bakery SAMPLE"}]
 ```
 
-The picker then shows people instead of roles, and the frontend stops hardcoding the organisation list in `lib/session.jsx`.
+The picker shows people. `lib/session.jsx` holds the organisation names shown in the app.
 
 ### Log rows
 
@@ -129,13 +127,13 @@ The picker then shows people instead of roles, and the frontend stops hardcoding
 | `supplier_name` | None | **New:** supplier's name for certificate events, otherwise `null` |
 | `decided_by` (on deliveries) | Role | Person's name |
 
-From these the screen builds "Aina, receiving staff, checked Cocoa Powder, Covered".
+The activity screen shows these on separate lines, with the person and title, the action, the material and delivery, and the coverage result.
 
-**Audit-context correction:** the default seed starts with empty deliveries
-and activity history; it does not manufacture a completed check. New flagged
+**Audit context:** the default seed has no deliveries or activity history.
+New flagged
 check events record the first failed rule and its detail in `reason`, including
 extraction recovery. Passing automatic checks leave reason null. Certificate
-events identify the certificate number in the reason; verification/rejection
+events identify the certificate number in the reason. Verification and rejection
 also retain the reviewer's note. `CertificateResponse.review_note` remains
 the original note. Historical rows are preserved without invented context.
 
@@ -151,7 +149,7 @@ the original note. Historical rows are preserved without invented context.
 | Status | Meaning |
 | --- | --- |
 | `pending` | **New:** submitted by the supplier, waiting for the reviewer, with no effect on any SME |
-| `active` | Current certificate; the one-active-per-supplier rule stays |
+| `active` | Current certificate, at most one per supplier |
 | `superseded` | Replaced by a verified renewal |
 | `rejected` | **New:** turned down by the reviewer, with no effect on any SME |
 
@@ -236,20 +234,20 @@ Only supervisors can hold, and a reason is required, as with accept and reject.
 
 **Owner:** Member 5. **Screen:** Member 2 (one button). Built on Day 3.
 
-**`POST /api/registry/expiry-check`** runs the check now, for the demo. It is restricted to a validated `reviewer` identity and needs no request body. **31 Oct user-approved amendment:** execution is manual through the reviewer button only; no scheduler is required or installed. It returns:
+**`POST /api/registry/expiry-check`** runs the check now, for the demo. It is restricted to a validated `reviewer` identity and needs no request body. The check runs only from the reviewer's button, and no scheduler calls it. It returns:
 
 ```json
 {"certificates_checked": 3, "requests_created": 1}
 ```
 
-- **What it does:** for each active certificate that falls inside a linked SME's own warning window, it writes a `renewal_requested` log entry (new action) to that SME. Days remaining must be between zero and that SME's `expiry_warning_days`, inclusive: certificates expiring today qualify; certificates already expired before today are skipped even if still marked active.
+- **What it does:** for each active certificate that falls inside a linked SME's own warning window, it writes a `renewal_requested` log entry (new action) to that SME. Days remaining must be between zero and that SME's `expiry_warning_days`, inclusive. Certificates expiring today qualify. Certificates already expired before today are skipped even if still marked active.
 - **On the certificate:** `renewal_requested_on` (`date | null`, new) is set. While the certificate is active and no renewal is waiting for review, the supplier page shows an urgent banner above the certificate list and "Renewal requested on 31 Oct 2026" on the card. A pending renewal replaces both with a waiting state, a rejection restores them, and verifying the renewal removes them.
-- **Running it twice with no newly eligible SME creates nothing new.** Deduplication is per `(SME, certificate)`, not per certificate. The check skips existing SME/certificate requests while still evaluating other linked SMEs against their own windows.
+- **Repeat runs:** a second run with no newly eligible SME creates nothing. Deduplication is per `(SME, certificate)`. The check skips existing SME/certificate requests while still evaluating other linked SMEs against their own windows.
 - **Counts:** `certificates_checked` counts active certificates examined, including already requested or out-of-window records. `requests_created` counts distinct certificates gaining one or more new SME request entries in this run, not SME log rows. One certificate qualifying for two SMEs returns 1 and creates two entries. When another SME qualifies later, that run returns 1 for the certificate as well, while preserving the supplier's first request date. An unchanged repeated run returns 0. Multiple materials in the same SME do not duplicate its entry.
-- **Scope of deduplication (PR review correction):** a certificate with 50 days remaining produces Sunrise's entry (60-day window) only. At 45 days, the check creates Crescent's missing entry (45-day window), without repeating Sunrise's entry. An internal certificate reference and unique SME/certificate request index enforce this. `renewal_requested_on` remains the date of the first supplier request, including when later SME entries are created.
+- **Scope of deduplication:** a certificate with 50 days remaining produces Sunrise's entry (60-day window) only. At 45 days, the check creates Crescent's missing entry (45-day window), without repeating Sunrise's entry. An internal certificate reference and unique SME/certificate request index enforce this. `renewal_requested_on` remains the date of the first supplier request, including when later SME entries are created.
 - **Recorded identity:** request logs use the reviewer's name/title and the supplier name. `material_name`, `verdict` and `delivery_id` are null. The reason identifies the certificate and its expiry.
-- **Persistence:** the request date uses the Malaysian calendar. The date and log rows commit together; PostgreSQL row locks prevent concurrent duplicate requests. Missing or invalid linked-SME settings return 503 and roll back the operation.
-- **No activation or messaging:** this records a request, not a replacement certificate. It sends no external message and does not approve, activate or supersede a certificate. Unlinked certificates produce no request.
+- **Persistence:** the request date uses the Malaysian calendar. The date and log rows commit together. PostgreSQL row locks prevent concurrent duplicate requests. Missing or invalid linked-SME settings return 503 and roll back the operation.
+- **Scope:** the check records a request. It sends no external message and does not approve, activate or supersede a certificate. Unlinked certificates produce no request.
 
 ---
 
@@ -262,7 +260,7 @@ Only supervisors can hold, and a reason is required, as with accept and reject.
 | `CertificateStatus` | `pending`, `rejected` |
 | `DeliveryStatus` | `on_hold` |
 | `ActivityAction` | `certificate_submitted`, `certificate_rejected`, `on_hold`, `renewal_requested` |
-| Decision values | `hold` (deliveries); `verify` and `reject` (renewals) |
+| Decision values | `hold` for deliveries, `verify` and `reject` for renewals |
 | Header | `X-Demo-Person` |
 | Routes | `GET /api/people`, `GET /api/registry/renewals`, `POST /api/registry/renewals/{id}/decision`, `POST /api/registry/expiry-check` |
 

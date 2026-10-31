@@ -1,6 +1,6 @@
 # RunPod endpoint
 
-`src/backend/extract.py` sends label photos through vLLM's
+`src/backend/extract.py` sends label and certificate photos through vLLM's
 OpenAI-compatible API to a RunPod Serverless endpoint that runs the vLLM
 worker with Qwen3-VL-8B-Instruct.
 
@@ -51,8 +51,8 @@ A nonzero `idle`, `ready` or `running` count under `workers` means a
 worker is up. With all three at 0, the first request waits for a worker
 to start, and in testing that wait took 2.5 minutes or more.
 
-To send the synthetic test label and check the extracted fields, run the
-live test from the repo root:
+To send the synthetic label, a finals label and a seed certificate and check
+the extracted fields, run the live tests from the repo root:
 
 ```bash
 uv run --env-file .env pytest -m live --run-live
@@ -69,7 +69,7 @@ steps:
 1. Edit the endpoint in the RunPod console, set Active workers to 1 and
    save.
 2. Run the health check above until `idle` or `ready` is nonzero.
-3. Run the live test above and confirm it passes.
+3. Run the live tests above and confirm they pass.
 
 RunPod bills an active worker for every second it is up, idle or not.
 After the session, set Active workers back to 0.
