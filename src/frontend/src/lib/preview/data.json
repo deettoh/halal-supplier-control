@@ -62,7 +62,7 @@
   ],
   "provenance": "Prepared synthetic UI simulation; not inference, persistence or evaluation measurements.",
   "date": "2026-10-22",
-  "seed_sha256": "001ced76f9451987bfba0f5bf159ec1729a37fa5a51919a97ddf79810b9fa70f",
+  "seed_sha256": "d701ad4670d87fa330f7dfb6171c43956176157f70675d960db899f6afc4513e",
   "materials": {
     "00": {
       "Sunrise Bakery SAMPLE": [
@@ -783,7 +783,8 @@
         "image": null,
         "status": "active",
         "review_note": null,
-        "reviewed_by": null
+        "reviewed_by": null,
+        "renewal_requested_on": null
       },
       {
         "id": 2,
@@ -813,7 +814,8 @@
         "image": null,
         "status": "superseded",
         "review_note": null,
-        "reviewed_by": null
+        "reviewed_by": null,
+        "renewal_requested_on": null
       }
     ],
     "2": [
@@ -861,7 +863,8 @@
         "image": null,
         "status": "active",
         "review_note": null,
-        "reviewed_by": null
+        "reviewed_by": null,
+        "renewal_requested_on": null
       },
       {
         "id": 4,
@@ -887,7 +890,8 @@
         "image": null,
         "status": "superseded",
         "review_note": null,
-        "reviewed_by": null
+        "reviewed_by": null,
+        "renewal_requested_on": null
       }
     ]
   },
@@ -1039,6 +1043,7 @@
           "verdict": "substitution",
           "status": "pending_review",
           "error": null,
+          "next_step": null,
           "decided_by": null,
           "reason": null,
           "created_at": "2026-10-22T10:31:00+08:00"
@@ -1091,6 +1096,7 @@
             "verdict": "substitution",
             "status": "pending_review",
             "error": null,
+            "next_step": null,
             "decided_by": null,
             "reason": null,
             "created_at": "2026-10-22T10:31:00+08:00"
@@ -1142,6 +1148,7 @@
             "verdict": "substitution",
             "status": "pending_review",
             "error": null,
+            "next_step": null,
             "decided_by": null,
             "reason": null,
             "created_at": "2026-10-22T10:31:00+08:00"
@@ -1193,6 +1200,7 @@
             "verdict": "substitution",
             "status": "pending_review",
             "error": null,
+            "next_step": null,
             "decided_by": null,
             "reason": null,
             "created_at": "2026-10-22T10:31:00+08:00"
@@ -1244,6 +1252,7 @@
             "verdict": "substitution",
             "status": "pending_review",
             "error": null,
+            "next_step": null,
             "decided_by": null,
             "reason": null,
             "created_at": "2026-10-22T10:31:00+08:00"
@@ -1308,6 +1317,7 @@
           "verdict": "covered",
           "status": "auto_accepted",
           "error": null,
+          "next_step": null,
           "decided_by": null,
           "reason": null,
           "created_at": "2026-10-22T10:31:00+08:00"
@@ -1360,6 +1370,7 @@
             "verdict": "covered",
             "status": "auto_accepted",
             "error": null,
+            "next_step": null,
             "decided_by": null,
             "reason": null,
             "created_at": "2026-10-22T10:31:00+08:00"
@@ -1411,6 +1422,7 @@
             "verdict": "covered",
             "status": "auto_accepted",
             "error": null,
+            "next_step": null,
             "decided_by": null,
             "reason": null,
             "created_at": "2026-10-22T10:31:00+08:00"
@@ -1462,6 +1474,7 @@
             "verdict": "covered",
             "status": "auto_accepted",
             "error": null,
+            "next_step": null,
             "decided_by": null,
             "reason": null,
             "created_at": "2026-10-22T10:31:00+08:00"
@@ -1513,6 +1526,7 @@
             "verdict": "covered",
             "status": "auto_accepted",
             "error": null,
+            "next_step": null,
             "decided_by": null,
             "reason": null,
             "created_at": "2026-10-22T10:31:00+08:00"
@@ -1577,6 +1591,7 @@
           "verdict": "needs_human",
           "status": "pending_review",
           "error": null,
+          "next_step": null,
           "decided_by": null,
           "reason": null,
           "created_at": "2026-10-22T10:31:00+08:00"
@@ -1629,6 +1644,7 @@
             "verdict": "needs_human",
             "status": "pending_review",
             "error": null,
+            "next_step": null,
             "decided_by": null,
             "reason": null,
             "created_at": "2026-10-22T10:31:00+08:00"
@@ -1680,6 +1696,7 @@
             "verdict": "needs_human",
             "status": "pending_review",
             "error": null,
+            "next_step": null,
             "decided_by": null,
             "reason": null,
             "created_at": "2026-10-22T10:31:00+08:00"
@@ -1731,6 +1748,7 @@
             "verdict": "needs_human",
             "status": "pending_review",
             "error": null,
+            "next_step": null,
             "decided_by": null,
             "reason": null,
             "created_at": "2026-10-22T10:31:00+08:00"
@@ -1782,6 +1800,7 @@
             "verdict": "needs_human",
             "status": "pending_review",
             "error": null,
+            "next_step": null,
             "decided_by": null,
             "reason": null,
             "created_at": "2026-10-22T10:31:00+08:00"
@@ -1846,6 +1865,7 @@
           "verdict": "expiring",
           "status": "auto_accepted",
           "error": null,
+          "next_step": null,
           "decided_by": null,
           "reason": null,
           "created_at": "2026-10-22T10:31:00+08:00"
@@ -1895,6 +1915,7 @@
           "verdict": "expiring",
           "status": "auto_accepted",
           "error": null,
+          "next_step": null,
           "decided_by": null,
           "reason": null,
           "created_at": "2026-10-22T10:31:00+08:00"
@@ -1947,6 +1968,7 @@
             "verdict": "expiring",
             "status": "auto_accepted",
             "error": null,
+            "next_step": null,
             "decided_by": null,
             "reason": null,
             "created_at": "2026-10-22T10:31:00+08:00"
@@ -1996,6 +2018,7 @@
             "verdict": "expiring",
             "status": "auto_accepted",
             "error": null,
+            "next_step": null,
             "decided_by": null,
             "reason": null,
             "created_at": "2026-10-22T10:31:00+08:00"
@@ -2047,6 +2070,7 @@
             "verdict": "covered",
             "status": "auto_accepted",
             "error": null,
+            "next_step": null,
             "decided_by": null,
             "reason": null,
             "created_at": "2026-10-22T10:31:00+08:00"
@@ -2096,6 +2120,7 @@
             "verdict": "covered",
             "status": "auto_accepted",
             "error": null,
+            "next_step": null,
             "decided_by": null,
             "reason": null,
             "created_at": "2026-10-22T10:31:00+08:00"
@@ -2147,6 +2172,7 @@
             "verdict": "expiring",
             "status": "auto_accepted",
             "error": null,
+            "next_step": null,
             "decided_by": null,
             "reason": null,
             "created_at": "2026-10-22T10:31:00+08:00"
@@ -2196,6 +2222,7 @@
             "verdict": "expiring",
             "status": "auto_accepted",
             "error": null,
+            "next_step": null,
             "decided_by": null,
             "reason": null,
             "created_at": "2026-10-22T10:31:00+08:00"
@@ -2247,6 +2274,7 @@
             "verdict": "covered",
             "status": "auto_accepted",
             "error": null,
+            "next_step": null,
             "decided_by": null,
             "reason": null,
             "created_at": "2026-10-22T10:31:00+08:00"
@@ -2296,6 +2324,7 @@
             "verdict": "covered",
             "status": "auto_accepted",
             "error": null,
+            "next_step": null,
             "decided_by": null,
             "reason": null,
             "created_at": "2026-10-22T10:31:00+08:00"
@@ -2579,6 +2608,7 @@
         "verdict": "substitution",
         "status": "pending_review",
         "error": null,
+        "next_step": null,
         "decided_by": null,
         "reason": null,
         "created_at": "2026-10-22T10:31:00+08:00"
@@ -2628,6 +2658,7 @@
         "verdict": "needs_human",
         "status": "pending_review",
         "error": null,
+        "next_step": null,
         "decided_by": null,
         "reason": null,
         "created_at": "2026-10-22T10:34:00+08:00"
@@ -2638,30 +2669,30 @@
   "initial_activity": {
     "Sunrise Bakery SAMPLE": [
       {
+        "actor_title": "Receiving staff",
+        "material_name": "Cocoa Powder",
+        "verdict": "substitution",
+        "supplier_name": null,
         "id": 102,
         "actor": "Aina",
         "role": "staff",
         "action": "pending_review",
         "delivery_id": 102,
         "reason": null,
-        "created_at": "2026-10-22T10:31:00+08:00",
-        "actor_title": "Receiving staff",
-        "material_name": "Cocoa Powder",
-        "verdict": "substitution",
-        "supplier_name": null
+        "created_at": "2026-10-22T10:31:00+08:00"
       },
       {
+        "actor_title": "Receiving staff",
+        "material_name": "Cocoa Powder",
+        "verdict": "needs_human",
+        "supplier_name": null,
         "id": 104,
         "actor": "Aina",
         "role": "staff",
         "action": "pending_review",
         "delivery_id": 104,
         "reason": null,
-        "created_at": "2026-10-22T10:34:00+08:00",
-        "actor_title": "Receiving staff",
-        "material_name": "Cocoa Powder",
-        "verdict": "needs_human",
-        "supplier_name": null
+        "created_at": "2026-10-22T10:34:00+08:00"
       }
     ],
     "Crescent Caterer SAMPLE": []
